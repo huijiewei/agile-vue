@@ -1,5 +1,7 @@
 const path = require('path')
 
+process.env.VUE_APP_QS_ARRAY_FORMAT = 'repeat'
+
 module.exports = {
   assetsDir: 'assets',
   devServer: {
