@@ -1,6 +1,10 @@
 import Vue from 'vue'
 
 const MiscService = {
+  districts(parentId) {
+    return Vue.http.get('misc/districts', { parentId: parentId })
+  },
+
   adminGroups() {
     return Vue.http.get('misc/admin-groups')
   },
