@@ -3,10 +3,11 @@
     <el-row :gutter="20">
       <el-col :span="6">
         <el-input
-          placeholder="筛选"
+          placeholder="搜索"
           size="small"
           suffix-icon="el-icon-search"
           v-model="keyword"
+          clearable
         >
         </el-input>
         <hr class="spacer-xs" />
@@ -23,10 +24,46 @@
         </div>
         <hr class="spacer-xs" />
         <el-tree
+          v-show="isSearched"
+          v-loading="loading"
+          :data="searchedData"
+          :highlight-current="true"
+          :default-expand-all="true"
+          ref="districtSearchTree"
+          node-key="id"
+        >
+          <div class="district-tree-node" slot-scope="{ node, data }">
+            <div class="district-tree-icon">
+              <ag-icon v-if="data.icon" :path="data.icon" />
+              <i v-else-if="data.code.length < 9" class="el-icon-folder" />
+              <i v-else class="el-icon-map-location" />
+              <span v-bind:title="'地区代码：' + data.code">{{
+                data.name
+              }}</span>
+            </div>
+            <el-button-group class="operate">
+              <el-button
+                size="mini"
+                @click.stop="handleDistrictEdit(data)"
+                :disabled="!$can('district/view')"
+                icon="el-icon-edit-outline"
+                title="查看编辑"
+              />
+              <el-button
+                size="mini"
+                @click.stop="handleDistrictCreate(data.id)"
+                :disabled="!$can('district/create')"
+                icon="el-icon-folder-add"
+                title="新建子地区"
+              />
+            </el-button-group>
+          </div>
+        </el-tree>
+        <el-tree
+          v-show="!isSearched"
           :loading="loading"
           :highlight-current="true"
           :default-expanded-keys="districtExpanded"
-          :filter-node-method="filterDistrictNode"
           ref="districtTree"
           node-key="id"
           :lazy="true"
@@ -40,7 +77,9 @@
               <ag-icon v-if="data.icon" :path="data.icon" />
               <i v-else-if="data.code.length < 9" class="el-icon-folder" />
               <i v-else class="el-icon-map-location" />
-              <span>{{ data.name }}</span>
+              <span v-bind:title="'地区代码：' + data.code">{{
+                data.name
+              }}</span>
             </div>
             <el-button-group class="operate">
               <el-button
@@ -62,7 +101,10 @@
         </el-tree>
       </el-col>
       <el-col :span="18">
-        <router-view @on-expanded="expandedDistrict" />
+        <router-view
+          @on-expanded="handleDistrictExpanded"
+          @on-updated="handleDistrictUpdated"
+        />
       </el-col>
     </el-row>
   </div>
@@ -76,8 +118,27 @@ import AgIcon from '@core/components/Icon'
 export default {
   name: 'District',
   watch: {
-    keyword(keyword) {
-      this.$refs.districtTree.filter(keyword)
+    async keyword(keyword) {
+      if (!keyword) {
+        this.isSearched = false
+
+        return
+      }
+
+      if (keyword.length < 2) {
+        return
+      }
+
+      this.isSearched = true
+      this.loading = true
+
+      const { data } = await flatry(MiscService.districtSearchTree(keyword))
+
+      if (data) {
+        this.searchedData = data
+      }
+
+      this.loading = false
     },
   },
   components: { AgIcon },
@@ -85,14 +146,25 @@ export default {
     return {
       loading: true,
       keyword: '',
+      isSearched: false,
+      searchedData: [],
       districtExpanded: [],
       districtCurrentId: 0,
     }
   },
   methods: {
-    expandedDistrict(expanded, currentId) {
+    handleDistrictExpanded(expanded, currentId) {
       this.districtExpanded = expanded
       this.districtCurrentId = currentId
+      this.$refs.districtTree.setCurrentKey(this.districtCurrentId)
+    },
+    handleDistrictUpdated(currentId, reloadId) {
+      this.districtCurrentId = currentId
+
+      const node = this.$refs.districtTree.getNode(reloadId)
+
+      node.loaded = false
+      node.expand()
     },
     handleDistrictCreate(parentId) {
       this.$router.push({
@@ -101,16 +173,11 @@ export default {
       })
     },
 
-    handleDistrictEdit(category) {
+    handleDistrictEdit(district) {
       this.$router.push({
         name: 'DistrictEdit',
-        params: { id: category.id },
+        params: { id: district.id },
       })
-    },
-
-    filterDistrictNode(value, data) {
-      if (!value) return true
-      return data.name.indexOf(value) !== -1
     },
 
     async loadDistricts(node, resolve) {
@@ -153,12 +220,12 @@ export default {
 
   &:hover {
     .operate {
-      display: inline-block;
+      visibility: visible;
     }
   }
 
   .operate {
-    display: none;
+    visibility: hidden;
     font-size: 12px;
     color: #a6a9ad;
 

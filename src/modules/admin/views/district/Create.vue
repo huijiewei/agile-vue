@@ -3,31 +3,30 @@
     <div class="box-header">
       <h4>{{ pageTitle }}</h4>
     </div>
-    <shop-category-form
-      v-if="shopCategory"
+    <district-from
+      v-if="district"
       :submit-text="pageTitle"
-      :shop-category="shopCategory"
-      :category-tree="categoryTree"
-      :category-parents="categoryParents"
+      :district="district"
+      :district-parents="districtParents"
       :is-edit="false"
-      :can-submit="$can('shop-category/create')"
-      @on-submit="createShopCategory"
+      :can-submit="$can('district/create')"
+      @on-submit="createDistrict"
     >
-    </shop-category-form>
+    </district-from>
     <placeholder-form v-else></placeholder-form>
   </el-row>
 </template>
 
 <script>
-import ShopCategoryForm from '@admin/views/shop-category/_EditForm'
-import ShopCategoryService from '@admin/services/ShopCategoryService'
+import DistrictFrom from '@admin/views/district/_EditForm'
+import DistrictService from '@admin/services/DistrictService'
 import MiscService from '@admin/services/MiscService'
 import flatry from '@core/utils/flatry'
 import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
 
 export default {
-  name: 'ShopCategoryCreate',
-  components: { PlaceholderForm, ShopCategoryForm },
+  name: 'DistrictCreate',
+  components: { PlaceholderForm, DistrictFrom },
   props: {
     categoryTree: {
       type: Array,
@@ -35,57 +34,55 @@ export default {
   },
   data() {
     return {
-      pageTitle: '新建商品分类',
-      shopCategory: null,
-      categoryParents: [],
+      pageTitle: '新建地区',
+      district: null,
+      districtParents: [],
     }
   },
   beforeRouteUpdate(to, from, next) {
-    this.shopCategory = null
+    this.district = null
+    this.getDistrictPath(to.params.id)
     next()
-    this.getShopCategoryPath(to.params.id)
   },
   created() {
-    this.getShopCategoryPath(this.$route.params.id)
+    this.getDistrictPath(this.$route.params.id)
   },
   methods: {
-    async getShopCategoryPath(id) {
+    async getDistrictPath(id) {
       let parents = [0]
 
       if (id > 0) {
-        const { data } = await flatry(MiscService.shopCategoryPath(id))
+        const { data } = await flatry(MiscService.districtPath(id))
 
-        if (data && Array.isArray(data)) {
+        if (data && Array.isArray(data) && data.length > 0) {
           parents = data.map((parent) => parent.id)
         }
       }
 
-      this.categoryParents = parents
+      this.districtParents = parents
 
       this.$emit('on-expanded', parents, id)
 
-      this.shopCategory = {
+      this.district = {
         parentId: id,
         name: '',
-        icon: '',
-        image: '',
-        description: '',
+        code: '',
+        zipCode: '',
+        areaCode: '',
       }
     },
-    async createShopCategory(shopCategory, done, fail, always) {
-      const { data, error } = await flatry(
-        ShopCategoryService.create(shopCategory)
-      )
+    async createDistrict(district, done, fail, always) {
+      const { data, error } = await flatry(DistrictService.create(district))
 
       if (data) {
         done()
 
-        this.$message.success('新建商品分类成功')
+        this.$message.success('新建地区成功')
 
-        this.$emit('on-updated', shopCategory.id)
+        this.$emit('on-updated', data.id, data.parentId)
 
         await this.$router.replace({
-          name: 'ShopCategoryEdit',
+          name: 'DistrictEdit',
           params: { id: data.id },
         })
       }

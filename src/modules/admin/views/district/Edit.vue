@@ -72,7 +72,7 @@ export default {
 
         this.$message.success('修改成功')
 
-        this.$emit('on-updated', district.id)
+        this.$emit('on-updated', data.id, data.parentId)
       }
 
       if (error) {
@@ -92,7 +92,7 @@ export default {
           if (data) {
             this.$message.success('删除成功')
 
-            this.$emit('on-updated', district.parentId)
+            this.$emit('on-updated', 0, district.parentId)
 
             await this.$router.replace({
               path: '/district',
