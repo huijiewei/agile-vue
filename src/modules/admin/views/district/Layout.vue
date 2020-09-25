@@ -157,6 +157,7 @@ export default {
       this.districtExpanded = expanded
       this.districtCurrentId = currentId
       this.$refs.districtTree.setCurrentKey(this.districtCurrentId)
+      this.$refs.districtSearchTree.setCurrentKey(this.districtCurrentId)
     },
     handleDistrictUpdated(currentId, reloadId) {
       this.districtCurrentId = currentId
