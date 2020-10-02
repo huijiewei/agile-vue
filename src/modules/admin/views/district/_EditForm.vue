@@ -41,7 +41,7 @@
       :rules="[{ required: true, message: '请输入地区代码', trigger: 'blur' }]"
     >
       <el-col :md="7">
-        <el-input v-model.trim="formModel.code" />
+        <el-input class="text-mono" v-model.trim="formModel.code" />
       </el-col>
     </el-form-item>
     <el-form-item label="地区邮编" prop="zipCode">

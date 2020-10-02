@@ -6,7 +6,7 @@
           placeholder="搜索"
           size="small"
           suffix-icon="el-icon-search"
-          v-model="keyword"
+          v-model.trim="keyword"
           clearable
         >
         </el-input>
@@ -66,6 +66,7 @@
           :default-expanded-keys="districtExpanded"
           ref="districtTree"
           node-key="id"
+          accordion
           :lazy="true"
           :load="loadDistricts"
           :props="{
