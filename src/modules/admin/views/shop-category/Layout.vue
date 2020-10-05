@@ -33,7 +33,7 @@
           ref="categoryTree"
           node-key="id"
         >
-          <div class="category-tree-node" slot-scope="{ node, data }">
+          <div class="category-tree-node" slot-scope="{ data }">
             <div class="category-tree-icon">
               <ag-icon v-if="data.icon" :path="data.icon" />
               <i v-else-if="data.children" class="el-icon-folder" />

@@ -70,9 +70,9 @@ npm run build:mobile
 密码：123456
 
 ### 后端配合
-Agile Boot
+Agile Spring Boot
 
-https://github.com/huijiewei/agile-boot
+https://github.com/huijiewei/agile-spring-boot
 
 ### 说明文件版本更新
 

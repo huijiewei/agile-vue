@@ -33,6 +33,7 @@
     </el-form-item>
     <el-form-item label="分类图标" prop="icon">
       <el-col :md="16">
+        <ag-icon v-if="formModel.icon" :path="formModel.icon" />
         <el-input
           placeholder="请填写 SVG 图标的 PATH 节点"
           type="textarea"
@@ -79,9 +80,10 @@
 <script>
 import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
 import ImageUpload from '@admin/components/upload/ImageUpload'
+import AgIcon from '@core/components/Icon'
 
 export default {
-  components: { ImageUpload },
+  components: { ImageUpload, AgIcon },
   mixins: [UnprocessableEntityHttpErrorMixin],
   props: {
     submitText: {

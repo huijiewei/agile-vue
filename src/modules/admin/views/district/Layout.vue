@@ -32,7 +32,7 @@
           ref="districtSearchTree"
           node-key="id"
         >
-          <div class="district-tree-node" slot-scope="{ node, data }">
+          <div class="district-tree-node" slot-scope="{ data }">
             <div class="district-tree-icon">
               <ag-icon v-if="data.icon" :path="data.icon" />
               <i v-else-if="data.code.length < 9" class="el-icon-folder" />
@@ -73,7 +73,7 @@
             isLeaf: 'leaf',
           }"
         >
-          <div class="district-tree-node" slot-scope="{ node, data }">
+          <div class="district-tree-node" slot-scope="{ data }">
             <div class="district-tree-icon">
               <ag-icon v-if="data.icon" :path="data.icon" />
               <i v-else-if="data.code.length < 9" class="el-icon-folder" />
