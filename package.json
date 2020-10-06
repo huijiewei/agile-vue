@@ -40,7 +40,7 @@
     "cross-env": "^7.0.2",
     "eslint": "^7.10.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-vue": "^7.0.0",
+    "eslint-plugin-vue": "^7.0.1",
     "less": "^3.12.2",
     "less-loader": "^7.0.1",
     "mocker-api": "^2.3.5",
