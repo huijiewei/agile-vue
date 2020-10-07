@@ -126,10 +126,14 @@ export default {
   },
   methods: {
     handleUserCreate() {
-      this.$router.push({ path: '/user/create' })
+      this.$router.push({
+        path: '/user/create',
+      })
     },
     handleUserEdit(user) {
-      this.$router.push({ name: 'UserEdit', params: { id: user.id } })
+      this.$router.push({
+        path: `/user/edit/${user.id}`,
+      })
     },
     handleUserDelete(user) {
       this.$deleteDialog({

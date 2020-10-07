@@ -115,10 +115,10 @@ export default {
   },
   methods: {
     handleUserCreate() {
-      this.$router.push({ path: '/shop/create' })
+      this.$router.push({ path: '/shop-product/create' })
     },
-    handleUserEdit(user) {
-      this.$router.push({ name: 'ShopEdit', params: { id: user.id } })
+    handleUserEdit(product) {
+      this.$router.push({ path: `/shop-product/edit/${product.id}` })
     },
     handleUserDelete(user) {
       this.$deleteDialog({

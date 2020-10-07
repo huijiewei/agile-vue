@@ -96,10 +96,14 @@ export default {
   },
   methods: {
     handleAdminCreate() {
-      this.$router.push({ path: '/admin/create' })
+      this.$router.push({
+        path: '/admin/create',
+      })
     },
     handleAdminEdit(admin) {
-      this.$router.push({ name: 'AdminEdit', params: { id: admin.id } })
+      this.$router.push({
+        path: `/admin/edit/${admin.id}`,
+      })
     },
     handleAdminDelete(admin) {
       this.$deleteDialog({

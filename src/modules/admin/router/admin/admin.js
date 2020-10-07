@@ -1,7 +1,6 @@
 export default [
   {
     path: '/admin',
-    name: 'Admin',
     component: () =>
       import(/* webpackChunkName: "chunk-admin" */ '@admin/views/admin/Index'),
     meta: {
@@ -10,7 +9,6 @@ export default [
   },
   {
     path: '/admin/create',
-    name: 'AdminCreate',
     component: () =>
       import(/* webpackChunkName: "chunk-admin" */ '@admin/views/admin/Create'),
     meta: {
@@ -19,7 +17,6 @@ export default [
   },
   {
     path: '/admin/edit/:id',
-    name: 'AdminEdit',
     component: () =>
       import(/* webpackChunkName: "chunk-admin" */ '@admin/views/admin/Edit'),
     meta: {

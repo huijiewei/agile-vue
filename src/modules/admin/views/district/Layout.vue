@@ -16,7 +16,7 @@
             :disabled="!$can('district/create')"
             title="创建根地区"
             size="mini"
-            @click.native="handleDistrictCreate(0)"
+            @click.native="handleDistrictCreate('0')"
             icon="el-icon-folder-add"
           >
             创建根地区
@@ -50,6 +50,7 @@
                 title="查看编辑"
               />
               <el-button
+                v-if="!data.leaf"
                 size="mini"
                 @click.stop="handleDistrictCreate(data.id)"
                 :disabled="!$can('district/create')"
@@ -91,6 +92,7 @@
                 title="查看编辑"
               />
               <el-button
+                v-if="!data.leaf"
                 size="mini"
                 @click.stop="handleDistrictCreate(data.id)"
                 :disabled="!$can('district/create')"
@@ -170,15 +172,13 @@ export default {
     },
     handleDistrictCreate(parentId) {
       this.$router.push({
-        name: 'DistrictCreate',
-        params: { id: parentId },
+        path: `/district/create/${parentId}`,
       })
     },
 
     handleDistrictEdit(district) {
       this.$router.push({
-        name: 'DistrictEdit',
-        params: { id: district.id },
+        path: `/district/edit/${district.id}`,
       })
     },
 
@@ -189,20 +189,13 @@ export default {
 
       const { data } = await flatry(MiscService.districts(parentId))
 
-      const districts = data || []
-
-      districts.forEach((item) => {
-        item.leaf = item.code.length === 9
-      })
-
-      resolve(districts)
+      resolve(data || [])
 
       this.$refs.districtTree.setCurrentKey(this.districtCurrentId)
 
       this.loading = false
     },
   },
-  created() {},
 }
 </script>
 <style lang="scss">

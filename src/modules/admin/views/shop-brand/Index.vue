@@ -136,8 +136,7 @@ export default {
     },
     handleShopBrandEdit(shopBrand) {
       this.$router.push({
-        name: 'ShopBrandEdit',
-        params: { id: shopBrand.id },
+        path: `/shop-brand/edit/${shopBrand.id}`,
       })
     },
     handleShopBrandDelete(shopBrand) {

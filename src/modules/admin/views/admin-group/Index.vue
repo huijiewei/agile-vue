@@ -68,8 +68,7 @@ export default {
     },
     handleAdminGroupEdit(adminGroup) {
       this.$router.push({
-        name: 'AdminGroupEdit',
-        params: { id: adminGroup.id },
+        path: `/admin-group/edit/${adminGroup.id}`,
       })
     },
     handleAdminGroupDelete(adminGroup) {

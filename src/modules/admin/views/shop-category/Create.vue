@@ -85,8 +85,7 @@ export default {
         this.$emit('on-updated', shopCategory.id)
 
         await this.$router.replace({
-          name: 'ShopCategoryEdit',
-          params: { id: data.id },
+          path: `/shop-category/edit/${data.id}`,
         })
       }
 
