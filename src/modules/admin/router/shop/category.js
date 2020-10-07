@@ -8,6 +8,7 @@ export default [
     children: [
       {
         path: '',
+        name: 'ShopCategory',
         component: () =>
           import(
             /* webpackChunkName: "chunk-shop" */ '@admin/views/shop-category/Index'
@@ -18,6 +19,7 @@ export default [
       },
       {
         path: 'create/:id',
+        name: 'ShopCategoryCreate',
         component: () =>
           import(
             /* webpackChunkName: "chunk-shop" */ '@admin/views/shop-category/Create'
@@ -33,6 +35,7 @@ export default [
       },
       {
         path: 'edit/:id',
+        name: 'ShopCategoryEdit',
         component: () =>
           import(
             /* webpackChunkName: "chunk-shop" */ '@admin/views/shop-category/Edit'

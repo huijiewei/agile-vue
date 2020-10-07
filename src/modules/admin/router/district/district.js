@@ -8,6 +8,7 @@ export default [
     children: [
       {
         path: '',
+        name: 'District',
         component: () =>
           import(
             /* webpackChunkName: "chunk-district" */ '@admin/views/district/Index'
@@ -18,6 +19,7 @@ export default [
       },
       {
         path: 'create/:id',
+        name: 'DistrictCreate',
         component: () =>
           import(
             /* webpackChunkName: "chunk-district" */ '@admin/views/district/Create'
@@ -33,6 +35,7 @@ export default [
       },
       {
         path: 'edit/:id',
+        name: 'DistrictEdit',
         component: () =>
           import(
             /* webpackChunkName: "chunk-district" */ '@admin/views/district/Edit'

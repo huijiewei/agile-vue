@@ -3,6 +3,7 @@ import AdminLayout from '@admin/components/AdminLayout'
 export default [
   {
     path: '/admin-group',
+    name: 'AdminGroup',
     component: () =>
       import(
         /* webpackChunkName: "chunk-admin" */ '@admin/views/admin-group/Index'
@@ -13,6 +14,7 @@ export default [
   },
   {
     path: '/admin-group/create',
+    name: 'AdminGroupCreate',
     component: () =>
       import(
         /* webpackChunkName: "chunk-admin" */ '@admin/views/admin-group/Create'
@@ -23,6 +25,7 @@ export default [
   },
   {
     path: '/admin-group/edit/:id',
+    name: 'AdminGroupEdit',
     component: () =>
       import(
         /* webpackChunkName: "chunk-admin" */ '@admin/views/admin-group/Edit'

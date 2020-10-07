@@ -23,6 +23,7 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/login',
+    name: 'Login',
     component: siteLogin,
     meta: {
       title: '登录',
@@ -38,6 +39,7 @@ const routes = [
       },
       {
         path: '/home',
+        name: 'Home',
         component: siteIndex,
         meta: {
           affix: true,
@@ -46,6 +48,7 @@ const routes = [
       },
       {
         path: '/profile',
+        name: 'Profile',
         component: siteProfile,
         meta: {
           title: '个人资料',

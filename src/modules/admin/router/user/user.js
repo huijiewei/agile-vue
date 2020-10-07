@@ -1,6 +1,7 @@
 export default [
   {
     path: '/user',
+    name: 'User',
     component: () =>
       import(/* webpackChunkName: "chunk-user" */ '@admin/views/user/Index'),
     meta: {
@@ -9,6 +10,7 @@ export default [
   },
   {
     path: '/user/create',
+    name: 'UserCreate',
     component: () =>
       import(/* webpackChunkName: "chunk-user" */ '@admin/views/user/Create'),
     meta: {
@@ -17,6 +19,7 @@ export default [
   },
   {
     path: '/user/edit/:id',
+    name: 'UserEdit',
     component: () =>
       import(/* webpackChunkName: "chunk-user" */ '@admin/views/user/Edit'),
     meta: {
