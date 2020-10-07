@@ -163,6 +163,12 @@ export default {
       this.$refs.districtSearchTree.setCurrentKey(this.districtCurrentId)
     },
     handleDistrictUpdated(currentId, reloadId) {
+      if (reloadId === 0) {
+        this.node.childNodes = []
+        this.loadDistricts(this.node, this.resolve)
+        return
+      }
+
       this.districtCurrentId = currentId
 
       const node = this.$refs.districtTree.getNode(reloadId)
@@ -184,6 +190,11 @@ export default {
 
     async loadDistricts(node, resolve) {
       const parentId = (node.data && node.data.id) || 0
+
+      if (parentId === 0) {
+        this.node = node
+        this.resolve = resolve
+      }
 
       this.loading = true
 

@@ -82,7 +82,7 @@ export default {
         this.$emit('on-updated', data.id, data.parentId)
 
         await this.$router.replace({
-          name: `/district/edit/${data.id}`,
+          path: `/district/edit/${data.id}`,
         })
       }
 
