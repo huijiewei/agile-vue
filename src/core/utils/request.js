@@ -2,7 +2,7 @@ import axios from 'axios'
 import { loadProgressBar } from 'axios-progress-bar'
 import 'axios-progress-bar/dist/nprogress.css'
 import contentDisposition from 'content-disposition'
-import { cacheAdapterEnhancer, throttleAdapterEnhancer } from 'axios-extensions'
+import { throttleAdapterEnhancer } from 'axios-extensions'
 
 class Request {
   constructor(options) {
@@ -33,9 +33,14 @@ class Request {
 
     loadProgressBar({ showSpinner: false }, httpClient)
 
-    httpClient.interceptors.request.use((config) => {
-      return opt.beforeRequest(config)
-    }, undefined)
+    httpClient.interceptors.request.use(
+      (config) => {
+        return opt.beforeRequest(config)
+      },
+      (error) => {
+        return Promise.reject(error)
+      }
+    )
 
     httpClient.interceptors.response.use(
       (response) => {
@@ -49,14 +54,19 @@ class Request {
     this.httpClient = httpClient
   }
 
-  request(method, url, params = null, data = null, back = false) {
+  request(
+    method,
+    url,
+    params = null,
+    data = null,
+    historyBack = false,
+    cancelIgnore = false
+  ) {
     const config = {
       url: url,
       method: method,
-    }
-
-    if (back === true) {
-      config.historyBack = true
+      historyBack: historyBack,
+      cancelIgnore: cancelIgnore,
     }
 
     if (params) {
@@ -72,37 +82,37 @@ class Request {
 
   all() {}
 
-  get(url, params = null, back = true) {
-    return this.request('GET', url, params, null, back)
+  get(url, params = null, historyBack = true, cancelIgnore = false) {
+    return this.request('GET', url, params, null, historyBack, cancelIgnore)
   }
 
   head(url, params = null) {
-    return this.request('HEAD', url, params)
+    return this.request('HEAD', url, params, null, false)
   }
 
-  post(url, data = null, params = null, back = false) {
-    return this.request('POST', url, params, data, back)
+  post(url, data = null, params = null, historyBack = false) {
+    return this.request('POST', url, params, data, historyBack)
   }
 
-  put(url, data = null, params = null, back = false) {
-    return this.request('PUT', url, params, data, back)
+  put(url, data = null, params = null, historyBack = false) {
+    return this.request('PUT', url, params, data, historyBack)
   }
 
-  path(url, data = null, params = null, back = false) {
-    return this.request('PATH', url, params, data, back)
+  path(url, data = null, params = null, historyBack = false) {
+    return this.request('PATH', url, params, data, historyBack)
   }
 
-  delete(url, params = null, back = false) {
-    return this.request('DELETE', url, params, null, back)
+  delete(url, params = null, historyBack = false) {
+    return this.request('DELETE', url, params, null, historyBack)
   }
 
-  download(method, url, params = null, data = null, back = false) {
+  download(method, url, params = null, data = null, historyBack = false) {
     const config = {
       url: url,
       method: method,
       timeout: 60000,
       responseType: 'blob',
-      historyBack: back,
+      historyBack: historyBack,
     }
 
     if (params) {
