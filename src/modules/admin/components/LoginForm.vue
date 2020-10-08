@@ -32,7 +32,7 @@
       :rules="[{ required: true, message: '请输入验证码', trigger: 'blur' }]"
     >
       <el-input
-        v-model="loginForm.captcha.code"
+        v-model="loginForm.captcha"
         placeholder="验证码"
         type="text"
         auto-complete="off"
@@ -44,7 +44,7 @@
             @click="updateCaptcha"
             alt="点击更新验证码"
             title="点击更新验证码"
-            :src="captcha.captcha"
+            :src="captcha.image"
           />
         </template>
       </el-input>
@@ -82,10 +82,9 @@ export default {
       loginForm: {
         account: '',
         password: '',
-        captcha: null,
+        captcha: '',
       },
       captcha: null,
-      captchaCode: '',
     }
   },
   methods: {
@@ -93,14 +92,11 @@ export default {
       const { data } = await flatry(OpenService.captcha())
 
       this.captcha = data
-      this.loginForm.captcha = {
-        code: '',
-        uuid: data.uuid,
-      }
+      this.loginForm.captcha = ''
     },
     removeCaptcha() {
       this.captcha = null
-      this.loginForm.captcha = null
+      this.loginForm.captcha = ''
     },
     login(formName) {
       this.$refs[formName].validate(async (valid) => {
@@ -110,7 +106,20 @@ export default {
 
         this.submitLoading = true
 
-        const { data, error } = await flatry(AuthService.login(this.loginForm))
+        let loginForm
+
+        if (this.captcha) {
+          // eslint-disable-next-line no-new-func
+          const captchaProcess = new Function('captcha', this.captcha.process)
+
+          loginForm = Object.assign({}, this.loginForm, {
+            captcha: captchaProcess(this.loginForm.captcha),
+          })
+        } else {
+          loginForm = this.loginForm
+        }
+
+        const { data, error } = await flatry(AuthService.login(loginForm))
 
         if (data) {
           await this.$store.dispatch('auth/login', data)
