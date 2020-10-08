@@ -32,7 +32,8 @@
       :rules="[{ required: true, message: '请输入验证码', trigger: 'blur' }]"
     >
       <el-input
-        v-model="loginForm.captcha"
+        class="uppercase"
+        v-model.trim="loginForm.captcha"
         placeholder="验证码"
         type="text"
         auto-complete="off"
