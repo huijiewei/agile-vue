@@ -28,7 +28,7 @@ export default {
       admin: null,
     }
   },
-  async activated() {
+  async created() {
     const { data } = await flatry(AuthService.profile())
 
     if (data) {
@@ -43,10 +43,10 @@ export default {
         done()
         this.$message.success('个人资料编辑成功')
 
-        const { data } = await flatry(AuthService.account())
+        const { account } = await flatry(AuthService.account())
 
-        if (data) {
-          await this.$store.dispatch('auth/account', data)
+        if (account) {
+          await this.$store.dispatch('auth/account', account)
         }
       }
 
