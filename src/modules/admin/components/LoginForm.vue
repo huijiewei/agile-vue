@@ -11,7 +11,7 @@
       <el-input
         v-model.trim="loginForm.account"
         placeholder="手机号码或者电子邮箱"
-        type="tel"
+        type="text"
         prefix-icon="el-icon-user"
       />
     </el-form-item>
