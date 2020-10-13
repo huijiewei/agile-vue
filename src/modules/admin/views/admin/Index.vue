@@ -73,7 +73,6 @@
 
 <script>
 import AdminService from '@admin/services/AdminService'
-import flatry from '@core/utils/flatry'
 import AgAvatar from '@core/components/Avatar'
 
 export default {
@@ -86,7 +85,7 @@ export default {
     }
   },
   async created() {
-    const { data } = await flatry(AdminService.all())
+    const { data } = await AdminService.all()
 
     if (data) {
       this.admins = data.items
@@ -113,7 +112,7 @@ export default {
         callback: async () => {
           this.loading = true
 
-          const { data } = await flatry(AdminService.delete(admin.id))
+          const { data } = await AdminService.delete(admin.id)
 
           if (data) {
             this.admins.forEach((item, index) => {

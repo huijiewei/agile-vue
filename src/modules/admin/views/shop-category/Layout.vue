@@ -71,7 +71,6 @@
 </template>
 
 <script>
-import flatry from '@core/utils/flatry'
 import MiscService from '@admin/services/MiscService'
 import AgIcon from '@core/components/Icon'
 
@@ -139,7 +138,7 @@ export default {
     async loadCategoryTree() {
       this.loading = true
 
-      const { data } = await flatry(MiscService.shopCategoryTree())
+      const { data } = await MiscService.shopCategoryTree()
 
       if (data) {
         this.categoryTree = data

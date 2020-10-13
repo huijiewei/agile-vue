@@ -88,7 +88,6 @@
 </template>
 
 <script>
-import flatry from '@core/utils/flatry'
 import ShopProductService from '@admin/services/ShopProductService'
 import SearchForm from '@admin/components/SearchForm'
 import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'
@@ -126,7 +125,7 @@ export default {
         callback: async () => {
           this.loading = true
 
-          const { data } = await flatry(ShopProductService.delete(user.id))
+          const { data } = await ShopProductService.delete(user.id)
 
           if (data) {
             this.shopProducts.forEach((item, index) => {
@@ -154,9 +153,7 @@ export default {
     async getShopProducts(query) {
       this.loading = true
 
-      const { data } = await flatry(
-        ShopProductService.all(this.buildRouteQuery(query))
-      )
+      const { data } = await ShopProductService.all(this.buildRouteQuery(query))
 
       if (data) {
         this.shopProducts = data.items

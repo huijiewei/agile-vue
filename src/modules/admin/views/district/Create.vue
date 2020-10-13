@@ -21,7 +21,6 @@
 import DistrictFrom from '@admin/views/district/_EditForm'
 import DistrictService from '@admin/services/DistrictService'
 import MiscService from '@admin/services/MiscService'
-import flatry from '@core/utils/flatry'
 import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
 
 export default {
@@ -52,7 +51,7 @@ export default {
       let parents = [0]
 
       if (id > 0) {
-        const { data } = await flatry(MiscService.districtPath(id))
+        const { data } = await MiscService.districtPath(id)
 
         if (data && Array.isArray(data) && data.length > 0) {
           parents = data.map((parent) => parent.id)
@@ -72,7 +71,7 @@ export default {
       }
     },
     async createDistrict(district, done, fail, always) {
-      const { data, error } = await flatry(DistrictService.create(district))
+      const { data, error } = await DistrictService.create(district)
 
       if (data) {
         done()

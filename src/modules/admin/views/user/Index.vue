@@ -99,7 +99,6 @@
 
 <script>
 import AgAvatar from '@core/components/Avatar'
-import flatry from '@core/utils/flatry'
 import UserService from '@admin/services/UserService'
 import SearchForm from '@admin/components/SearchForm'
 import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'
@@ -141,7 +140,7 @@ export default {
         callback: async () => {
           this.loading = true
 
-          const { data } = await flatry(UserService.delete(user.id))
+          const { data } = await UserService.delete(user.id)
 
           if (data) {
             this.users.forEach((item, index) => {
@@ -163,9 +162,7 @@ export default {
     async getUsers(query) {
       this.loading = true
 
-      const { data } = await flatry(
-        UserService.all(this.buildRouteQuery(query))
-      )
+      const { data } = await UserService.all(this.buildRouteQuery(query))
 
       if (data) {
         this.users = data.items

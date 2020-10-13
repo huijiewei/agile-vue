@@ -3,13 +3,14 @@ import { loadProgressBar } from 'axios-progress-bar'
 import 'axios-progress-bar/dist/nprogress.css'
 import contentDisposition from 'content-disposition'
 import { throttleAdapterEnhancer } from 'axios-extensions'
+import flatry from '@core/utils/flatry'
 
 class Request {
   constructor(options) {
     const opt = {
       ...{
         baseUrl: '',
-        timeout: 20000,
+        timeout: 10 * 1000,
         withCredentials: false,
         paramsSerializer: null,
         beforeRequest: (config) => {
@@ -38,7 +39,7 @@ class Request {
         return opt.beforeRequest(config)
       },
       (error) => {
-        return Promise.reject(error)
+        return opt.onError(error)
       }
     )
 
@@ -77,17 +78,11 @@ class Request {
       config.data = data
     }
 
-    return this.httpClient.request(config)
+    return flatry(this.httpClient.request(config))
   }
-
-  all() {}
 
   get(url, params = null, historyBack = true, cancelIgnore = false) {
     return this.request('GET', url, params, null, historyBack, cancelIgnore)
-  }
-
-  head(url, params = null) {
-    return this.request('HEAD', url, params, null, false)
   }
 
   post(url, data = null, params = null, historyBack = false) {
@@ -110,9 +105,12 @@ class Request {
     const config = {
       url: url,
       method: method,
-      timeout: 60000,
+      timeout: 120 * 1000,
       responseType: 'blob',
       historyBack: historyBack,
+      onDownloadProgress: (progressEvent) => {
+        console.log(progressEvent)
+      },
     }
 
     if (params) {
@@ -123,30 +121,32 @@ class Request {
       config.data = data
     }
 
-    return this.httpClient.request(config).then((response) => {
-      let filename = response.headers['x-suggested-filename']
+    return flatry(
+      this.httpClient.request(config).then((response) => {
+        let filename = response.headers['x-suggested-filename']
 
-      if (!filename) {
-        const disposition = contentDisposition.parse(
-          response.headers['content-disposition']
-        )
+        if (!filename) {
+          const disposition = contentDisposition.parse(
+            response.headers['content-disposition']
+          )
 
-        filename = disposition.parameters.filename
-      }
+          filename = disposition.parameters.filename
+        }
 
-      if (filename) {
-        const url = window.URL.createObjectURL(new Blob([response.data]))
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', decodeURIComponent(filename))
-        link.click()
-        window.URL.revokeObjectURL(url)
+        if (filename) {
+          const url = window.URL.createObjectURL(new Blob([response.data]))
+          const link = document.createElement('a')
+          link.href = url
+          link.setAttribute('download', decodeURIComponent(filename))
+          link.click()
+          window.URL.revokeObjectURL(url)
 
-        return true
-      } else {
-        return false
-      }
-    })
+          return true
+        } else {
+          return false
+        }
+      })
+    )
   }
 }
 

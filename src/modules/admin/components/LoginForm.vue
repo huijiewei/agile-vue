@@ -64,7 +64,6 @@
 </template>
 
 <script>
-import flatry from '@core/utils/flatry'
 import AuthService from '@admin/services/AuthService'
 import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
 import OpenService from '@admin/services/OpenService'
@@ -90,7 +89,7 @@ export default {
   },
   methods: {
     async updateCaptcha() {
-      const { data } = await flatry(OpenService.captcha())
+      const { data } = await OpenService.captcha()
 
       this.captcha = data
       this.loginForm.captcha = ''
@@ -120,7 +119,7 @@ export default {
           loginForm = this.loginForm
         }
 
-        const { data, error } = await flatry(AuthService.login(loginForm))
+        const { data, error } = await AuthService.login(loginForm)
 
         if (data) {
           await this.$store.dispatch('auth/login', data)

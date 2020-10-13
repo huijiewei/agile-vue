@@ -114,7 +114,6 @@
 </template>
 
 <script>
-import flatry from '@core/utils/flatry'
 import MiscService from '@admin/services/MiscService'
 import AgIcon from '@core/components/Icon'
 
@@ -135,7 +134,7 @@ export default {
       this.isSearched = true
       this.loading = true
 
-      const { data } = await flatry(MiscService.districtSearchTree(keyword))
+      const { data } = await MiscService.districtSearchTree(keyword)
 
       if (data) {
         this.searchedData = data
@@ -198,7 +197,7 @@ export default {
 
       this.loading = true
 
-      const { data } = await flatry(MiscService.districts(parentId))
+      const { data } = await MiscService.districts(parentId)
 
       resolve(data || [])
 
