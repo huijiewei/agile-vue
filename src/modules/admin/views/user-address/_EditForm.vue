@@ -34,6 +34,18 @@
         <el-input v-model.trim="formModel.phone" />
       </el-col>
     </el-form-item>
+    <el-form-item label="所在地区" prop="districtCode">
+      <el-col :md="16">
+        <district-cascader
+          :props="{
+            value: 'code',
+          }"
+          placeholder="请选择所在地区"
+          v-model="formDistrictParents"
+          @change="handleDistrictChange"
+        ></district-cascader>
+      </el-col>
+    </el-form-item>
     <el-form-item
       label="详细地址"
       prop="address"
@@ -53,8 +65,10 @@
 
 <script>
 import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
+import DistrictCascader from '@admin/components/DistrictCascader'
 
 export default {
+  components: { DistrictCascader },
   mixins: [UnprocessableEntityHttpErrorMixin],
   props: {
     submitText: {
@@ -74,12 +88,19 @@ export default {
     return {
       submitLoading: false,
       formModel: null,
+      formDistrictParents: [],
     }
   },
   created() {
     this.formModel = Object.assign({}, this.userAddress)
+    this.formDistrictParents = this.userAddress.districtPath.map(
+      (district) => district.code
+    )
   },
   methods: {
+    handleDistrictChange(value) {
+      this.formModel.districtCode = value[value.length - 1]
+    },
     handleFormSubmit(formName) {
       this.$refs[formName].validate((valid) => {
         if (!valid) {
