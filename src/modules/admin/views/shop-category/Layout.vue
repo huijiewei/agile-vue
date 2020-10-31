@@ -130,9 +130,8 @@ export default {
       this.$refs.categoryTree.setCurrentKey(currentId)
     },
 
-    async handleCategoryTreeUpdated(currentId) {
+    async handleCategoryTreeUpdated() {
       await this.loadCategoryTree()
-      this.$refs.categoryTree.setCurrentKey(currentId)
     },
 
     async loadCategoryTree() {
