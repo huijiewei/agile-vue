@@ -2,6 +2,7 @@
   <el-cascader
     style="width: 100%"
     :placeholder="placeholder"
+    :options="rootDistricts"
     :props="
       Object.assign(
         {
@@ -48,37 +49,56 @@ export default {
     prop: 'value',
     event: 'change',
   },
+  data() {
+    return {
+      rootDistricts: [],
+    }
+  },
+  mounted() {
+    this.getRootDistricts()
+  },
   methods: {
     handleChange(value) {
       this.$emit('change', value)
     },
-    async loadDistricts(node, resolve) {
-      if (node.data && node.data.leaf) {
-        resolve([])
-        return
-      }
-
-      const parentId = (node.data && node.data.id) || 0
-
+    async getDistricts(parentId) {
+      return await MiscService.districts(parentId)
+    },
+    async getRootDistricts() {
       this.loading = true
+      const { data } = await this.getDistricts(0)
 
-      const { data } = await MiscService.districts(parentId)
-
-      if (data) {
-        data.forEach((item) => {
-          item.leaf = item.code.length === this.leafLength
-          item.disabled = this.disabledCodes.includes(item.code)
-        })
-
-        const districts =
-          parentId === 0
-            ? [...[{ id: 0, name: '全国', code: '0', leaf: true }], ...data]
-            : data
-
-        resolve(districts)
-      }
+      this.rootDistricts = [
+        ...[
+          {
+            id: 0,
+            name: '全国',
+            code: '0',
+            leaf: true,
+          },
+        ],
+        ...data,
+      ]
 
       this.loading = false
+    },
+    async loadDistricts(node, resolve) {
+      if (node.data && node.data.id) {
+        this.loading = true
+
+        const { data } = await this.getDistricts(node.data.id)
+
+        if (data) {
+          data.forEach((item) => {
+            item.leaf = item.code.length === this.leafLength
+            item.disabled = this.disabledCodes.includes(item.code)
+          })
+
+          resolve(data)
+        }
+
+        this.loading = false
+      }
     },
   },
 }
