@@ -37,6 +37,12 @@ export default {
       type: Number,
       default: 9,
     },
+    disabledCodes: {
+      type: Array,
+      default: () => {
+        return []
+      },
+    },
   },
   model: {
     prop: 'value',
@@ -59,17 +65,15 @@ export default {
       const { data } = await MiscService.districts(parentId)
 
       if (data) {
+        data.forEach((item) => {
+          item.leaf = item.code.length === this.leafLength
+          item.disabled = this.disabledCodes.includes(item.code)
+        })
+
         const districts =
           parentId === 0
-            ? [
-                ...[{ id: 0, name: '全国', code: '0'.repeat(this.leafLength) }],
-                ...data,
-              ]
+            ? [...[{ id: 0, name: '全国', code: '0', leaf: true }], ...data]
             : data
-
-        districts.forEach((item) => {
-          item.leaf = item.code.length === this.leafLength
-        })
 
         resolve(districts)
       }

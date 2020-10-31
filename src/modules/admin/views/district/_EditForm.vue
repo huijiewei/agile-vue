@@ -14,6 +14,7 @@
           v-model="formDistrictParents"
           @change="handleDistrictParentsChange"
           :leaf-length="6"
+          :disabled-codes="[this.district.code]"
         >
         </district-cascader>
       </el-col>
