@@ -76,4 +76,8 @@ https://github.com/huijiewei/agile-spring-boot
 
 ### 说明文件版本更新
 
-Version: 2019-11-06 09:09
+Version: 2020-10-31 19:30
+
+### Element-UI 的一个小修正
+打开 ./node_modules/element-ui/lib/cascader-panel.js 文件 1053 行
+把 `if(value)` 改为 `if (value !== undefined && value !== null) {`
