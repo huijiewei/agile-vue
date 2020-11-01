@@ -19,7 +19,7 @@ import UserForm from '@admin/views/user/_EditForm'
 import UserService from '@admin/services/UserService'
 
 export default {
-  name: 'UserCreate',
+  name: 'UserAddressCreate',
   components: { UserForm, PlaceholderForm },
   data() {
     return {

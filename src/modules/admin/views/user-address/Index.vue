@@ -22,7 +22,7 @@
         class-name="text-mono"
         label="联系电话"
       />
-      <el-table-column width="150" align="center" label="用户">
+      <el-table-column width="150" label="用户">
         <template slot-scope="scope">
           <ag-avatar :src="scope.row.user.avatar" />
           &nbsp;
@@ -66,7 +66,7 @@ import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'
 import Pagination from '@admin/components/Pagination'
 
 export default {
-  name: 'User',
+  name: 'UserAddress',
   components: { SearchForm, AgAvatar, Pagination },
   mixins: [SearchFormFieldsMixin],
   data() {
