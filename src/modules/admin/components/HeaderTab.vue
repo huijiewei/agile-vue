@@ -214,8 +214,6 @@ export default {
         parent: route.meta && route.meta.parent,
       }
 
-      console.log(route)
-
       this.$store.dispatch('tabs/open', tab)
     },
     isActive(tab) {
