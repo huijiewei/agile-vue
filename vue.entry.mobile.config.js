@@ -1,6 +1,5 @@
 const path = require('path')
 const apiMocker = require('mocker-api')
-const assign = require('assign-deep')
 
 const vueConfig = require('./vue.config')
 
@@ -25,6 +24,7 @@ const customConfig = {
   },
 }
 
-const config = assign(vueConfig, customConfig)
-
-module.exports = config
+module.exports = {
+  ...vueConfig,
+  ...customConfig,
+}
