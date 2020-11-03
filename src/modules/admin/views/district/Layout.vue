@@ -215,7 +215,7 @@ export default {
   },
 }
 </script>
-<style lang="scss">
+<style lang="less">
 .district-tree-node {
   font-size: 14px;
   flex: 1;

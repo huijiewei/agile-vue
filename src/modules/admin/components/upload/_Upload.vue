@@ -463,7 +463,7 @@ export default {
   },
 }
 </script>
-<style lang="scss">
+<style lang="less">
 .image-view-dialog {
   .el-dialog {
     width: auto;

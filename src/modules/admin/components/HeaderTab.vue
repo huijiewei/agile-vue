@@ -276,7 +276,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="less">
 .context-menu {
   position: absolute;
   margin: 0;

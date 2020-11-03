@@ -151,7 +151,7 @@ export default {
   },
 }
 </script>
-<style lang="scss">
+<style lang="less">
 .category-tree-node {
   font-size: 14px;
   flex: 1;
