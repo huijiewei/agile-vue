@@ -246,7 +246,7 @@ export default {
     },
 
     getFilename(url) {
-      if (url.length === 0) {
+      if (!url || url.length === 0) {
         return ''
       }
 
