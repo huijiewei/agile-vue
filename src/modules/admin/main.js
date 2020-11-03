@@ -18,13 +18,23 @@ import PermissionCheck from './plugins/PermissionCheck'
 Vue.use(ElementUI)
 
 Vue.use(HttpClient, {
-  apiHost: document
-    .querySelector('meta[name="api-host"]')
-    .getAttribute('content'),
-  store,
-  getAccessTokenGetter: 'auth/getAccessToken',
-  setLoginActionDispatch: 'auth/setLoginAction',
-  setErrorDispatch: 'setError',
+  getApiHost: () => {
+    return document
+      .querySelector('meta[name="api-host"]')
+      .getAttribute('content')
+  },
+  getAccessToken: () => {
+    return store.getters['auth/getAccessToken']
+  },
+  setLoginAction: async (action) => {
+    await store.dispatch('auth/setLoginAction', action)
+  },
+  setErrorMessage: async (message, historyBack) => {
+    await store.dispatch('setError', {
+      message: message,
+      historyBack: historyBack,
+    })
+  },
   paramsSerializer: function (params) {
     return qs.stringify(params, {
       arrayFormat: process.env.VUE_APP_QS_ARRAY_FORMAT || 'brackets',
