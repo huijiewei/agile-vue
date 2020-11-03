@@ -34,6 +34,7 @@
     "@vue/cli-plugin-vuex": "^4.5.8",
     "@vue/cli-service": "^4.5.8",
     "@vue/eslint-config-prettier": "^6.0.0",
+    "assign-deep": "^1.0.1",
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
     "eslint": "^7.12.1",
@@ -45,7 +46,6 @@
     "prettier": "^2.1.2",
     "sass": "^1.28.0",
     "sass-loader": "^10.0.4",
-    "assign-deep": "^1.0.1",
     "vue-template-compiler": "^2.6.12"
   },
   "eslintConfig": {
