@@ -1,6 +1,6 @@
 const path = require('path')
 
-process.env.VUE_APP_QS_ARRAY_FORMAT = 'repeat'
+process.env.VUE_APP_QS_ARRAY_FORMAT = 'none'
 
 module.exports = {
   assetsDir: 'assets',

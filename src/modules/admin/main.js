@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import qs from 'qs'
+import queryString from 'query-string'
 
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
@@ -36,7 +36,7 @@ Vue.use(HttpClient, {
     })
   },
   paramsSerializer: function (params) {
-    return qs.stringify(params, {
+    return queryString.stringify(params, {
       arrayFormat: process.env.VUE_APP_QS_ARRAY_FORMAT || 'brackets',
     })
   },
