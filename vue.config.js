@@ -1,19 +1,30 @@
 const path = require('path')
+const assign = require('assign-deep')
+
+const moduleConfig = require(process.env.MODULE_CONFIG)
 
 process.env.VUE_APP_QS_ARRAY_FORMAT = 'none'
+process.env.VUE_APP_PUBLIC_PATH = moduleConfig.config.publicPath
 
-module.exports = {
+const config = {
   assetsDir: 'assets',
   devServer: {
     host: 'www.agile.test',
     compress: true,
   },
   chainWebpack: (config) => {
-    config.resolve.alias
-      .set('@core', path.resolve('src/core'))
-      .set('@admin', path.resolve('src/modules/admin'))
-      .set('@mobile', path.resolve('src/modules/mobile'))
-      .delete('@')
+    config.entryPoints.delete('app')
+
+    config.resolve.alias.set('@core', path.resolve('src/core')).delete('@')
+
+    config.plugin('copy').tap((args) => {
+      args[0][1] = Object.assign({}, args[0][0], {
+        from: path.resolve('./public/common'),
+      })
+      return args
+    })
+
+    moduleConfig.chainWebpack(config)
 
     config.optimization.splitChunks({
       chunks: 'all',
@@ -41,3 +52,5 @@ module.exports = {
     })
   },
 }
+
+module.exports = assign(config, moduleConfig.config)
