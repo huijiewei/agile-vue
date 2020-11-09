@@ -128,7 +128,7 @@ export default {
       if (spinner) {
         spinner.remove()
       }
-    }, 100)
+    }, 500)
 
     this.storeSubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === 'TOGGLE_ERROR') {
