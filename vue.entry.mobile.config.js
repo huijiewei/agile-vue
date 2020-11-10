@@ -31,7 +31,7 @@ const customConfig = {
   devServer: {
     port: 8080,
     before(app) {
-      apiMocker(app, path.resolve('./mocker/admin/index.js'))
+      apiMocker(app, path.resolve('./mocker/mobile/index.js'))
     },
   },
 }
@@ -46,7 +46,7 @@ module.exports = {
     config.plugin('html').tap((args) => {
       args[0].template = 'public/mobile/index.html'
       args[0].title = 'Agile 移动应用'
-      args[0].chunks = ['vendor', 'element', 'agile', 'mobile']
+      args[0].chunks = ['vendor', 'agile', 'mobile']
       return args
     })
 
