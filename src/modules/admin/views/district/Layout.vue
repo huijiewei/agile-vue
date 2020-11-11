@@ -74,8 +74,8 @@
             isLeaf: 'leaf',
           }"
         >
-          <div class="district-tree-node" slot-scope="{ data }">
-            <div class="district-tree-icon">
+          <div class="category-tree-node" slot-scope="{ data }">
+            <div class="category-tree-icon">
               <ag-icon v-if="data.icon" :path="data.icon" />
               <i v-else-if="data.code.length < 9" class="el-icon-folder" />
               <i v-else class="el-icon-map-location" />
