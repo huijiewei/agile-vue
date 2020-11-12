@@ -103,7 +103,7 @@
       :accept="option.typesLimit.map((type) => '.' + type).join(', ')"
       :multiple="false"
       :show-file-list="false"
-      :http-request="getHttpRequest"
+      :http-request="httpRequest"
       :before-upload="handleBeforeUpload"
       :on-success="handleSuccess"
       :on-error="handleError"
@@ -137,7 +137,7 @@
 </template>
 
 <script>
-import Request from '@core/utils/request'
+import Upload from '@core/utils/upload'
 import ImageCropper from '@admin/components/ImageCropper'
 
 export default {
@@ -187,19 +187,7 @@ export default {
     return {
       box: { width: 'auto', height: '32px' },
       timer: null,
-      option: {
-        url: '',
-        cropUrl: '',
-        timeout: 0,
-        params: [],
-        headers: [],
-        dataType: '',
-        paramName: '',
-        imageProcess: '',
-        responseParse: '',
-        sizeLimit: 0,
-        typesLimit: [],
-      },
+      option: Upload.defaultOption(),
       buttonDisabled: true,
       uploadFiles: this.multiple ? [] : null,
       cropperImage: null,
@@ -292,65 +280,16 @@ export default {
       this.$emit('change', this.uploadFiles)
     },
 
-    getHttpRequest(option) {
-      const request = new Request({
-        baseUrl: option.action,
-        withCredentials: option.withCredentials,
-        onSuccess: (response) => option.onSuccess(response.data),
-        onError: (error) => option.onError(error),
-      })
-
-      const headers = this.option.headers
-
-      if (headers && Array.isArray(headers)) {
-        request.httpClient.interceptors.request.use((config) => {
-          for (const key in headers) {
-            if (!headers.hasOwnProperty(key)) {
-              continue
-            }
-
-            config.headers[key] = headers[key]
-          }
-
-          return config
-        }, undefined)
-      }
-
-      const params = this.option.params
-
-      const formData = new FormData()
-
-      if (params) {
-        for (const key in params) {
-          if (!params.hasOwnProperty(key)) {
-            continue
-          }
-
-          const value = params[key]
-
-          // eslint-disable-next-line no-template-curly-in-string
-          if (value.toString().indexOf('${filename}') !== -1) {
-            let randomFileName =
-              Math.random().toString(36).substring(3, 15) +
-              '.' +
-              option.file.name.split('.').pop()
-
-            // eslint-disable-next-line no-template-curly-in-string
-            formData.append(
-              key,
-              value.toString().replace('${filename}', randomFileName)
-            )
-          } else {
-            formData.append(key, value)
-          }
-        }
-      }
-
-      formData.append(this.option.paramName, option.file, option.file.name)
-
+    httpRequest(option) {
       this.buttonDisabled = true
 
-      request.post(option.action, formData, null, false)
+      Upload.upload(
+        option.action,
+        this.option,
+        option.file,
+        option.onSuccess,
+        option.onError
+      )
     },
 
     humanFileSize(size) {
@@ -378,18 +317,8 @@ export default {
       return true
     },
 
-    handleSuccess(response) {
+    handleSuccess(upload) {
       this.buttonDisabled = false
-
-      const result =
-        this.option.dataType === 'xml'
-          ? new DOMParser().parseFromString(response, 'application/xml')
-          : response
-
-      // eslint-disable-next-line no-new-func
-      const responseParse = new Function('result', this.option.responseParse)
-
-      const upload = responseParse(result)
 
       if (upload.original) {
         if (
@@ -418,15 +347,8 @@ export default {
       return upload.original
     },
 
-    handleError(error) {
+    handleError(message) {
       this.buttonDisabled = false
-
-      const message =
-        error.response.data.detail ||
-        error.response.data.title ||
-        error.response.data.message ||
-        error.response.statusText ||
-        error.message
 
       this.$message({
         type: 'error',

@@ -34,12 +34,6 @@
             :src="scope.row.logo"
             class="logo"
           />
-          <img
-            :alt="scope.row.name"
-            v-else
-            src="../../assets/images/banner.png"
-            class="logo"
-          />
         </template>
       </el-table-column>
       <el-table-column width="260" label="品牌分类">

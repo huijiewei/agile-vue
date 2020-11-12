@@ -52,6 +52,15 @@ Vue.use(DeleteDialog, {
 
 Vue.config.productionTip = false
 
+Vue.mixin({
+  data: function () {
+    return {
+      tinymceUrl: process.env.VUE_APP_TINYMCE_URL,
+      tinymceLanguageUrl: process.env.VUE_APP_TINYMCE_LANGUAGE_URL,
+    }
+  },
+})
+
 new Vue({
   router,
   store,

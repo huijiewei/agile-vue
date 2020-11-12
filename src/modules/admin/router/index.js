@@ -10,18 +10,31 @@ import siteProfile from '@admin/views/site/Profile'
 import adminRoute from './admin/admin'
 import adminLogRoute from './admin/admin-log'
 import adminGroupRoute from './admin/group'
+
 import userRoute from './user/user'
 import userAddressRoute from './user/address'
+
 import shopCategoryRoute from './shop/category'
 import shopBrandRoute from './shop/brand'
 import shopProductRoute from './shop/product'
+
 import districtRoute from './district/district'
 
 import cmsCategoryRoute from './cms/category'
+import cmsArticleRoute from './cms/article'
 
 import AdminLayout from '@admin/components/AdminLayout'
 
 Vue.use(VueRouter)
+
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+  if (onResolve || onReject) {
+    return originalPush.call(this, location, onResolve, onReject)
+  }
+
+  return originalPush.call(this, location).catch((err) => err)
+}
 
 const routes = [
   {
@@ -67,6 +80,7 @@ const routes = [
       ...shopCategoryRoute,
       ...districtRoute,
       ...cmsCategoryRoute,
+      ...cmsArticleRoute,
       {
         path: '*',
         component: notFound,
