@@ -72,7 +72,7 @@ npm run build:mobile
 ### 后端配合
 Agile Spring Boot
 
-https://github.com/huijiewei/agile-spring-boot
+https://github.com/huijiewei/agile-boot
 
 ### 说明文件版本更新
 

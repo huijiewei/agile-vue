@@ -27,7 +27,7 @@ export default {
   },
   data() {
     return {
-      pageTitle: '编辑商品品牌',
+      pageTitle: '编辑文章',
       cmsArticle: null,
     }
   },

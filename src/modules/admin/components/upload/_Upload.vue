@@ -123,6 +123,9 @@
       center
     >
       <img class="image-view" :src="dialogImageUrl" alt="" />
+      <div>
+        图片链接：<span>{{ dialogImageUrl }}</span>
+      </div>
     </el-dialog>
     <image-cropper
       v-if="cropperImage"

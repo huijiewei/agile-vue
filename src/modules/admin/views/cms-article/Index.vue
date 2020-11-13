@@ -158,7 +158,8 @@ export default {
 .cms-articles {
   .title {
     font-weight: bold;
-    margin-bottom: 9px;
+    font-size: 15px;
+    margin-bottom: 3px;
   }
 }
 </style>
