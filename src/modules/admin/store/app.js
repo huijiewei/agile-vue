@@ -7,15 +7,17 @@ const app = {
     auth: auth,
     tabs: tabs,
   },
-  state: {
-    error: {
-      message: '',
-      historyBack: false,
-    },
-    sidebar: {
-      collapsed: window.matchMedia('(max-width: 991px)').matches,
-      hidden: false,
-    },
+  state() {
+    return {
+      error: {
+        message: '',
+        historyBack: false,
+      },
+      sidebar: {
+        collapsed: window.matchMedia('(max-width: 991px)').matches,
+        hidden: false,
+      },
+    }
   },
   getters: {
     isSidebarCollapsed: (state) => {

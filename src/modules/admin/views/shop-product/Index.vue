@@ -61,7 +61,7 @@
         min-width="160"
       />
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button
             :disabled="!$can('shop-product/edit')"
             plain

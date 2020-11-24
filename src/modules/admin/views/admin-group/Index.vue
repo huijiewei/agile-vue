@@ -16,7 +16,7 @@
       <el-table-column width="90" class-name="text-mono" prop="id" label="Id" />
       <el-table-column prop="name" label="名称" />
       <el-table-column width="130" fixed="right" label="操作" align="right">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button
             :disabled="!$can('admin-group/edit')"
             plain

@@ -1,8 +1,8 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const OpenService = {
   captcha() {
-    return Vue.http.get('open/captcha', null, false, true)
+    return useHttpClient().get('open/captcha', null, false, true)
   },
 }
 

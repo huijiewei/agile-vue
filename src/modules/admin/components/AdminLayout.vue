@@ -23,18 +23,20 @@
         <header-tab></header-tab>
       </header>
       <main class="ag-main">
-        <transition name="fade">
-          <keep-alive :include="cachedTabs">
-            <router-view
-              :key="
-                $route.meta && $route.meta.parent
-                  ? $route.meta.parent.path
-                  : $route.path
-              "
-              v-if="isRouterAlive"
-            />
-          </keep-alive>
-        </transition>
+        <router-view
+          v-slot="{ Component }"
+          :key="
+            $route.meta && $route.meta.parent
+              ? $route.meta.parent.path
+              : $route.path
+          "
+          v-if="isRouterAlive"
+        >
+          <transition name="fade">
+            <keep-alive :include="cachedTabs">
+              <component :is="Component" />
+            </keep-alive> </transition
+        ></router-view>
       </main>
     </section>
   </section>
@@ -89,7 +91,7 @@ export default {
 
       this.isRouterAlive = false
 
-      this.$nextTick(() => {
+      await this.$nextTick(() => {
         this.isRouterAlive = true
         this.$store.dispatch('tabs/updateCache', cacheNames)
       })
@@ -192,7 +194,6 @@ export default {
     width: calc(~'100% - ' @aside-width);
     z-index: 10;
     right: 0;
-    overflow-x: hidden;
 
     .ag-nav {
       .clearfix();

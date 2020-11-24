@@ -3,6 +3,7 @@
 .clearfix {
   .clearfix();
 }
+
 .ag {
   .el-button,
   .el-tag,
@@ -115,11 +116,12 @@
 
   .el-dropdown-menu,
   .el-select-dropdown {
-    border-radius: 2px;
     padding: 0;
-    box-shadow: 0 0 15px 1px rgba(69, 65, 78, 0.2);
+  }
 
-    .popper__arrow {
+  .el-dropdown__popper {
+    margin-top: -15px;
+    .el-popper__arrow {
       display: none;
     }
   }
@@ -221,6 +223,7 @@
     height: 0;
     display: none !important;
   }
+
   .box-toolbar .box-toolbar-search .el-form-item {
     margin-bottom: 3px !important;
     display: block;

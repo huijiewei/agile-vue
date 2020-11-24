@@ -38,7 +38,7 @@ export default {
       this.update()
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.ps.destroy()
     this.ps = null
   },

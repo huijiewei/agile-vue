@@ -2,7 +2,7 @@
   <div v-if="pages" class="ag-pages">
     <el-pagination
       :background="true"
-      :current-page.sync="pages.currentPage"
+      v-model:current-page="pages.currentPage"
       :page-sizes="[20, 50, 100, 200]"
       :page-size="pages.perPage"
       layout="total, prev, pager, next, sizes, jumper"

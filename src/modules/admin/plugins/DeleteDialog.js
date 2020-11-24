@@ -1,6 +1,6 @@
 const DeleteDialog = {
-  install(Vue, { MessageBox }) {
-    Vue.prototype.$deleteDialog = (option) => {
+  install(app, { MessageBox }) {
+    app.config.globalProperties.$deleteDialog = (option) => {
       const dialogOption = Object.assign(
         {
           title: '你确定吗？',

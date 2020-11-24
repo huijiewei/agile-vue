@@ -1,7 +1,7 @@
 <template>
   <el-menu-item :index="'/' + menuUrl">
     <sider-menu-icon v-if="menu.icon" :icon="menu.icon" />
-    <span slot="title">{{ menu.label }}</span>
+    <span>{{ menu.label }}</span>
   </el-menu-item>
 </template>
 

@@ -5,13 +5,15 @@ const accessTokenKey = 'ag:admin-access-token'
 
 const auth = {
   namespaced: true,
-  state: {
-    accessToken: window.localStorage.getItem(accessTokenKey) || '',
-    loginAction: 'none', // none, modal, direct
-    currentUser: null,
-    groupMenus: [],
-    groupMenusUrl: [],
-    groupPermissions: [],
+  state() {
+    return {
+      accessToken: window.localStorage.getItem(accessTokenKey) || '',
+      loginAction: 'none', // none, modal, direct
+      currentUser: null,
+      groupMenus: [],
+      groupMenusUrl: [],
+      groupPermissions: [],
+    }
   },
   getters: {
     getAccessToken: (state) => {

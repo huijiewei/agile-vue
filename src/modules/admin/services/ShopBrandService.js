@@ -1,24 +1,24 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const ShopBrandService = {
   all(query) {
-    return Vue.http.get('shop-brands', query)
+    return useHttpClient().get('shop-brands', query)
   },
 
   create(shopBrand) {
-    return Vue.http.post('shop-brands', shopBrand)
+    return useHttpClient().post('shop-brands', shopBrand)
   },
 
   view(id) {
-    return Vue.http.get('shop-brands/' + id)
+    return useHttpClient().get('shop-brands/' + id)
   },
 
   edit(shopBrand) {
-    return Vue.http.put('shop-brands/' + shopBrand.id, shopBrand)
+    return useHttpClient().put('shop-brands/' + shopBrand.id, shopBrand)
   },
 
   delete(id) {
-    return Vue.http.delete('shop-brands/' + id)
+    return useHttpClient().delete('shop-brands/' + id)
   },
 }
 

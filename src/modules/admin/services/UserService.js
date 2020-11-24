@@ -1,24 +1,24 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const UserService = {
   all(query) {
-    return Vue.http.get('users', query)
+    return useHttpClient().get('users', query)
   },
 
   delete(id) {
-    return Vue.http.delete('users/' + id)
+    return useHttpClient().delete('users/' + id)
   },
 
   create(user) {
-    return Vue.http.post('users', user)
+    return useHttpClient().post('users', user)
   },
 
   view(id) {
-    return Vue.http.get('users/' + id)
+    return useHttpClient().get('users/' + id)
   },
 
   edit(user) {
-    return Vue.http.put('users/' + user.id, user)
+    return useHttpClient().put('users/' + user.id, user)
   },
 }
 

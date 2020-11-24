@@ -1,28 +1,28 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const AdminService = {
   all() {
-    return Vue.http.get('admins')
+    return useHttpClient().get('admins')
   },
 
   log(query) {
-    return Vue.http.get('admin-logs', query)
+    return useHttpClient().get('admin-logs', query)
   },
 
   delete(id) {
-    return Vue.http.delete('admins/' + id)
+    return useHttpClient().delete('admins/' + id)
   },
 
   create(admin) {
-    return Vue.http.post('admins', admin)
+    return useHttpClient().post('admins', admin)
   },
 
   view(id) {
-    return Vue.http.get('admins/' + id)
+    return useHttpClient().get('admins/' + id)
   },
 
   edit(admin) {
-    return Vue.http.put('admins/' + admin.id, admin)
+    return useHttpClient().put('admins/' + admin.id, admin)
   },
 }
 

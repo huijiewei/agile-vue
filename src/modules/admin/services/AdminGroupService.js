@@ -1,24 +1,24 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const AdminGroupService = {
   all() {
-    return Vue.http.get('admin-groups')
+    return useHttpClient().get('admin-groups')
   },
 
   delete(id) {
-    return Vue.http.delete('admin-groups/' + id)
+    return useHttpClient().delete('admin-groups/' + id)
   },
 
   create(adminGroup) {
-    return Vue.http.post('admin-groups', adminGroup)
+    return useHttpClient().post('admin-groups', adminGroup)
   },
 
   view(id) {
-    return Vue.http.get('admin-groups/' + id)
+    return useHttpClient().get('admin-groups/' + id)
   },
 
   edit(adminGroup) {
-    return Vue.http.put('admin-groups/' + adminGroup.id, adminGroup)
+    return useHttpClient().put('admin-groups/' + adminGroup.id, adminGroup)
   },
 }
 

@@ -1,6 +1,6 @@
 const PermissionCheck = {
-  install(Vue, { store }) {
-    Vue.prototype.$can = (actionId) => {
+  install(app, { store }) {
+    app.config.globalProperties.$can = (actionId) => {
       return store.getters['auth/isRouteInAcl'](actionId)
     }
   },

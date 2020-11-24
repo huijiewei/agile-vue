@@ -47,7 +47,7 @@
       />
       <el-table-column prop="name" width="120" label="名称" />
       <el-table-column width="55" align="center" label="头像">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <ag-avatar :src="scope.row.avatar" />
         </template>
       </el-table-column>
@@ -71,7 +71,7 @@
         width="160"
       />
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button
             :disabled="!$can('user/edit')"
             plain

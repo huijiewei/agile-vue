@@ -5,7 +5,7 @@
     :hide-timeout="200"
     :index="'m' + depth + index"
   >
-    <template slot="title">
+    <template v-slot:title>
       <sider-menu-icon v-if="menu.icon" :icon="menu.icon" />
       <span>{{ menu.label }}</span>
     </template>

@@ -1,6 +1,4 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import VueRouterBackButton from 'vue-router-back-button'
+import { createRouter, createWebHistory } from 'vue-router'
 
 import notFound from '@admin/views/site/NotFound'
 import siteIndex from '@admin/views/site/Index'
@@ -24,17 +22,6 @@ import cmsCategoryRoute from './cms/category'
 import cmsArticleRoute from './cms/article'
 
 import AdminLayout from '@admin/components/AdminLayout'
-
-Vue.use(VueRouter)
-
-const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location, onResolve, onReject) {
-  if (onResolve || onReject) {
-    return originalPush.call(this, location, onResolve, onReject)
-  }
-
-  return originalPush.call(this, location).catch((err) => err)
-}
 
 const routes = [
   {
@@ -82,7 +69,7 @@ const routes = [
       ...cmsCategoryRoute,
       ...cmsArticleRoute,
       {
-        path: '*',
+        path: '/:pathMatch(.*)*',
         component: notFound,
         meta: {
           title: '页面未找到',
@@ -92,9 +79,8 @@ const routes = [
   },
 ]
 
-const router = new VueRouter({
-  base: process.env.VUE_APP_PUBLIC_PATH,
-  mode: 'history',
+const router = createRouter({
+  history: createWebHistory(process.env.VUE_APP_PUBLIC_PATH),
   routes: routes,
   scrollBehavior: (to, from, savedPosition) => {
     if (savedPosition) {
@@ -102,13 +88,11 @@ const router = new VueRouter({
     }
 
     if (to.hash) {
-      return { selector: to.hash }
+      return { el: to.hash, behavior: 'smooth' }
     }
 
-    return { x: 0, y: 0 }
+    return { left: 0, top: 0 }
   },
 })
-
-Vue.use(VueRouterBackButton, { router, ignoreRoutesWithSameName: false })
 
 export default router

@@ -9,15 +9,17 @@
       :key="index"
       :to="{ path: breadcrumb.path }"
     >
-      <bp-icon v-if="breadcrumb.icon" :type="breadcrumb.icon" />
+      <ag-icon v-if="breadcrumb.icon" :type="breadcrumb.icon" />
       <span>{{ breadcrumb.title }}</span>
     </el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script>
+import AgIcon from '@core/components/Icon/index'
 export default {
   name: 'Breadcrumb',
+  components: { AgIcon },
   data() {
     return {
       breadcrumbs: [],

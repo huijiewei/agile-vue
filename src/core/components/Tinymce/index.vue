@@ -33,7 +33,6 @@
       images_upload_handler: imagesUploadHandler,
     }"
     v-bind="$attrs"
-    v-on="$listeners"
   ></editor>
 </template>
 
@@ -54,7 +53,7 @@ export default {
   async mounted() {
     await this.updateImageUploadOption()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.destroyTimer()
   },
   methods: {

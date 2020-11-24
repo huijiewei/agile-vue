@@ -27,7 +27,7 @@
       <el-table-column prop="name" width="230" label="品牌名称" />
       <el-table-column prop="slug" width="150" label="品牌别名" />
       <el-table-column width="110" align="center" label="图片">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <img
             :alt="scope.row.name"
             v-if="scope.row.logo"
@@ -37,7 +37,7 @@
         </template>
       </el-table-column>
       <el-table-column width="260" label="品牌分类">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <div class="brand-category-tags">
             <template v-for="shopCategory in scope.row.shopCategories">
               <el-tag size="medium" :key="scope.row.id + '-' + shopCategory.id">
@@ -48,7 +48,7 @@
         </template>
       </el-table-column>
       <el-table-column label="品牌介绍">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <div class="description">{{ scope.row.description }}</div>
           <div class="website" v-if="scope.row.website">
             网址：<a :href="scope.row.website" target="_blank">{{
@@ -58,7 +58,7 @@
         </template>
       </el-table-column>
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button
             :disabled="!$can('shop-brand/edit')"
             type="primary"

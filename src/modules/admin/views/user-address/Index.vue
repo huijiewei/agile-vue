@@ -23,7 +23,7 @@
         label="联系电话"
       />
       <el-table-column width="150" label="用户">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <ag-avatar :src="scope.row.user.avatar" />
           &nbsp;
           <span>{{ scope.row.user.name }}</span>
@@ -32,7 +32,7 @@
       <el-table-column width="390" prop="districtAddress" label="区域地址" />
       <el-table-column prop="address" label="详细地址" min-width="200" />
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button
             :disabled="!$can('user-address/edit')"
             plain

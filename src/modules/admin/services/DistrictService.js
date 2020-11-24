@@ -1,20 +1,20 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const DistrictService = {
   create(district) {
-    return Vue.http.post('districts', district)
+    return useHttpClient().post('districts', district)
   },
 
   view(id) {
-    return Vue.http.get('districts/' + id, { withParents: true })
+    return useHttpClient().get('districts/' + id, { withParents: true })
   },
 
   edit(district) {
-    return Vue.http.put('districts/' + district.id, district)
+    return useHttpClient().put('districts/' + district.id, district)
   },
 
   delete(id) {
-    return Vue.http.delete('districts/' + id)
+    return useHttpClient().delete('districts/' + id)
   },
 }
 

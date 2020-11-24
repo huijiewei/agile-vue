@@ -1,13 +1,16 @@
 import Request from '../utils/request'
+import { inject } from 'vue'
 
 const UnauthorizedHttpCode = 401
 const UnprocessableEntityHttpCode = 422
 
 const HttpGetMethod = ['GET', 'HEAD']
 
+const httpClientSymbol = 'httpClient'
+
 const HttpClient = {
   install(
-    Vue,
+    app,
     {
       getApiHost,
       getAccessToken,
@@ -79,9 +82,15 @@ const HttpClient = {
       },
     })
 
-    Vue.http = request
-    Vue.prototype.$http = request
+    app.config.globalProperties.$http = request
+    app.provide(httpClientSymbol, request)
   },
 }
 
-export default HttpClient
+export function createHttpClient() {
+  return HttpClient
+}
+
+export function useHttpClient() {
+  return inject(httpClientSymbol)
+}

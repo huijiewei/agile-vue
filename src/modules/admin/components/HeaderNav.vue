@@ -37,23 +37,25 @@
             </span>
             <i class="el-icon-arrow-down el-icon--right" />
           </span>
-          <el-dropdown-menu slot="dropdown" class="profile-dropdown-menu">
-            <el-dropdown-item disabled>
-              {{ getCurrentUser.adminGroup.name }}
-            </el-dropdown-item>
-            <el-dropdown-item command="userProfile" divided>
-              <i class="el-icon-user" />
-              个人资料
-            </el-dropdown-item>
-            <el-dropdown-item command="userRefresh">
-              <i class="el-icon-refresh" />
-              刷新资料
-            </el-dropdown-item>
-            <el-dropdown-item command="userLogout" divided>
-              <i class="el-icon-switch-button" />
-              退出登陆
-            </el-dropdown-item>
-          </el-dropdown-menu>
+          <template #dropdown>
+            <el-dropdown-menu class="profile-dropdown-menu">
+              <el-dropdown-item disabled>
+                {{ getCurrentUser.adminGroup.name }}
+              </el-dropdown-item>
+              <el-dropdown-item command="userProfile" divided>
+                <i class="el-icon-user" />
+                个人资料
+              </el-dropdown-item>
+              <el-dropdown-item command="userRefresh">
+                <i class="el-icon-refresh" />
+                刷新资料
+              </el-dropdown-item>
+              <el-dropdown-item command="userLogout" divided>
+                <i class="el-icon-switch-button" />
+                退出登陆
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
         </el-dropdown>
       </li>
     </ul>
@@ -130,7 +132,7 @@ export default {
 
 <style lang="less">
 .ag-nav {
-  overflow: hidden;
+  position: relative;
 
   @media (min-width: 992px) {
     i.trigger-right {

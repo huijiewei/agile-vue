@@ -1,20 +1,23 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const ShopCategoryService = {
   create(shopCategory) {
-    return Vue.http.post('shop-categories', shopCategory)
+    return useHttpClient().post('shop-categories', shopCategory)
   },
 
   view(id) {
-    return Vue.http.get('shop-categories/' + id, { withParents: true })
+    return useHttpClient().get('shop-categories/' + id, { withParents: true })
   },
 
   edit(shopCategory) {
-    return Vue.http.put('shop-categories/' + shopCategory.id, shopCategory)
+    return useHttpClient().put(
+      'shop-categories/' + shopCategory.id,
+      shopCategory
+    )
   },
 
   delete(id) {
-    return Vue.http.delete('shop-categories/' + id)
+    return useHttpClient().delete('shop-categories/' + id)
   },
 }
 

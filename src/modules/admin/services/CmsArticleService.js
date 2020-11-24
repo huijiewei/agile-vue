@@ -1,24 +1,24 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const CmsArticleService = {
   all(query) {
-    return Vue.http.get('cms-articles', query)
+    return useHttpClient().get('cms-articles', query)
   },
 
   create(cmsArticle) {
-    return Vue.http.post('cms-articles', cmsArticle)
+    return useHttpClient().post('cms-articles', cmsArticle)
   },
 
   view(id) {
-    return Vue.http.get('cms-articles/' + id)
+    return useHttpClient().get('cms-articles/' + id)
   },
 
   edit(cmsArticle) {
-    return Vue.http.put('cms-articles/' + cmsArticle.id, cmsArticle)
+    return useHttpClient().put('cms-articles/' + cmsArticle.id, cmsArticle)
   },
 
   delete(id) {
-    return Vue.http.delete('cms-articles/' + id)
+    return useHttpClient().delete('cms-articles/' + id)
   },
 }
 

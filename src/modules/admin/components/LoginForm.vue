@@ -39,7 +39,7 @@
         auto-complete="off"
         prefix-icon="el-icon-view"
       >
-        <template slot="append">
+        <template v-slot:append>
           <img
             style="cursor: pointer; vertical-align: middle"
             @click="updateCaptcha"

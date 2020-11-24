@@ -140,7 +140,7 @@ export default {
       }
     })
   },
-  destroyed() {
+  unmounted() {
     if (this.spinnerTimeout) {
       clearTimeout(this.spinnerTimeout)
     }

@@ -1,20 +1,20 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const CmsCategoryService = {
   create(cmsCategory) {
-    return Vue.http.post('cms-categories', cmsCategory)
+    return useHttpClient().post('cms-categories', cmsCategory)
   },
 
   view(id) {
-    return Vue.http.get('cms-categories/' + id, { withParents: true })
+    return useHttpClient().get('cms-categories/' + id, { withParents: true })
   },
 
   edit(cmsCategory) {
-    return Vue.http.put('cms-categories/' + cmsCategory.id, cmsCategory)
+    return useHttpClient().put('cms-categories/' + cmsCategory.id, cmsCategory)
   },
 
   delete(id) {
-    return Vue.http.delete('cms-categories/' + id)
+    return useHttpClient().delete('cms-categories/' + id)
   },
 }
 

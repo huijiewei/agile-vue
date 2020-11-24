@@ -15,12 +15,12 @@
         label="Id"
       />
       <el-table-column width="130" label="管理员">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <span>{{ scope.row.admin.name || scope.row.admin.phone }}</span>
         </template>
       </el-table-column>
       <el-table-column width="62" align="center" label="状态">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-tag
             size="small"
             :type="scope.row.status.value === 1 ? 'success' : 'danger'"
@@ -50,7 +50,7 @@
         width="160"
       />
       <el-table-column width="75" label="操作" fixed="right" align="right">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button
             plain
             type="primary"
@@ -65,7 +65,7 @@
     <pagination :pages="pages"></pagination>
     <el-dialog
       title="日志详情"
-      :visible.sync="dialogVisible"
+      v-model:visible="dialogVisible"
       :before-close="handleClose"
     >
       <el-table :data="viewAdminLog" :show-header="false">

@@ -1,23 +1,23 @@
-import Vue from 'vue'
+import { useHttpClient } from '@core/plugins/HttpClient'
 
 const AuthService = {
   login(credentials) {
-    return Vue.http.post('auth/login', credentials, null, false)
+    return useHttpClient().post('auth/login', credentials, null, false)
   },
   logout() {
-    return Vue.http.post('auth/logout', null, null, false)
+    return useHttpClient().post('auth/logout', null, null, false)
   },
   account() {
-    return Vue.http.get('auth/account', null, false)
+    return useHttpClient().get('auth/account', null, false)
   },
   profile(profile = null) {
     const endpoint = 'auth/profile'
 
     if (profile === null) {
-      return Vue.http.get(endpoint)
+      return useHttpClient().get(endpoint)
     }
 
-    return Vue.http.put(endpoint, profile)
+    return useHttpClient().put(endpoint, profile)
   },
 }
 

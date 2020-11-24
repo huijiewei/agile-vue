@@ -2,10 +2,12 @@ const viewedTabsKey = 'ag:admin-viewed-tabs'
 
 const tabs = {
   namespaced: true,
-  state: {
-    viewed: [],
-    cached: [],
-    current: null,
+  state() {
+    return {
+      viewed: [],
+      cached: [],
+      current: null,
+    }
   },
   getters: {
     getViewed: (state) => {

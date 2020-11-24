@@ -25,13 +25,13 @@
         label="Id"
       />
       <el-table-column label="文章">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <div class="title">{{ scope.row.title }}</div>
           <div class="slug">{{ scope.row.slug }}</div>
         </template>
       </el-table-column>
       <el-table-column width="110" align="center" label="图片">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <img
             width="80"
             :alt="scope.row.title"
@@ -42,7 +42,7 @@
         </template>
       </el-table-column>
       <el-table-column width="160" label="文章分类">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-tag size="medium">
             {{ scope.row.cmsCategory.name }}
           </el-tag>
@@ -55,7 +55,7 @@
         width="160"
       />
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template slot-scope="scope">
+        <template v-slot="scope">
           <el-button
             :disabled="!$can('cms-article/edit')"
             type="primary"
