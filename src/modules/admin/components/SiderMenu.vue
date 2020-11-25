@@ -2,11 +2,12 @@
   <el-menu
     :collapse-transition="false"
     :router="true"
-    :default-active="getRouteActive"
+    :default-active="getActive"
     :collapse="isCollapsed"
     background-color="#2c343f"
     text-color="#fff"
     active-text-color="#ffd04b"
+    @select="handleSelect"
   >
     <template v-for="(menu, index) in getMenus">
       <sider-menu-item
@@ -28,6 +29,9 @@
 <script>
 import SiderMenuSub from './SiderMenuSub'
 import SiderMenuItem from './SiderMenuItem'
+import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 export default {
   name: 'SiderMenu',
@@ -41,14 +45,21 @@ export default {
       default: false,
     },
   },
-  computed: {
-    getMenus() {
-      return this.$store.getters['auth/getGroupMenus']
-    },
-    getRouteActive() {
-      const paths = this.$route.path
-        .split('/')
-        .filter((split) => split.length > 0)
+  setup() {
+    const store = useStore()
+    const route = useRoute()
+    const router = useRouter()
+
+    const handleSelect = (index) => {
+      router.push(index)
+    }
+
+    const getMenus = computed(() => {
+      return store.getters['auth/getGroupMenus']
+    })
+
+    const getActive = computed(() => {
+      const paths = route.path.split('/').filter((split) => split.length > 0)
 
       const pathTable = []
 
@@ -58,15 +69,21 @@ export default {
 
       for (let i = 0; i < pathTable.length; i++) {
         const url = pathTable[i].join('/')
-        const find = this.$store.getters['auth/isRouteInMenus'](url)
+        const find = store.getters['auth/isRouteInMenus'](url)
 
         if (find) {
           return '/' + url
         }
       }
 
-      return this.$route.path
-    },
+      return route.path
+    })
+
+    return {
+      getMenus,
+      getActive,
+      handleSelect,
+    }
   },
 }
 </script>

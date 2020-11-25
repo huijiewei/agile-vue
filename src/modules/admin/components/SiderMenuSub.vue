@@ -29,6 +29,7 @@
 <script>
 import SiderMenuItem from './SiderMenuItem'
 import SiderMenuIcon from './SiderMenuIcon'
+import { ref } from 'vue'
 
 export default {
   name: 'SiderMenuSub',
@@ -47,15 +48,17 @@ export default {
       default: 0,
     },
   },
-  data() {
-    return {
-      opened: false,
+  setup() {
+    const opened = ref(false)
+
+    const changeOpened = (value) => {
+      opened.value = value
     }
-  },
-  methods: {
-    changeOpened(opened) {
-      this.opened = opened
-    },
+
+    return {
+      opened,
+      changeOpened,
+    }
   },
 }
 </script>
