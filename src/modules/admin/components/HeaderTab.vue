@@ -6,9 +6,9 @@
     <div class="tab-right tab-item" @click="handleScroll(-200)">
       <i class="el-icon-arrow-right"></i>
     </div>
-    <div ref="tabScroll" class="tab-scroll" @wheel.prevent="handleWheel">
+    <div ref="tabScrollRef" class="tab-scroll" @wheel.prevent="handleWheel">
       <ul
-        ref="tabContent"
+        ref="tabContentRef"
         class="tab-list"
         :style="{ left: tabContentLeft + 'px' }"
       >
@@ -23,7 +23,7 @@
           :class="isActive(tab) ? 'active' : ''"
           :key="tab.path"
           @click="openTab(tab)"
-          @contextmenu.prevent="handleContextMenu(tab, $event)"
+          @contextmenu.prevent="handleContextMenu(tab, idx, $event)"
         >
           <span>{{ tab.parent ? tab.parent.title : tab.title }}</span>
           <i
@@ -35,20 +35,27 @@
       </ul>
     </div>
     <div
+      :ref="
+        (el) => {
+          tabRefs[-1] = el
+        }
+      "
       class="tab-close tab-item"
-      @click.stop="handleContextMenu('CLOSED', $event)"
-      @contextmenu.prevent="handleContextMenu('CLOSED', $event)"
+      @click.stop="handleContextMenu(null, -1, $event)"
+      @contextmenu.prevent="handleContextMenu(null, -1, $event)"
     >
       <i class="el-icon-arrow-down"></i>
     </div>
     <ul
-      v-transform-dom
       ref="contextMenu"
       :style="{ left: contextMenuLeft + 'px', top: contextMenuTop + 'px' }"
       v-show="contextMenuShow"
       class="context-menu"
     >
-      <li v-if="contextMenuTab" @click="handleTabRefresh">
+      <li
+        v-if="contextMenuTab && isActive(contextMenuTab)"
+        @click="handleTabRefresh"
+      >
         <i class="el-icon-refresh-right"></i>
         重载页面
       </li>
@@ -72,8 +79,7 @@
 </template>
 
 <script>
-import TransformDom from '@core/directives/TransformDom'
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, inject, watch } from 'vue'
 import { useStore } from 'vuex'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 
@@ -85,16 +91,15 @@ export default {
     const router = useRouter()
 
     const tabRefs = ref([])
+    const tabScrollRef = ref(null)
+    const tabContentRef = ref(null)
 
-    const setTabRef = (el) => {
-      console.log(el)
-      tabRefs.value.push(el)
-    }
+    const contextMenuShow = ref(false)
+    const contextMenuLeft = ref(0)
+    const contextMenuTop = ref(0)
+    const contextMenuTab = ref(null)
 
-    const getTabRef = (idx) => {
-      console.log(tabRefs.value)
-      return tabRefs.value[idx]
-    }
+    const tabContentLeft = ref(0)
 
     const getAffixTabs = (routes, basePath = '') => {
       const tabs = []
@@ -151,41 +156,57 @@ export default {
     const moveToCurrentTable = async () => {
       await nextTick()
 
-      getViewedTabs.value.forEach((tab, index) => {
+      const scrollWidth = tabScrollRef.value.offsetWidth
+      const contentWidth = tabContentRef.value.offsetWidth
+
+      getViewedTabs.value.forEach((tab, idx) => {
         if (isActive(tab)) {
-          const elem = getTabRef(index)
-
-          console.log(elem)
-
-          return
-
-          const scrollWidth = this.$refs.tabScroll.offsetWidth
-          const contentWidth = this.$refs.tabContent.offsetWidth
+          const elem = tabRefs.value[idx]
 
           if (contentWidth < scrollWidth) {
-            this.tabContentLeft = 0
-          } else if (elem.offsetLeft < -this.tabContentLeft) {
+            tabContentLeft.value = 0
+          } else if (elem.offsetLeft < -tabContentLeft.value) {
             // 标签在可视区域左侧
-            this.tabContentLeft = -elem.offsetLeft
+            tabContentLeft.value = -elem.offsetLeft
           } else if (
-            elem.offsetLeft > -this.tabContentLeft &&
+            elem.offsetLeft > -tabContentLeft.value &&
             elem.offsetLeft + elem.offsetWidth <
-              -this.tabContentLeft + scrollWidth
+              -tabContentLeft.value + scrollWidth
           ) {
             // 标签在可视区域
-            this.tabContentLeft = Math.min(
+            tabContentLeft.value = Math.min(
               0,
               scrollWidth - elem.offsetWidth - elem.offsetLeft
             )
           } else {
             // 标签在可视区域右侧
-            this.tabContentLeft = -(
+            tabContentLeft.value = -(
               elem.offsetLeft -
               (scrollWidth - elem.offsetWidth)
             )
           }
         }
       })
+    }
+
+    const handleScroll = (delta) => {
+      const scrollWidth = tabScrollRef.value.offsetWidth
+      const contentWidth = tabContentRef.value.offsetWidth
+
+      if (delta > 0) {
+        tabContentLeft.value = Math.min(0, tabContentLeft.value + delta)
+      } else {
+        if (scrollWidth < contentWidth) {
+          if (tabContentLeft.value >= -(contentWidth - scrollWidth)) {
+            tabContentLeft.value = Math.max(
+              tabContentLeft.value + delta,
+              scrollWidth - contentWidth
+            )
+          }
+        } else {
+          tabContentLeft.value = 0
+        }
+      }
     }
 
     const openTab = (tab) => {
@@ -197,7 +218,66 @@ export default {
       })
     }
 
-    const handleTabClose = () => {}
+    const closeTab = async (tab) => {
+      const next = await store.dispatch('tabs/close', tab)
+
+      if (isActive(tab)) {
+        openTab(next)
+      }
+    }
+
+    const handleTabClose = () => {
+      if (contextMenuTab.value) {
+        closeTab(contextMenuTab.value)
+      }
+    }
+
+    const handleTabRefresh = inject('reload')
+
+    const handleCloseAll = async () => {
+      const next = await store.dispatch('tabs/closeAll')
+
+      if (next !== null) {
+        openTab(next)
+      }
+    }
+
+    const handleCloseOther = async () => {
+      const tab = contextMenuTab.value
+        ? contextMenuTab.value
+        : store.getters['tabs/getCurrent']
+
+      await store.dispatch('tabs/closeOther', tab)
+
+      openTab(tab)
+    }
+
+    const handleWheel = (e) => {
+      const delta = e.wheelDelta ? e.wheelDelta : -(e.detail || 0) * 30
+
+      handleScroll(delta)
+    }
+
+    const handleContextMenu = (tab, idx, event) => {
+      const elem = tabRefs.value[idx]
+
+      const left = elem.offsetLeft + elem.offsetWidth / 2
+
+      contextMenuLeft.value = left
+      contextMenuTop.value = elem.offsetHeight + 9
+
+      contextMenuTab.value = tab
+
+      contextMenuShow.value = true
+
+      document.body.addEventListener('click', closeContextMenu)
+    }
+
+    const closeContextMenu = () => {
+      contextMenuShow.value = false
+
+      document.body.removeEventListener('click', closeContextMenu)
+    }
 
     const getViewedTabs = computed(() => {
       return store.getters['tabs/getViewed']
@@ -209,7 +289,7 @@ export default {
 
     onBeforeRouteUpdate(async (to) => {
       addTab(to)
-      moveToCurrentTable()
+      await moveToCurrentTable()
     })
 
     initTabs()
@@ -220,96 +300,24 @@ export default {
       getViewedTabs,
       isActive,
       openTab,
-      setTabRef,
+      closeTab,
+      tabRefs,
+      tabScrollRef,
+      tabContentRef,
+      tabContentLeft,
+      handleWheel,
+      handleScroll,
       handleTabClose,
+      handleTabRefresh,
+      handleCloseAll,
+      handleCloseOther,
+      contextMenuShow,
+      contextMenuLeft,
+      contextMenuTop,
+      contextMenuTab,
+      closeContextMenu,
+      handleContextMenu,
     }
-  },
-  directives: {
-    transformDom: TransformDom,
-  },
-  inject: ['reload'],
-  watch: {
-    contextMenuShow(show) {
-      if (show) {
-        document.body.addEventListener('click', this.closeContextMenu)
-      } else {
-        document.body.removeEventListener('click', this.closeContextMenu)
-      }
-    },
-  },
-  data() {
-    return {
-      tabContentLeft: 0,
-      contextMenuShow: false,
-      contextMenuLeft: 0,
-      contextMenuTop: 0,
-      contextMenuTab: null,
-    }
-  },
-  methods: {
-    handleTabRefresh() {
-      this.reload()
-    },
-    handleContextMenu(tab, event) {
-      const max =
-        this.$el.offsetWidth + this.$el.getBoundingClientRect().left - 100
-      const left = event.clientX
-
-      this.contextMenuLeft = left > max ? max : left
-      this.contextMenuTop = event.clientY + 12
-
-      this.contextMenuTab = tab !== 'CLOSED' ? tab : null
-
-      this.contextMenuShow = true
-    },
-    closeContextMenu() {
-      this.contextMenuShow = false
-    },
-    handleWheel(e) {
-      const delta = e.wheelDelta ? e.wheelDelta : -(e.detail || 0) * 30
-
-      this.handleScroll(delta)
-    },
-    handleScroll(delta) {
-      const scrollWidth = this.$refs.tabScroll.offsetWidth
-      const contentWidth = this.$refs.tabContent.offsetWidth
-
-      if (delta > 0) {
-        this.tabContentLeft = Math.min(0, this.tabContentLeft + delta)
-      } else {
-        if (scrollWidth < contentWidth) {
-          if (this.tabContentLeft >= -(contentWidth - scrollWidth)) {
-            this.tabContentLeft = Math.max(
-              this.tabContentLeft + delta,
-              scrollWidth - contentWidth
-            )
-          }
-        } else {
-          this.tabContentLeft = 0
-        }
-      }
-    },
-    handleCloseOther() {
-      const tab = this.contextMenuTab ? this.contextMenuTab : this.currentTab
-
-      this.$store.dispatch('tabs/closeOther', tab)
-
-      this.openTab(tab)
-    },
-    async handleCloseAll() {
-      const next = await this.$store.dispatch('tabs/closeAll')
-
-      if (next !== null) {
-        this.openTab(next)
-      }
-    },
-    async closeTab(tab) {
-      const next = await this.$store.dispatch('tabs/close', tab)
-
-      if (this.isActive(tab)) {
-        this.openTab(next)
-      }
-    },
   },
 }
 </script>
