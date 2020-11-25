@@ -24,7 +24,7 @@
       :img-style="{ width: '100%' }"
       alt="Source Image"
     />
-    <span slot="footer" class="dialog-footer">
+    <span class="dialog-footer">
       <el-button @click="handleCancel">取 消</el-button>
       <el-button :disabled="buttonDisabled" type="primary" @click="handleSubmit"
         >确 定</el-button

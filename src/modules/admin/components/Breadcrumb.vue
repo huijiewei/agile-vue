@@ -16,32 +16,41 @@
 </template>
 
 <script>
-import AgIcon from '@core/components/Icon/index'
+import AgIcon from '@core/components/Icon'
+import { ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+
 export default {
   name: 'Breadcrumb',
   components: { AgIcon },
-  data() {
-    return {
-      breadcrumbs: [],
-      documentTitle: '%s - ' + '管理后台',
+  setup() {
+    const route = useRoute()
+
+    const breadcrumbs = ref([])
+    const documentTitle = '%s - ' + '管理后台'
+
+    const updateBreadcrumbs = () => {
+      const title = route.meta.title
+
+      breadcrumbs.value = [{ title: title }]
+
+      document.title = documentTitle.replace('%s', title)
     }
-  },
-  watch: {
-    $route() {
-      this.updateBreadcrumbs()
-    },
-  },
-  mounted() {
-    this.updateBreadcrumbs()
-  },
-  methods: {
-    updateBreadcrumbs() {
-      const title = this.$route.meta.title
 
-      this.breadcrumbs = [{ title: title }]
+    onMounted(updateBreadcrumbs)
 
-      document.title = this.documentTitle.replace('%s', title)
-    },
+    watch(
+      () => route.path,
+      () => {
+        updateBreadcrumbs()
+      }
+    )
+
+    return {
+      breadcrumbs,
+      documentTitle,
+      updateBreadcrumbs,
+    }
   },
 }
 </script>

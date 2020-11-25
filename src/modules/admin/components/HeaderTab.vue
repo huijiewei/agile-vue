@@ -13,8 +13,12 @@
         :style="{ left: tabContentLeft + 'px' }"
       >
         <li
-          v-for="(tab, index) in viewedTabs"
-          :ref="'tabs-' + index"
+          v-for="(tab, idx) in getViewedTabs"
+          :ref="
+            (el) => {
+              tabRefs[idx] = el
+            }
+          "
           class="tab-item"
           :class="isActive(tab) ? 'active' : ''"
           :key="tab.path"
@@ -69,37 +73,168 @@
 
 <script>
 import TransformDom from '@core/directives/TransformDom'
+import { ref, computed, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 
 export default {
   name: 'HeaderTab',
-  created() {
-    this.initTabs()
-    this.addTab(this.$route)
-    this.moveToCurrentTab()
+  setup() {
+    const store = useStore()
+    const route = useRoute()
+    const router = useRouter()
+
+    const tabRefs = ref([])
+
+    const setTabRef = (el) => {
+      console.log(el)
+      tabRefs.value.push(el)
+    }
+
+    const getTabRef = (idx) => {
+      console.log(tabRefs.value)
+      return tabRefs.value[idx]
+    }
+
+    const getAffixTabs = (routes, basePath = '') => {
+      const tabs = []
+
+      routes.forEach((route) => {
+        if (route.meta && route.meta.affix) {
+          tabs.push({
+            name: route.name,
+            path: basePath + route.path,
+            query: route.query || {},
+            title: route.meta.title,
+            affix: true,
+          })
+        }
+
+        if (route.children) {
+          const children = getAffixTabs(
+            route.children,
+            route.path.charAt(route.path.length - 1) === '/'
+              ? route.path.substr(0, route.path.length - 1)
+              : route.path
+          )
+
+          if (children.length >= 1) {
+            tabs.push(...children)
+          }
+        }
+      })
+
+      return tabs
+    }
+
+    const initTabs = () => {
+      const affixTabs = getAffixTabs(router.options.routes, '')
+
+      for (const tab of affixTabs) {
+        store.dispatch('tabs/open', tab)
+      }
+    }
+
+    const addTab = (route) => {
+      const tab = {
+        name: route.name,
+        path: route.path,
+        query: route.query,
+        title: route.meta.title,
+        affix: route.meta && route.meta.affix,
+        parent: route.meta && route.meta.parent,
+      }
+
+      store.dispatch('tabs/open', tab)
+    }
+
+    const moveToCurrentTable = async () => {
+      await nextTick()
+
+      getViewedTabs.value.forEach((tab, index) => {
+        if (isActive(tab)) {
+          const elem = getTabRef(index)
+
+          console.log(elem)
+
+          return
+
+          const scrollWidth = this.$refs.tabScroll.offsetWidth
+          const contentWidth = this.$refs.tabContent.offsetWidth
+
+          if (contentWidth < scrollWidth) {
+            this.tabContentLeft = 0
+          } else if (elem.offsetLeft < -this.tabContentLeft) {
+            // 标签在可视区域左侧
+            this.tabContentLeft = -elem.offsetLeft
+          } else if (
+            elem.offsetLeft > -this.tabContentLeft &&
+            elem.offsetLeft + elem.offsetWidth <
+              -this.tabContentLeft + scrollWidth
+          ) {
+            // 标签在可视区域
+            this.tabContentLeft = Math.min(
+              0,
+              scrollWidth - elem.offsetWidth - elem.offsetLeft
+            )
+          } else {
+            // 标签在可视区域右侧
+            this.tabContentLeft = -(
+              elem.offsetLeft -
+              (scrollWidth - elem.offsetWidth)
+            )
+          }
+        }
+      })
+    }
+
+    const openTab = (tab) => {
+      store.dispatch('tabs/current', tab)
+
+      router.push({
+        path: tab.path,
+        query: tab.query,
+      })
+    }
+
+    const handleTabClose = () => {}
+
+    const getViewedTabs = computed(() => {
+      return store.getters['tabs/getViewed']
+    })
+
+    const isActive = (tab) => {
+      return tab.path === store.getters['tabs/getCurrent'].path
+    }
+
+    onBeforeRouteUpdate(async (to) => {
+      addTab(to)
+      moveToCurrentTable()
+    })
+
+    initTabs()
+    addTab(route)
+    moveToCurrentTable()
+
+    return {
+      getViewedTabs,
+      isActive,
+      openTab,
+      setTabRef,
+      handleTabClose,
+    }
   },
   directives: {
     transformDom: TransformDom,
   },
   inject: ['reload'],
   watch: {
-    $route(to) {
-      this.addTab(to)
-      this.moveToCurrentTab()
-    },
     contextMenuShow(show) {
       if (show) {
         document.body.addEventListener('click', this.closeContextMenu)
       } else {
         document.body.removeEventListener('click', this.closeContextMenu)
       }
-    },
-  },
-  computed: {
-    viewedTabs() {
-      return this.$store.getters['tabs/getViewed']
-    },
-    currentTab() {
-      return this.$store.getters['tabs/getCurrent']
     },
   },
   data() {
@@ -109,83 +244,9 @@ export default {
       contextMenuLeft: 0,
       contextMenuTop: 0,
       contextMenuTab: null,
-      affixTabs: [],
     }
   },
   methods: {
-    filterAffixTabs(routes, basePath = '') {
-      let tabs = []
-
-      routes.forEach((route) => {
-        if (route.meta && route.meta.affix) {
-          tabs.push({
-            name: route.name,
-            path: route.path,
-            query: basePath + '/' + route.query,
-            title: route.meta.title,
-            affix: true,
-          })
-        }
-
-        if (route.children) {
-          const tab = this.filterAffixTabs(route.children, route.path)
-
-          if (tab.length >= 1) {
-            tabs = [...tabs, ...tab]
-          }
-        }
-      })
-      return tabs
-    },
-    initTabs() {
-      const affixTabs = (this.affixTabs = this.filterAffixTabs(
-        this.$router.options.routes
-      ))
-
-      for (const tab of affixTabs) {
-        this.$store.dispatch('tabs/open', tab)
-      }
-    },
-    moveToCurrentTab() {
-      this.$nextTick(() => {
-        this.viewedTabs.forEach((tab, index) => {
-          if (this.isActive(tab)) {
-            const elem = this.$refs['tabs-' + index][0]
-
-            const scrollWidth = this.$refs.tabScroll.offsetWidth
-            const contentWidth = this.$refs.tabContent.offsetWidth
-
-            if (contentWidth < scrollWidth) {
-              this.tabContentLeft = 0
-            } else if (elem.offsetLeft < -this.tabContentLeft) {
-              // 标签在可视区域左侧
-              this.tabContentLeft = -elem.offsetLeft
-            } else if (
-              elem.offsetLeft > -this.tabContentLeft &&
-              elem.offsetLeft + elem.offsetWidth <
-                -this.tabContentLeft + scrollWidth
-            ) {
-              // 标签在可视区域
-              this.tabContentLeft = Math.min(
-                0,
-                scrollWidth - elem.offsetWidth - elem.offsetLeft
-              )
-            } else {
-              // 标签在可视区域右侧
-              this.tabContentLeft = -(
-                elem.offsetLeft -
-                (scrollWidth - elem.offsetWidth)
-              )
-            }
-          }
-        })
-      })
-    },
-    handleTabClose() {
-      if (this.contextMenuTab) {
-        this.closeTab(this.contextMenuTab)
-      }
-    },
     handleTabRefresh() {
       this.reload()
     },
@@ -203,21 +264,6 @@ export default {
     },
     closeContextMenu() {
       this.contextMenuShow = false
-    },
-    addTab(route) {
-      const tab = {
-        name: route.name,
-        path: route.path,
-        query: route.query,
-        title: route.meta.title,
-        affix: route.meta && route.meta.affix,
-        parent: route.meta && route.meta.parent,
-      }
-
-      this.$store.dispatch('tabs/open', tab)
-    },
-    isActive(tab) {
-      return tab.path === this.currentTab.path
     },
     handleWheel(e) {
       const delta = e.wheelDelta ? e.wheelDelta : -(e.detail || 0) * 30
@@ -256,14 +302,6 @@ export default {
       if (next !== null) {
         this.openTab(next)
       }
-    },
-    openTab(tab) {
-      this.$store.dispatch('tabs/current', tab)
-
-      this.$router.push({
-        path: tab.path,
-        query: tab.query,
-      })
     },
     async closeTab(tab) {
       const next = await this.$store.dispatch('tabs/close', tab)

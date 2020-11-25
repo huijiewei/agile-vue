@@ -4,12 +4,12 @@
     :model="formModel"
     size="small"
     autocomplete="off"
-    @submit.native.stop.prevent="handleFormSubmit()"
-    @reset.native.stop.prevent="handleFormReset()"
+    @submit.stop.prevent="handleFormSubmit()"
+    @reset.stop.prevent="handleFormReset()"
   >
-    <template v-for="(item, index) in getOtherFields">
-      <hr v-if="item.type === 'br'" :key="index" class="br" />
-      <el-form-item v-else :key="index">
+    <template v-for="item in getOtherFields" :key="item.id">
+      <hr v-if="item.type === 'br'" class="br" />
+      <el-form-item v-else>
         <el-select
           v-if="item.type === 'select'"
           v-model="formModel[item.field]"
@@ -48,12 +48,7 @@
     </template>
     <el-form-item v-if="getKeywordFields.length > 0">
       <el-input v-model="keywordValue" placeholder="请输入内容" clearable>
-        <el-select
-          slot="prepend"
-          v-model="keywordField"
-          :style="{ width: '100px' }"
-          value=""
-        >
+        <el-select v-model="keywordField" :style="{ width: '100px' }" value="">
           <el-option
             v-for="(item, index) in getKeywordFields"
             :key="index"
@@ -85,7 +80,11 @@ export default {
       },
     },
   },
+  emits: ['submit', 'reset'],
   inject: ['reload'],
+  setup(props) {
+
+  },
   data() {
     return {
       formModel: {},

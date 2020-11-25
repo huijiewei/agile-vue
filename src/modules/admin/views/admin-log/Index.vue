@@ -82,26 +82,52 @@ import SearchForm from '@admin/components/SearchForm'
 import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'
 import { tabledObject } from '@core/utils/util'
 import Pagination from '@admin/components/Pagination'
+import { onBeforeRouteUpdate, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
 
 export default {
   name: 'AdminLog',
   components: { SearchForm, Pagination },
   mixins: [SearchFormFieldsMixin],
-  data() {
-    return {
-      loading: true,
-      adminLogs: [],
-      pages: null,
-      dialogVisible: false,
-      viewAdminLog: [],
+  setup() {
+    const route = useRoute()
+
+    const adminLogs = ref([])
+
+    let pages = null
+    let loading = true
+    let dialogVisible = false
+    let viewAdminLog = []
+
+    const getAdminLogs = async (query) => {
+      const { data } = await AdminService.log(this.buildRouteQuery(query))
+
+      if (data) {
+        adminLogs.value = Object.freeze(data.items)
+        pages = data.pages
+
+        this.setSearchFields(data.searchFields)
+      }
+
+      loading = false
     }
-  },
-  beforeRouteUpdate(to, from, next) {
-    this.getAdminLogs(to.query)
-    next()
-  },
-  created() {
-    this.getAdminLogs(this.$route.query)
+
+    getAdminLogs(route.query)
+
+    onBeforeRouteUpdate(async (to, from) => {
+      if (to.query !== from.query) {
+        await getAdminLogs(to.query)
+      }
+    })
+
+    return {
+      adminLogs,
+      pages,
+      loading,
+      dialogVisible,
+      viewAdminLog,
+      getAdminLogs,
+    }
   },
   methods: {
     handleView(adminLog) {
@@ -165,20 +191,6 @@ export default {
     handleClose() {
       this.dialogVisible = false
       this.viewAdminLog = []
-    },
-    async getAdminLogs(query) {
-      this.loading = true
-
-      const { data } = await AdminService.log(this.buildRouteQuery(query))
-
-      if (data) {
-        this.adminLogs = Object.freeze(data.items)
-        this.pages = data.pages
-
-        this.setSearchFields(data.searchFields)
-      }
-
-      this.loading = false
     },
   },
 }

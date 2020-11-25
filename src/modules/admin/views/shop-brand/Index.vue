@@ -39,9 +39,11 @@
       <el-table-column width="260" label="品牌分类">
         <template v-slot="scope">
           <div class="brand-category-tags">
-            <template v-for="shopCategory in scope.row.shopCategories">
-              <el-tag size="medium" :key="scope.row.id + '-' + shopCategory.id">
-                {{ shopCategory.name }} </el-tag
+            <template
+              v-for="shopCategory in scope.row.shopCategories"
+              :key="scope.row.id + '-' + shopCategory.id"
+            >
+              <el-tag size="medium"> {{ shopCategory.name }} </el-tag
               >&nbsp;&nbsp;
             </template>
           </div>
