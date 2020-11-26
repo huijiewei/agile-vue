@@ -5,6 +5,8 @@ const AuthService = {
     return useHttpClient().post('auth/login', credentials, null, false)
   },
   logout() {
+    const httpClient = useHttpClient()
+    console.log(httpClient)
     return useHttpClient().post('auth/logout', null, null, false)
   },
   account() {

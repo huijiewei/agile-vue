@@ -66,6 +66,9 @@
 import AgAvatar from '@core/components/Avatar'
 import AuthService from '@admin/services/AuthService'
 import Breadcrumb from '@admin/components/Breadcrumb'
+import { useStore } from 'vuex'
+import { computed, inject, getCurrentInstance } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'HeaderNav',
@@ -76,32 +79,35 @@ export default {
       default: false,
     },
   },
-  inject: ['reload'],
-  computed: {
-    getCurrentUser() {
-      return this.$store.getters['auth/getCurrentUser']
-    },
-  },
-  methods: {
-    handleRefresh() {
-      this.reload()
-    },
-    async toggleSidebar() {
-      await this.$store.dispatch('toggleSidebar')
-    },
-    async handleCommand(command) {
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+
+    const { ctx } = getCurrentInstance()
+
+    const handleRefresh = inject('reload')
+
+    const getCurrentUser = computed(() => {
+      return store.getters['auth/getCurrentUser']
+    })
+
+    const toggleSidebar = async () => {
+      await store.dispatch('toggleSidebar')
+    }
+
+    const handleCommand = async (command) => {
       if (command === 'userLogout') {
         const { data } = await AuthService.logout()
 
         if (data) {
-          await this.$store.dispatch('auth/logout')
+          await store.dispatch('auth/logout')
 
-          this.$message({
+          ctx.$message({
             type: 'success',
             duration: 1000,
             message: data.message,
             onClose: () => {
-              this.$router.push({
+              router.push({
                 path: '/login',
                 query: { direct: this.$route.fullPath },
               })
@@ -113,7 +119,7 @@ export default {
       }
 
       if (command === 'userProfile') {
-        await this.$router.push({
+        await router.push({
           path: '/profile',
         })
       }
@@ -122,10 +128,17 @@ export default {
         const { data } = await AuthService.account()
 
         if (data) {
-          await this.$store.dispatch('auth/account', data)
+          await store.dispatch('auth/account', data)
         }
       }
-    },
+    }
+
+    return {
+      handleRefresh,
+      getCurrentUser,
+      toggleSidebar,
+      handleCommand,
+    }
   },
 }
 </script>

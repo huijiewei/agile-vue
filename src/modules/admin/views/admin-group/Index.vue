@@ -6,7 +6,7 @@
           :disabled="!$can('admin-group/create')"
           type="primary"
           size="medium"
-          @click.native="handleAdminGroupCreate()"
+          @click="handleAdminGroupCreate()"
         >
           新建管理组
         </el-button>
@@ -43,35 +43,39 @@
 
 <script>
 import AdminGroupService from '@admin/services/AdminGroupService'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'AdminGroup',
-  data() {
-    return {
-      loading: true,
-      adminGroups: [],
-    }
-  },
-  async created() {
-    const { data } = await AdminGroupService.all()
+  setup(ctx) {
+    const router = useRouter()
 
-    if (data) {
-      this.adminGroups = Object.freeze(data.items)
+    const loading = ref(true)
+    const adminGroups = ref([])
+
+    const loadAdminGroups = async () => {
+      const { data } = await AdminGroupService.all()
+
+      if (data) {
+        adminGroups.value = Object.freeze(data.items)
+      }
+
+      loading.value = false
     }
 
-    this.loading = false
-  },
-  methods: {
-    handleAdminGroupCreate() {
-      this.$router.push({ path: '/admin-group/create' })
-    },
-    handleAdminGroupEdit(adminGroup) {
-      this.$router.push({
+    const handleAdminGroupCreate = () => {
+      router.push({ path: '/admin-group/create' })
+    }
+
+    const handleAdminGroupEdit = (adminGroup) => {
+      router.push({
         path: `/admin-group/edit/${adminGroup.id}`,
       })
-    },
-    handleAdminGroupDelete(adminGroup) {
-      this.$deleteDialog({
+    }
+
+    const handleAdminGroupDelete = (adminGroup) => {
+      ctx.root.$deleteDialog({
         message: `删除管理组 <strong>${adminGroup.name}</strong>`,
         callback: async () => {
           this.loading = true
@@ -92,7 +96,17 @@ export default {
           this.loading = false
         },
       })
-    },
+    }
+
+    loadAdminGroups()
+
+    return {
+      loading,
+      adminGroups,
+      handleAdminGroupCreate,
+      handleAdminGroupEdit,
+      handleAdminGroupDelete,
+    }
   },
 }
 </script>
