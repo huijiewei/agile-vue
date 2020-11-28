@@ -1,4 +1,4 @@
-VUE + ELEMENT.UI 演示项目
+Vue.js 3 + Element-Plus 演示项目
 
 项目目前正在开发，变动可能会很大，暂时只供研究学习参考
 
@@ -77,7 +77,3 @@ https://github.com/huijiewei/agile-boot
 ### 说明文件版本更新
 
 Version: 2020-10-31 19:30
-
-### Element-UI 的一个小修正
-打开 ./node_modules/element-ui/lib/cascader-panel.js 文件 1053 行
-把 `if(value)` 改为 `if (value !== undefined && value !== null) {`
