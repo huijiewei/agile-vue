@@ -4,8 +4,9 @@
     "baseUrl": "./src",
     "paths": {
       "@core/*": ["core/*"],
-      "@admin/*": ["modules/admin/*"],
-      "@mobile/*": ["modules/mobile/*"]
+      "@admin/*": ["app/admin/*"],
+      "@mobile/*": ["app/mobile/*"],
+      "@website/*": ["app/website/*"]
     }
   }
 }

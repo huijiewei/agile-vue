@@ -58,7 +58,7 @@ const vueConfig = {
     }
 
     config.plugin('html').tap((args) => {
-      args[0].template = 'public' + moduleConfig.appPath + '/index.html'
+      args[0].template = 'public/app' + moduleConfig.appPath + '/index.html'
       args[0].title = moduleConfig.appName
       args[0].chunks = moduleConfig.appChunks
 
@@ -66,10 +66,10 @@ const vueConfig = {
     })
 
     config.plugin('copy').tap((args) => {
-      args[0][0].from = path.resolve('./public' + moduleConfig.appPath)
+      args[0][0].from = path.resolve('./public/app' + moduleConfig.appPath)
 
       args[0][1] = Object.assign({}, args[0][0], {
-        from: path.resolve('./public/common'),
+        from: path.resolve('./public/shared'),
       })
 
       return args
@@ -80,7 +80,6 @@ const vueConfig = {
     }
 
     config.optimization.splitChunks({
-      chunks: 'all',
       cacheGroups: {
         vendor: {
           test: /[\\/]node_modules[\\/]/,
@@ -91,12 +90,14 @@ const vueConfig = {
         },
         element: {
           test: /[\\/]node_modules[\\/]_?element-plus(.*)/,
+          chunks: 'initial',
           name: 'element',
           priority: 20,
           enforce: true,
         },
         agile: {
           test: /[\\/]src\/core[\\/]/,
+          chunks: 'initial',
           name: 'agile',
           priority: 5,
           enforce: true,

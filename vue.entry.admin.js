@@ -5,10 +5,10 @@ module.exports = {
   appPath: '/admin',
   appName: 'Agile 管理后台',
   appEntry: {
-    admin: './src/modules/admin/main.js',
+    admin: './src/app/admin/main.js',
   },
   appAlias: {
-    '@admin': path.resolve('src/modules/admin'),
+    '@admin': path.resolve('src/app/admin'),
   },
   appChunks: ['vendor', 'element', 'agile', 'admin'],
   outputDir: 'dist/admin',

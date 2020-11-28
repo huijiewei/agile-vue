@@ -5,10 +5,10 @@ module.exports = {
   appPath: '/mobile',
   appName: 'Agile 移动应用',
   appEntry: {
-    mobile: './src/modules/mobile/main.js',
+    mobile: './src/app/mobile/main.js',
   },
   appAlias: {
-    '@mobile': path.resolve('src/modules/mobile'),
+    '@mobile': path.resolve('src/app/mobile'),
   },
   appChunks: ['vendor', 'agile', 'mobile'],
   outputDir: 'dist/mobile',
