@@ -9,7 +9,7 @@
           :disabled="!$can('user/create')"
           type="primary"
           size="medium"
-          @click.native="handleUserCreate()"
+          @click="handleUserCreate()"
         >
           新建会员
         </el-button>
@@ -116,6 +116,7 @@ export default {
       pages: null,
     }
   },
+  emits: ['close'],
   beforeRouteUpdate(to, from, next) {
     this.getUsers(to.query)
     next()

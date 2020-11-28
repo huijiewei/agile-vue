@@ -5,7 +5,7 @@
     :model="formModel"
     label-width="100px"
     label-suffix="："
-    @submit.native.stop.prevent="handleFormSubmit('formModel')"
+    @submit.stop.prevent="handleFormSubmit('formModel')"
   >
     <el-form-item
       label="标题"
@@ -144,6 +144,7 @@ export default {
       default: null,
     },
   },
+  emits: ['submit'],
   data() {
     return {
       submitLoading: false,

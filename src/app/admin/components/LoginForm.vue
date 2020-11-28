@@ -2,7 +2,7 @@
   <el-form
     ref="loginForm"
     :model="loginForm"
-    @submit.native.prevent="login('loginForm')"
+    @submit.prevent="login('loginForm')"
   >
     <el-form-item
       prop="account"
@@ -76,6 +76,7 @@ export default {
       type: Boolean,
     },
   },
+  emits: ['submit'],
   data() {
     return {
       submitLoading: false,

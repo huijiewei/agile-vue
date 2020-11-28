@@ -4,7 +4,6 @@
       :disabled="disabled"
       :value="value"
       v-bind="$attrs"
-      v-on="$listeners"
     >
       <el-option
         v-for="option in options"

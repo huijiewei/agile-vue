@@ -6,7 +6,7 @@
           :disabled="!$can('admin/create')"
           type="primary"
           size="medium"
-          @click.native="handleAdminCreate()"
+          @click="handleAdminCreate()"
         >
           新建管理员
         </el-button>
@@ -78,6 +78,7 @@ import AgAvatar from '@core/components/Avatar'
 export default {
   name: 'Admin',
   components: { AgAvatar },
+  emits: ['click'],
   data() {
     return {
       loading: true,
