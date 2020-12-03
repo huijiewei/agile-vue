@@ -43,59 +43,67 @@
 </template>
 
 <script>
-import PrefectScrollbar from '@core/components/PrefectScrollbar/index'
+import PrefectScrollbar from '@core/components/PrefectScrollbar'
 import HeaderNav from '@admin/components/HeaderNav'
 import SiderMenu from '@admin/components/SiderMenu'
 import AuthService from '@admin/services/AuthService'
 import HeaderTab from '@admin/components/HeaderTab'
+import { provide, ref, nextTick, computed } from 'vue'
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 
 export default {
   name: 'AdminLayout',
   components: { HeaderTab, PrefectScrollbar, HeaderNav, SiderMenu },
-  computed: {
-    isCollapsed() {
-      return this.$store.getters['isSidebarCollapsed']
-    },
-    cachedTabs() {
-      return this.$store.getters['tabs/getCached']
-    },
-  },
-  async beforeCreate() {
-    if (!this.$store.getters['auth/getCurrentUser']) {
+  setup() {
+    const store = useStore()
+    const route = useRoute()
+
+    const isRouterAlive = ref(true)
+
+    const loadAccount = async () => {
       const { data } = await AuthService.account()
 
       if (data) {
-        await this.$store.dispatch('auth/account', data)
+        await store.dispatch('auth/account', data)
       }
     }
-  },
-  provide() {
-    return {
-      reload: this.reload,
-    }
-  },
-  data() {
-    return {
-      isRouterAlive: true,
-    }
-  },
-  methods: {
-    async reload() {
-      const cacheNames = [this.$route.name]
 
-      if (this.$route.meta.parent) {
-        cacheNames.push(this.$route.meta.parent.name)
+    if (!store.getters['auth/getCurrentUser']) {
+      loadAccount()
+    }
+
+    const isCollapsed = computed(() => {
+      return store.getters['isSidebarCollapsed']
+    })
+
+    const cachedTabs = computed(() => {
+      return store.getters['tabs/getCached']
+    })
+
+    provide('reload', async () => {
+      const cacheNames = [route.name]
+
+      if (route.meta.parent) {
+        cacheNames.push(route.meta.parent.name)
       }
 
-      await this.$store.dispatch('tabs/deleteCache', cacheNames)
+      await store.dispatch('tabs/deleteCache', cacheNames)
 
-      this.isRouterAlive = false
+      isRouterAlive.value = false
 
-      await this.$nextTick(() => {
-        this.isRouterAlive = true
-        this.$store.dispatch('tabs/updateCache', cacheNames)
-      })
-    },
+      await nextTick()
+
+      isRouterAlive.value = true
+
+      await store.dispatch('tabs/updateCache', cacheNames)
+    })
+
+    return {
+      isRouterAlive,
+      isCollapsed,
+      cachedTabs,
+    }
   },
 }
 </script>

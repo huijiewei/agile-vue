@@ -5,7 +5,7 @@
     ref="formModel"
     label-width="100px"
     label-suffix="："
-    @submit.native.stop.prevent="handleFormSubmit('formModel')"
+    @submit.stop.prevent="handleFormSubmit('formModel')"
   >
     <el-form-item label="上级地区" prop="parentId">
       <el-col :md="16">
@@ -62,7 +62,7 @@
         plain
         type="danger"
         size="small"
-        @click.native="handleDistrictDelete"
+        @click="handleDistrictDelete"
       >
         删除
       </el-button>
@@ -97,6 +97,7 @@ export default {
       type: Array,
     },
   },
+  emits: ['submit', 'click'],
   data() {
     return {
       submitLoading: false,

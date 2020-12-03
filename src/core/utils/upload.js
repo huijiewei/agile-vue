@@ -71,14 +71,12 @@ const Upload = {
 
         const value = params[key]
 
-        // eslint-disable-next-line no-template-curly-in-string
         if (value.toString().indexOf('${filename}') !== -1) {
           let randomFileName =
             Math.random().toString(36).substring(3, 15) +
             '.' +
             file.name.split('.').pop()
 
-          // eslint-disable-next-line no-template-curly-in-string
           formData.append(
             key,
             value.toString().replace('${filename}', randomFileName)

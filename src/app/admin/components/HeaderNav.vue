@@ -95,25 +95,29 @@ export default {
       await store.dispatch('toggleSidebar')
     }
 
+    const logout = async () => {
+      const { data } = await AuthService.logout()
+
+      if (data) {
+        await store.dispatch('auth/logout')
+
+        ctx.$message({
+          type: 'success',
+          duration: 1000,
+          message: data.message,
+          onClose: () => {
+            router.push({
+              path: '/login',
+              query: { direct: this.$route.fullPath },
+            })
+          },
+        })
+      }
+    }
+
     const handleCommand = async (command) => {
       if (command === 'userLogout') {
-        const { data } = await AuthService.logout()
-
-        if (data) {
-          await store.dispatch('auth/logout')
-
-          ctx.$message({
-            type: 'success',
-            duration: 1000,
-            message: data.message,
-            onClose: () => {
-              router.push({
-                path: '/login',
-                query: { direct: this.$route.fullPath },
-              })
-            },
-          })
-        }
+        await logout()
 
         return
       }

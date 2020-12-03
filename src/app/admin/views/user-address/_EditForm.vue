@@ -84,6 +84,7 @@ export default {
       default: null,
     },
   },
+  emits: ['submit'],
   data() {
     return {
       submitLoading: false,

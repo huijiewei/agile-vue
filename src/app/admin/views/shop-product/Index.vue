@@ -9,7 +9,7 @@
           :disabled="!$can('shop-product/create')"
           type="primary"
           size="medium"
-          @click.native="handleUserCreate()"
+          @click="handleUserCreate()"
         >
           新建商品
         </el-button>
@@ -98,28 +98,29 @@ export default {
   name: 'ShopProduct',
   components: { ExportButton, SearchForm, Pagination },
   mixins: [SearchFormFieldsMixin],
-  data() {
+  data () {
     return {
       loading: true,
       shopProducts: [],
-      pages: null,
+      pages: null
     }
   },
-  beforeRouteUpdate(to, from, next) {
+  emits: ['click'],
+  beforeRouteUpdate (to, from, next) {
     this.getShopProducts(to.query)
     next()
   },
-  created() {
+  created () {
     this.getShopProducts(this.$route.query)
   },
   methods: {
-    handleUserCreate() {
+    handleUserCreate () {
       this.$router.push({ path: '/shop-product/create' })
     },
-    handleUserEdit(product) {
+    handleUserEdit (product) {
       this.$router.push({ path: `/shop-product/edit/${product.id}` })
     },
-    handleUserDelete(user) {
+    handleUserDelete (user) {
       this.$deleteDialog({
         message: `删除用户 <strong>${user.name || user.phone}</strong>`,
         callback: async () => {
@@ -136,21 +137,21 @@ export default {
 
             this.$message({
               type: 'success',
-              message: data.message,
+              message: data.message
             })
           }
 
           this.loading = false
-        },
+        }
       })
     },
-    handleCurrentChange(page) {
+    handleCurrentChange (page) {
       this.$router.push({
         path: this.$route.fullPath,
-        query: { page: page },
+        query: { page: page }
       })
     },
-    async getShopProducts(query) {
+    async getShopProducts (query) {
       this.loading = true
 
       const { data } = await ShopProductService.all(this.buildRouteQuery(query))
@@ -163,7 +164,7 @@ export default {
       }
 
       this.loading = false
-    },
-  },
+    }
+  }
 }
 </script>

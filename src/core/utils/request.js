@@ -107,9 +107,6 @@ class Request {
       timeout: 120 * 1000,
       responseType: 'blob',
       historyBack: historyBack,
-      onDownloadProgress: (progressEvent) => {
-        console.log(progressEvent)
-      },
     }
 
     if (params) {
