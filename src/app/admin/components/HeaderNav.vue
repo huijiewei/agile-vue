@@ -79,7 +79,7 @@ export default {
       default: false,
     },
   },
-  setup() {
+  setup(props) {
     const store = useStore()
     const router = useRouter()
 

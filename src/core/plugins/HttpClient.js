@@ -6,7 +6,7 @@ const UnprocessableEntityHttpCode = 422
 
 const HttpGetMethod = ['GET', 'HEAD']
 
-const httpClientSymbol = 'httpClient'
+const httpClientSymbol = 'agileHttpClient'
 
 const HttpClient = {
   install(

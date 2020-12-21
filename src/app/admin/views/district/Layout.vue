@@ -16,7 +16,7 @@
             :disabled="!$can('district/create')"
             title="创建根地区"
             size="mini"
-            @click.native="handleDistrictCreate('0')"
+            @click="handleDistrictCreate('0')"
             icon="el-icon-folder-add"
           >
             创建根地区
@@ -32,33 +32,35 @@
           ref="districtSearchTree"
           node-key="id"
         >
-          <div class="category-tree-node" slot-scope="{ data }">
-            <div class="category-tree-icon">
-              <ag-icon v-if="data.icon" :path="data.icon" />
-              <i v-else-if="data.code.length < 9" class="el-icon-folder" />
-              <i v-else class="el-icon-map-location" />
-              <span v-bind:title="'地区代码：' + data.code">{{
-                data.name
-              }}</span>
+          <template #default="{ data }">
+            <div class="category-tree-node">
+              <div class="category-tree-icon">
+                <ag-icon v-if="data.icon" :path="data.icon" />
+                <i v-else-if="data.code.length < 9" class="el-icon-folder" />
+                <i v-else class="el-icon-map-location" />
+                <span v-bind:title="'地区代码：' + data.code">{{
+                  data.name
+                }}</span>
+              </div>
+              <el-button-group class="operate">
+                <el-button
+                  size="mini"
+                  @click.stop="handleDistrictEdit(data)"
+                  :disabled="!$can('district/view')"
+                  icon="el-icon-edit-outline"
+                  title="查看编辑"
+                />
+                <el-button
+                  v-if="!data.leaf"
+                  size="mini"
+                  @click.stop="handleDistrictCreate(data.id)"
+                  :disabled="!$can('district/create')"
+                  icon="el-icon-folder-add"
+                  title="新建子地区"
+                />
+              </el-button-group>
             </div>
-            <el-button-group class="operate">
-              <el-button
-                size="mini"
-                @click.stop="handleDistrictEdit(data)"
-                :disabled="!$can('district/view')"
-                icon="el-icon-edit-outline"
-                title="查看编辑"
-              />
-              <el-button
-                v-if="!data.leaf"
-                size="mini"
-                @click.stop="handleDistrictCreate(data.id)"
-                :disabled="!$can('district/create')"
-                icon="el-icon-folder-add"
-                title="新建子地区"
-              />
-            </el-button-group>
-          </div>
+          </template>
         </el-tree>
         <el-tree
           v-show="!isSearched"
@@ -74,33 +76,35 @@
             isLeaf: 'leaf',
           }"
         >
-          <div class="category-tree-node" slot-scope="{ data }">
-            <div class="category-tree-icon">
-              <ag-icon v-if="data.icon" :path="data.icon" />
-              <i v-else-if="data.code.length < 9" class="el-icon-folder" />
-              <i v-else class="el-icon-map-location" />
-              <span v-bind:title="'地区代码：' + data.code">{{
-                data.name
-              }}</span>
+          <template #default="{ data }">
+            <div class="category-tree-node">
+              <div class="category-tree-icon">
+                <ag-icon v-if="data.icon" :path="data.icon" />
+                <i v-else-if="data.code.length < 9" class="el-icon-folder" />
+                <i v-else class="el-icon-map-location" />
+                <span v-bind:title="'地区代码：' + data.code">{{
+                  data.name
+                }}</span>
+              </div>
+              <el-button-group class="operate">
+                <el-button
+                  size="mini"
+                  @click.stop="handleDistrictEdit(data)"
+                  :disabled="!$can('district/view')"
+                  icon="el-icon-edit-outline"
+                  title="查看编辑"
+                />
+                <el-button
+                  v-if="!data.leaf"
+                  size="mini"
+                  @click.stop="handleDistrictCreate(data.id)"
+                  :disabled="!$can('district/create')"
+                  icon="el-icon-folder-add"
+                  title="新建子地区"
+                />
+              </el-button-group>
             </div>
-            <el-button-group class="operate">
-              <el-button
-                size="mini"
-                @click.stop="handleDistrictEdit(data)"
-                :disabled="!$can('district/view')"
-                icon="el-icon-edit-outline"
-                title="查看编辑"
-              />
-              <el-button
-                v-if="!data.leaf"
-                size="mini"
-                @click.stop="handleDistrictCreate(data.id)"
-                :disabled="!$can('district/create')"
-                icon="el-icon-folder-add"
-                title="新建子地区"
-              />
-            </el-button-group>
-          </div>
+          </template>
         </el-tree>
       </el-col>
       <el-col :span="18">
@@ -154,6 +158,7 @@ export default {
       districtCurrentId: 0,
     }
   },
+  emits: ['click'],
   methods: {
     handleDistrictExpanded(expanded, currentId) {
       this.districtExpanded = expanded

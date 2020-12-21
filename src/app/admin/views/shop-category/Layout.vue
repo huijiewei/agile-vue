@@ -16,7 +16,7 @@
             :disabled="!$can('shop-category/create')"
             title="创建根分类"
             size="mini"
-            @click.native="handleCategoryCreate(0)"
+            @click="handleCategoryCreate(0)"
             icon="el-icon-folder-add"
           >
             创建根分类
@@ -33,30 +33,32 @@
           ref="categoryTree"
           node-key="id"
         >
-          <div class="category-tree-node" slot-scope="{ data }">
-            <div class="category-tree-icon">
-              <ag-icon v-if="data.icon" :path="data.icon" />
-              <i v-else-if="data.children" class="el-icon-folder" />
-              <i v-else class="el-icon-document" />
-              <span>{{ data.name }}</span>
+          <template #default="{ data }">
+            <div class="category-tree-node">
+              <div class="category-tree-icon">
+                <ag-icon v-if="data.icon" :path="data.icon" />
+                <i v-else-if="data.children" class="el-icon-folder" />
+                <i v-else class="el-icon-document" />
+                <span>{{ data.name }}</span>
+              </div>
+              <el-button-group class="operate">
+                <el-button
+                  size="mini"
+                  @click.stop="handleCategoryEdit(data)"
+                  :disabled="!$can('shop-category/view')"
+                  icon="el-icon-edit-outline"
+                  title="查看编辑"
+                />
+                <el-button
+                  size="mini"
+                  @click.stop="handleCategoryCreate(data.id)"
+                  :disabled="!$can('shop-category/create')"
+                  icon="el-icon-folder-add"
+                  title="新建子分类"
+                />
+              </el-button-group>
             </div>
-            <el-button-group class="operate">
-              <el-button
-                size="mini"
-                @click.stop="handleCategoryEdit(data)"
-                :disabled="!$can('shop-category/view')"
-                icon="el-icon-edit-outline"
-                title="查看编辑"
-              />
-              <el-button
-                size="mini"
-                @click.stop="handleCategoryCreate(data.id)"
-                :disabled="!$can('shop-category/create')"
-                icon="el-icon-folder-add"
-                title="新建子分类"
-              />
-            </el-button-group>
-          </div>
+          </template>
         </el-tree>
       </el-col>
       <el-col :span="18">
@@ -94,6 +96,7 @@ export default {
       categoryExpanded: [],
     }
   },
+  emits: ['submit'],
   methods: {
     setAllExpand(state) {
       const nodes = this.$refs.categoryTree.store.nodesMap

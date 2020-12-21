@@ -29,11 +29,11 @@ class Request {
       adapter: throttleAdapterEnhancer(axios.defaults.adapter),
     }
 
-    const httpClient = axios.create(axiosConfig)
+    const axiosInstance = axios.create(axiosConfig)
 
-    loadProgressBar({ showSpinner: false }, httpClient)
+    loadProgressBar({ showSpinner: false }, axiosInstance)
 
-    httpClient.interceptors.request.use(
+    axiosInstance.interceptors.request.use(
       (config) => {
         return opt.beforeRequest(config)
       },
@@ -42,7 +42,7 @@ class Request {
       }
     )
 
-    httpClient.interceptors.response.use(
+    axiosInstance.interceptors.response.use(
       (response) => {
         return opt.onSuccess(response)
       },
@@ -51,7 +51,7 @@ class Request {
       }
     )
 
-    this.httpClient = httpClient
+    this.axios = axiosInstance
   }
 
   request(
@@ -77,7 +77,7 @@ class Request {
       config.data = data
     }
 
-    return flatry(this.httpClient.request(config))
+    return flatry(this.axios.request(config))
   }
 
   get(url, params = null, historyBack = true, cancelIgnore = false) {
@@ -118,7 +118,7 @@ class Request {
     }
 
     return flatry(
-      this.httpClient.request(config).then((response) => {
+      this.axios.request(config).then((response) => {
         let filename = response.headers['x-suggested-filename']
 
         if (!filename) {

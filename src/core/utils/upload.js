@@ -31,6 +31,19 @@ const Upload = {
 
         onSuccess(upload)
       },
+      beforeRequest: (config) => {
+        if (option.headers && Array.isArray(option.headers)) {
+          for (const key in option.headers) {
+            if (!option.headers.hasOwnProperty(key)) {
+              continue
+            }
+
+            config.headers[key] = option.headers[key]
+          }
+        }
+
+        return config
+      },
       onError: (error) => {
         const message =
           error.response.data.detail ||
@@ -42,22 +55,6 @@ const Upload = {
         onError(message)
       },
     })
-
-    const headers = option.headers
-
-    if (headers && Array.isArray(headers)) {
-      request.httpClient.interceptors.request.use((config) => {
-        for (const key in headers) {
-          if (!headers.hasOwnProperty(key)) {
-            continue
-          }
-
-          config.headers[key] = headers[key]
-        }
-
-        return config
-      }, undefined)
-    }
 
     const params = option.params
 
