@@ -22,7 +22,7 @@
 import ShopCategoryForm from '@admin/views/shop-category/_EditForm'
 import ShopCategoryService from '@admin/services/ShopCategoryService'
 import MiscService from '@admin/services/MiscService'
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 
 export default {
   name: 'ShopCategoryCreate',

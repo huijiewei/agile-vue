@@ -16,7 +16,7 @@
 
 <script>
 import ShopBrandForm from '@admin/views/shop-brand/_EditForm'
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 import ShopBrandService from '@admin/services/ShopBrandService'
 
 export default {

@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import AgAvatar from '@core/components/Avatar'
+import AgAvatar from '../../../../shared/components/Avatar'
 import UserService from '@admin/services/UserService'
 import SearchForm from '@admin/components/SearchForm'
 import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'

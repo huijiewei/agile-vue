@@ -22,7 +22,7 @@
 <script>
 import CmsCategoryForm from '@admin/views/cms-category/_EditForm'
 import CmsCategoryService from '@admin/services/CmsCategoryService'
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 
 export default {
   name: 'CmsCategoryEdit',

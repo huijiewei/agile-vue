@@ -14,7 +14,7 @@ import './registerServiceWorker'
 import DeleteDialog from './plugins/DeleteDialog'
 import PermissionCheck from './plugins/PermissionCheck'
 
-import { createHttpClient } from '@core/plugins/HttpClient'
+import { createHttpClient } from '@shared/plugins/HttpClient'
 
 const app = createApp(App)
 

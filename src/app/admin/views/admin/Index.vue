@@ -73,7 +73,7 @@
 
 <script>
 import AdminService from '@admin/services/AdminService'
-import AgAvatar from '@core/components/Avatar'
+import AgAvatar from '../../../../shared/components/Avatar'
 
 export default {
   name: 'Admin',

@@ -16,7 +16,7 @@
 
 <script>
 import CmsArticleForm from '@admin/views/cms-article/_EditForm'
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 import CmsArticleService from '@admin/services/CmsArticleService'
 
 export default {

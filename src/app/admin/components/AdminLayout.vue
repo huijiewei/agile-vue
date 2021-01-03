@@ -19,7 +19,7 @@
     </aside>
     <section class="ag-layout">
       <header class="ag-header">
-        <header-nav :is-collapsed="isCollapsed" />
+        <header-nav :is-collapsed="isCollapsed" :current-user='' />
         <header-tab></header-tab>
       </header>
       <main class="ag-main">
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import PrefectScrollbar from '@core/components/PrefectScrollbar'
+import PrefectScrollbar from '../../../shared/components/PrefectScrollbar'
 import HeaderNav from '@admin/components/HeaderNav'
 import SiderMenu from '@admin/components/SiderMenu'
 import AuthService from '@admin/services/AuthService'
@@ -109,7 +109,7 @@ export default {
 </script>
 
 <style lang="less">
-@import '../../../core/assets/styles/mixin.less';
+@import '../../../shared/assets/styles/mixin.less';
 @aside-width: 220px;
 @aside-collapsed-width: 60px;
 @aside-background-color: #2c343f;

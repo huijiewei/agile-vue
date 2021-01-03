@@ -36,7 +36,7 @@
 <script>
 import VueCropper from 'vue-cropperjs'
 import 'cropperjs/dist/cropper.css'
-import Request from '@core/utils/request'
+import Request from '../../../shared/utils/request'
 
 export default {
   name: 'ImageCropper',

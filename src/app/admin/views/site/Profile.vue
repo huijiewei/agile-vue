@@ -17,7 +17,7 @@
 <script>
 import AdminForm from '@admin/views/admin/_EditForm'
 import AuthService from '@admin/services/AuthService'
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 
 export default {
   components: { PlaceholderForm, AdminForm },

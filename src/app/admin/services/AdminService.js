@@ -1,4 +1,4 @@
-import { useHttpClient } from '@core/plugins/HttpClient'
+import { useHttpClient } from '@shared/plugins/HttpClient'
 
 const AdminService = {
   all() {

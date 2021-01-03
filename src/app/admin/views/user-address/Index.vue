@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import AgAvatar from '@core/components/Avatar'
+import AgAvatar from '../../../../shared/components/Avatar'
 import UserAddressService from '@admin/services/UserAddressService'
 import SearchForm from '@admin/components/SearchForm'
 import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'

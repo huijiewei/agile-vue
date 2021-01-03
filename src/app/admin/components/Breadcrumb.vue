@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import AgIcon from '@core/components/Icon'
+import AgIcon from '../../../shared/components/Icon'
 import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 

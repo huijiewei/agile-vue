@@ -80,7 +80,7 @@
 import AdminService from '@admin/services/AdminService'
 import SearchForm from '@admin/components/SearchForm'
 import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'
-import { tabledObject } from '@core/utils/util'
+import { tabledObject } from '../../../../shared/utils/util'
 import Pagination from '@admin/components/Pagination'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'

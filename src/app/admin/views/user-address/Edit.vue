@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 import UserAddressForm from '@admin/views/user-address/_EditForm'
 import UserAddressService from '@admin/services/UserAddressService'
 

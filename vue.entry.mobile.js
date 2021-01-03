@@ -10,7 +10,7 @@ module.exports = {
   appAlias: {
     '@mobile': path.resolve('src/app/mobile'),
   },
-  appChunks: ['vendor', 'agile', 'mobile'],
+  appChunks: ['vendor', 'shared', 'mobile'],
   outputDir: 'dist/mobile',
   pwaEnable: true,
   vueConfig: {

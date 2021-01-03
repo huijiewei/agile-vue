@@ -34,5 +34,5 @@ body {
     Microsoft YaHei, SimSun, sans-serif;
 }
 
-@import '../../core/assets/styles/base.less';
+@import '../../shared/assets/styles/base.less';
 </style>

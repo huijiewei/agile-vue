@@ -10,7 +10,7 @@ module.exports = {
   appAlias: {
     '@admin': path.resolve('src/app/admin'),
   },
-  appChunks: ['vendor', 'element', 'agile', 'admin'],
+  appChunks: ['vendor', 'element', 'shared', 'admin'],
   outputDir: 'dist/admin',
   pwaEnable: true,
   vueConfig: {

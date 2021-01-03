@@ -140,7 +140,7 @@
 </template>
 
 <script>
-import Upload from '@core/utils/upload'
+import Upload from '../../../../shared/utils/upload'
 import ImageCropper from '@admin/components/ImageCropper'
 
 export default {

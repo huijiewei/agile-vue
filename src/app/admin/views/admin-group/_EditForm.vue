@@ -93,7 +93,7 @@
 import MiscService from '@admin/services/MiscService'
 import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
 import AuthService from '@admin/services/AuthService'
-import SameWidth from '@core/directives/SameWidth'
+import SameWidth from '../../../../shared/directives/SameWidth'
 
 export default {
   directives: {

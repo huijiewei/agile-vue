@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import AgIcon from '@core/components/Icon/index'
+import AgIcon from '../../../shared/components/Icon/index'
 export default {
   name: 'SiderMenuIcon',
   components: { AgIcon },

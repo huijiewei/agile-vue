@@ -21,7 +21,7 @@
 import DistrictFrom from '@admin/views/district/_EditForm'
 import DistrictService from '@admin/services/DistrictService'
 import MiscService from '@admin/services/MiscService'
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 
 export default {
   name: 'DistrictCreate',

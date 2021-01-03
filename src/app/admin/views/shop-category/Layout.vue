@@ -74,7 +74,7 @@
 
 <script>
 import MiscService from '@admin/services/MiscService'
-import AgIcon from '@core/components/Icon'
+import AgIcon from '../../../../shared/components/Icon'
 
 export default {
   name: 'ShopCategory',

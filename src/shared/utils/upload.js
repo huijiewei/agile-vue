@@ -1,4 +1,4 @@
-import Request from '@core/utils/request'
+import Request from '../utils/request'
 
 const Upload = {
   defaultOption: () => {

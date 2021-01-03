@@ -1,6 +1,6 @@
 <template>
   <editor
-    :tinymce-script-src="'https://cdn.jsdelivr.net/npm/tinymce@5.5.1/tinymce.min.js'"
+    :tinymce-script-src="'https://cdn.jsdelivr.net/npm/tinymce@5.6.2/tinymce.min.js'"
     :init="{
       height: 500,
       menubar: false,
@@ -38,7 +38,7 @@
 
 <script>
 import Editor from '@tinymce/tinymce-vue'
-import Upload from '@core/utils/upload'
+import Upload from '../../utils/upload'
 
 export default {
   name: 'Tinymce',

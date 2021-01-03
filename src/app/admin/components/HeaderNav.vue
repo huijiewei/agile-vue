@@ -27,20 +27,20 @@
         title="重载页面"
       ></i>
     </div>
-    <ul v-if="getCurrentUser" class="nav nav-right">
+    <ul v-if="currentUser" class="nav nav-right">
       <li class="profile">
         <el-dropdown trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">
-            <ag-avatar :src="getCurrentUser.avatar" />
+            <ag-avatar :src="currentUser.avatar" />
             <span class="ag-display">
-              {{ getCurrentUser.name || getCurrentUser.phone }}
+              {{ currentUser.name || currentUser.phone }}
             </span>
             <i class="el-icon-arrow-down el-icon--right" />
           </span>
           <template #dropdown>
             <el-dropdown-menu class="profile-dropdown-menu">
               <el-dropdown-item disabled>
-                {{ getCurrentUser.adminGroup.name }}
+                {{ currentUser.adminGroup.name }}
               </el-dropdown-item>
               <el-dropdown-item command="userProfile" divided>
                 <i class="el-icon-user" />
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import AgAvatar from '@core/components/Avatar'
+import AgAvatar from '../../../shared/components/Avatar'
 import AuthService from '@admin/services/AuthService'
 import Breadcrumb from '@admin/components/Breadcrumb'
 import { useStore } from 'vuex'
@@ -78,6 +78,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    currentUser: {
+      type: Object,
+      default: null,
+    },
   },
   setup(props) {
     const store = useStore()
@@ -86,10 +90,6 @@ export default {
     const { ctx } = getCurrentInstance()
 
     const handleRefresh = inject('reload')
-
-    const getCurrentUser = computed(() => {
-      return store.getters['auth/getCurrentUser']
-    })
 
     const toggleSidebar = async () => {
       await store.dispatch('toggleSidebar')
@@ -139,7 +139,6 @@ export default {
 
     return {
       handleRefresh,
-      getCurrentUser,
       toggleSidebar,
       handleCommand,
     }

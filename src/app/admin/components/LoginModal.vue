@@ -7,7 +7,7 @@
     :close-on-click-modal="false"
     :show-close="false"
     :close-on-press-escape="false"
-    :visible="true"
+    :model-value="true"
   >
     <login-form />
   </el-dialog>

@@ -91,7 +91,7 @@
 <script>
 import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
 import ImageUpload from '@admin/components/upload/ImageUpload'
-import AgIcon from '@core/components/Icon'
+import AgIcon from '../../../../shared/components/Icon'
 
 export default {
   components: { ImageUpload, AgIcon },

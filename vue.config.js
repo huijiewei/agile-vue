@@ -49,7 +49,7 @@ const vueConfig = {
       }
     }
 
-    config.resolve.alias.set('@core', path.resolve('src/core')).delete('@')
+    config.resolve.alias.set('@shared', path.resolve('src/shared')).delete('@')
 
     if (moduleConfig.appAlias) {
       for (const [key, value] of Object.entries(moduleConfig.appAlias)) {
@@ -95,10 +95,10 @@ const vueConfig = {
           priority: 20,
           enforce: true,
         },
-        agile: {
-          test: /[\\/]src\/core[\\/]/,
+        shared: {
+          test: /[\\/]src\/shared[\\/]/,
           chunks: 'initial',
-          name: 'agile',
+          name: 'shared',
           priority: 5,
           enforce: true,
         },

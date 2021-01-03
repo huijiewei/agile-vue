@@ -153,6 +153,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '../../core/assets/styles/base.less';
+@import '../../shared/assets/styles/base.less';
 @import './assets/styles/style.less';
 </style>

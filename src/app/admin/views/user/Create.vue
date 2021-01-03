@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 import UserForm from '@admin/views/user/_EditForm'
 import UserService from '@admin/services/UserService'
 

@@ -16,7 +16,7 @@
 <script>
 import AdminGroupForm from '@admin/views/admin-group/_EditForm'
 import AdminGroupService from '@admin/services/AdminGroupService'
-import PlaceholderForm from '@core/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
 
 export default {
   name: 'AdminGroupCreate',

@@ -2,7 +2,7 @@ import axios from 'axios'
 import { loadProgressBar } from 'axios-progress-bar'
 import 'axios-progress-bar/dist/nprogress.css'
 import { throttleAdapterEnhancer } from 'axios-extensions'
-import flatry from '@core/utils/flatry'
+import flatry from '../utils/flatry'
 
 class Request {
   constructor(options) {

@@ -125,7 +125,7 @@
 import ImageUpload from '@admin/components/upload/ImageUpload'
 import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
 import MiscService from '@admin/services/MiscService'
-import Tinymce from '@core/components/Tinymce/index'
+import Tinymce from '../../../../shared/components/Tinymce/index'
 
 export default {
   components: { Tinymce, ImageUpload },

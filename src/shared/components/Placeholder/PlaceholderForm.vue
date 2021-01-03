@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import PlaceholderTextRow from '@core/components/Placeholder/PlaceholderTextRow'
+import PlaceholderTextRow from '../../components/Placeholder/PlaceholderTextRow'
 
 export default {
   name: 'PlaceholderForm',

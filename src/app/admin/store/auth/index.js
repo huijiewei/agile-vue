@@ -1,4 +1,4 @@
-import { deepSearch, formatUrl } from '@core/utils/util'
+import { deepSearch, formatUrl } from '../../../../shared/utils/util'
 
 const clientIdKey = 'ag:admin-client-id'
 const accessTokenKey = 'ag:admin-access-token'
