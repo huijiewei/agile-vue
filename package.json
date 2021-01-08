@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build:admin": "cross-env MODULE_CONFIG=$PWD/vue.entry.admin.js vue-cli-service build",
-    "build:mobile": "cross-env MODULE_CONFIG=$PWD/vue.entry.mobile.js vue-cli-service build",
-    "inspect:admin": "cross-env MODULE_CONFIG=$PWD/vue.entry.admin.js vue-cli-service inspect --mode production > webpack.entry.admin.js",
-    "inspect:mobile": "cross-env MODULE_CONFIG=$PWD/vue.entry.mobile.js vue-cli-service inspect --mode production > webpack.entry.mobile.js",
-    "serve:admin": "cross-env MODULE_CONFIG=$PWD/vue.entry.admin.js vue-cli-service serve",
-    "serve:mobile": "cross-env MODULE_CONFIG=$PWD/vue.entry.mobile.js vue-cli-service serve"
+    "build:admin": "cross-env MODULE_CONFIG=./vue.entry.admin.js vue-cli-service build",
+    "build:mobile": "cross-env MODULE_CONFIG=./vue.entry.mobile.js vue-cli-service build",
+    "inspect:admin": "cross-env MODULE_CONFIG=./vue.entry.admin.js vue-cli-service inspect --mode production > webpack.entry.admin.js",
+    "inspect:mobile": "cross-env MODULE_CONFIG=./vue.entry.mobile.js vue-cli-service inspect --mode production > webpack.entry.mobile.js",
+    "serve:admin": "cross-env MODULE_CONFIG=./vue.entry.admin.js vue-cli-service serve",
+    "serve:mobile": "cross-env MODULE_CONFIG=./vue.entry.mobile.js vue-cli-service serve"
   },
   "dependencies": {
     "@tinymce/tinymce-vue": "^4.0.0",
