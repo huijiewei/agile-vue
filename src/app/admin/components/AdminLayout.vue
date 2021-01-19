@@ -19,7 +19,7 @@
     </aside>
     <section class="ag-layout">
       <header class="ag-header">
-        <header-nav :is-collapsed="isCollapsed" :current-user='' />
+        <header-nav :is-collapsed="isCollapsed" :current-user="currentUser" />
         <header-tab></header-tab>
       </header>
       <main class="ag-main">
@@ -81,6 +81,10 @@ export default {
       return store.getters['tabs/getCached']
     })
 
+    const currentUser = computed(() => {
+      return store.getters['auth/getCurrentUser']
+    })
+
     provide('reload', async () => {
       const cacheNames = [route.name]
 
@@ -103,6 +107,7 @@ export default {
       isRouterAlive,
       isCollapsed,
       cachedTabs,
+      currentUser,
     }
   },
 }

@@ -64,11 +64,11 @@
 
 <script>
 import AgAvatar from '../../../shared/components/Avatar'
-import AuthService from '@admin/services/AuthService'
 import Breadcrumb from '@admin/components/Breadcrumb'
 import { useStore } from 'vuex'
-import { computed, inject, getCurrentInstance } from 'vue'
-import { useRouter } from 'vue-router'
+import { inject, getCurrentInstance } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useHttpClient } from '@shared/plugins/HttpClient'
 
 export default {
   name: 'HeaderNav',
@@ -83,9 +83,11 @@ export default {
       default: null,
     },
   },
-  setup(props) {
+  setup() {
     const store = useStore()
     const router = useRouter()
+    const httpClient = useHttpClient()
+    const route = useRoute()
 
     const { ctx } = getCurrentInstance()
 
@@ -96,7 +98,7 @@ export default {
     }
 
     const logout = async () => {
-      const { data } = await AuthService.logout()
+      const { data } = await httpClient.post('auth/logout', null, null, false)
 
       if (data) {
         await store.dispatch('auth/logout')
@@ -108,7 +110,7 @@ export default {
           onClose: () => {
             router.push({
               path: '/login',
-              query: { direct: this.$route.fullPath },
+              query: { direct: route.fullPath },
             })
           },
         })
@@ -129,7 +131,7 @@ export default {
       }
 
       if (command === 'userRefresh') {
-        const { data } = await AuthService.account()
+        const { data } = await httpClient.get('auth/account', null, false)
 
         if (data) {
           await store.dispatch('auth/account', data)

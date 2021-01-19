@@ -1,13 +1,11 @@
 <template>
   <el-form
-    ref="loginForm"
+    ref="loginFormRef"
     :model="loginForm"
-    @submit.prevent="login('loginForm')"
+    :rules="loginFromRules"
+    @submit.prevent="loginSubmit()"
   >
-    <el-form-item
-      prop="account"
-      :rules="[{ required: true, message: '请输入帐号', trigger: 'blur' }]"
-    >
+    <el-form-item prop="account" :error="loginFormError.account">
       <el-input
         v-model.trim="loginForm.account"
         placeholder="手机号码或者电子邮箱"
@@ -15,10 +13,7 @@
         prefix-icon="el-icon-user"
       />
     </el-form-item>
-    <el-form-item
-      prop="password"
-      :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]"
-    >
+    <el-form-item prop="password" :error="loginFormError.password">
       <el-input
         v-model.trim="loginForm.password"
         placeholder="密码"
@@ -26,11 +21,7 @@
         prefix-icon="el-icon-lock"
       />
     </el-form-item>
-    <el-form-item
-      v-if="captcha"
-      prop="captcha"
-      :rules="[{ required: true, message: '请输入验证码', trigger: 'blur' }]"
-    >
+    <el-form-item v-if="captcha" prop="captcha" :error="loginFormError.captcha">
       <el-input
         class="uppercase"
         v-model.trim="loginForm.captcha"
@@ -64,110 +55,128 @@
 </template>
 
 <script>
-import AuthService from '@admin/services/AuthService'
-import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
-import OpenService from '@admin/services/OpenService'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { reactive, ref } from 'vue'
+import { ElNotification } from 'element-plus'
+import { useStore } from 'vuex'
+import { useFormError } from '@admin/hooks/useFormError'
 
 export default {
   name: 'LoginForm',
-  mixins: [UnprocessableEntityHttpErrorMixin],
   props: {
     inModal: {
       type: Boolean,
     },
   },
   emits: ['submit'],
-  data() {
-    return {
-      submitLoading: false,
-      loginForm: {
-        account: '',
-        password: '',
-        captcha: '',
-      },
-      captcha: null,
+  setup() {
+    const httpClient = useHttpClient()
+
+    const store = useStore()
+
+    const { getViolation, handleViolation } = useFormError()
+
+    const submitLoading = ref(false)
+    const captcha = ref(null)
+    const loginForm = reactive({
+      account: '',
+      password: '',
+      captcha: '',
+    })
+    const loginFormError = reactive({})
+    const loginFormRef = ref(null)
+
+    const loginFromRules = reactive({
+      account: [{ required: true, message: '请输入帐号', trigger: 'blur' }],
+      password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+      captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+    })
+
+    const updateCaptcha = async () => {
+      const { data } = await httpClient.get('open/captcha', null, false, true)
+
+      captcha.value = data
+      loginForm.captcha = ''
     }
-  },
-  methods: {
-    async updateCaptcha() {
-      const { data } = await OpenService.captcha()
 
-      this.captcha = data
-      this.loginForm.captcha = ''
-    },
-    removeCaptcha() {
-      this.captcha = null
-      this.loginForm.captcha = ''
-    },
-    login(formName) {
-      this.$refs[formName].validate(async (valid) => {
-        if (!valid) {
-          return false
-        }
+    const removeCaptcha = () => {
+      captcha.value = null
+      loginForm.captcha = ''
+    }
 
-        this.submitLoading = true
+    const loginSubmit = async () => {
+      const valid = await loginFormRef.value.validate()
 
-        let loginForm
+      if (!valid) {
+        return false
+      }
 
-        if (this.captcha) {
-          // eslint-disable-next-line no-new-func
-          const captchaProcess = new Function('captcha', this.captcha.process)
+      submitLoading.value = true
 
-          loginForm = Object.assign({}, this.loginForm, {
-            captcha: captchaProcess(this.loginForm.captcha),
+      let loginFormData
+
+      if (captcha.value) {
+        // eslint-disable-next-line no-new-func
+        const captchaProcess = new Function('captcha', captcha.value.process)
+
+        loginFormData = Object.assign({}, loginForm, {
+          captcha: captchaProcess(loginForm.captcha),
+        })
+      } else {
+        loginFormData = loginForm
+      }
+
+      const { data, error } = await httpClient.post(
+        'auth/login',
+        loginFormData,
+        null,
+        false
+      )
+
+      if (data) {
+        await store.dispatch('auth/login', data)
+
+        ElNotification.success({
+          title: data.message,
+          message: '欢迎光临 Agile 管理系统',
+          duration: 2000,
+        })
+
+        this.$emit('on-success')
+      }
+
+      if (error) {
+        let violations = getViolation(error)
+
+        if (violations) {
+          const violationCaptcha = violations.find((violation) => {
+            return violation.field.split('.').pop() === 'captcha'
           })
-        } else {
-          loginForm = this.loginForm
-        }
 
-        const { data, error } = await AuthService.login(loginForm)
-
-        if (data) {
-          await this.$store.dispatch('auth/login', data)
-
-          this.$notify.success({
-            title: data.message,
-            message: '欢迎光临 Agile 管理系统',
-            duration: 2000,
-          })
-
-          this.$emit('on-success')
-        }
-
-        if (error) {
-          if (
-            error &&
-            error.response &&
-            error.response.status &&
-            error.response.status === 422
-          ) {
-            let violations
-
-            if (Array.isArray(error.response.data.violations)) {
-              violations = error.response.data.violations
-            }
-
-            if (Array.isArray(error.response.data)) {
-              violations = error.response.data
-            }
-
-            const violationCaptcha = violations.find((violation) => {
-              return violation.field.split('.').pop() === 'captcha'
-            })
-
-            if (violationCaptcha) {
-              await this.updateCaptcha()
-            } else {
-              this.removeCaptcha()
-            }
+          if (violationCaptcha) {
+            await updateCaptcha()
+          } else {
+            removeCaptcha()
           }
-
-          this.handleViolationError(error, formName)
         }
 
-        this.submitLoading = false
-      })
-    },
+        handleViolation(violations, loginFormError)
+      }
+
+      submitLoading.value = false
+    }
+
+    return {
+      submitLoading,
+      loginForm,
+      loginFromRules,
+      loginFormRef,
+      loginFormError,
+      captcha,
+      updateCaptcha,
+      removeCaptcha,
+      loginSubmit,
+    }
   },
 }
 </script>

@@ -6,7 +6,11 @@
 </template>
 
 <script>
+import { getCurrentInstance, provide } from 'vue'
 import LoginModal from '@admin/components/LoginModal'
+import { useSplash } from '@shared/hooks/useSplash'
+import { useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
 
 let lastErrorMessage = ''
 let lastLoginAction = ''
@@ -15,7 +19,6 @@ export default {
   name: 'App',
   components: { LoginModal },
   storeSubscribe: null,
-  spinnerTimeout: null,
   computed: {
     loginModalShowed: function () {
       return !this.isLogin
@@ -88,48 +91,45 @@ export default {
         })
       }
     },
-    async historyBack(route = null, force = false, closeTab = false) {
-      if (closeTab) {
-        const next = await this.$store.dispatch('tabs/close', {
-          name: this.$route.name,
-          path: this.$route.path,
-        })
+  },
+  setup() {
+    useSplash()
 
-        this.routerBack(route ? route : next, force)
-      } else {
-        this.routerBack(route, force)
-      }
-    },
-    routerBack(route = null, force = false) {
-      if ((!force || route === null) && this.$routerHistory.hasPrevious()) {
-        this.$router.replace(this.$routerHistory.previous())
-      } else {
-        if (route == null) {
-          route = { path: '/home' }
-        } else if (typeof route === 'string') {
-          route = { path: route }
+    const store = useStore()
+    const route = useRoute()
+    const router = useRouter()
+
+    const { ctx } = getCurrentInstance()
+
+    provide(
+      'historyBack',
+      async (to = null, force = false, closeTab = false) => {
+        if (closeTab) {
+          const next = await store.dispatch('tabs/close', {
+            name: route.name,
+            path: route.path,
+          })
+
+          if (to == null) {
+            to = next
+          }
         }
 
-        this.$router.replace(route)
+        if ((!force || to === null) && ctx.$routerHistory.hasPrevious()) {
+          await router.replace(ctx.$routerHistory.previous())
+        } else {
+          if (to == null) {
+            to = { path: '/home' }
+          } else if (typeof to === 'string') {
+            to = { path: to }
+          }
+
+          await router.replace(to)
+        }
       }
-    },
-  },
-  provide() {
-    return {
-      historyBack: this.historyBack,
-    }
+    )
   },
   mounted() {
-    document.body.classList.add('ag')
-
-    this.spinnerTimeout = setTimeout(() => {
-      const spinner = document.getElementById('spinner')
-
-      if (spinner) {
-        spinner.remove()
-      }
-    }, 500)
-
     this.storeSubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === 'TOGGLE_ERROR') {
         this.showErrorMessage(mutation.payload)
@@ -141,10 +141,6 @@ export default {
     })
   },
   unmounted() {
-    if (this.spinnerTimeout) {
-      clearTimeout(this.spinnerTimeout)
-    }
-
     if (this.storeSubscribe) {
       this.storeSubscribe()
     }
