@@ -53,6 +53,7 @@ app.use(DeleteDialog, {
   MessageBox: ElementPlus.MessageBox,
 })
 
+/*
 app.mixin({
   data: function () {
     return {
@@ -61,7 +62,7 @@ app.mixin({
     }
   },
 })
-
+*/
 app.use(store)
 app.use(router)
 app.mount('#root')

@@ -1,30 +1,38 @@
 <template>
-  <el-form
-    ref="loginFormRef"
-    :model="loginForm"
-    :rules="loginFromRules"
-    @submit.prevent="loginSubmit()"
-  >
-    <el-form-item prop="account" :error="loginFormError.account">
+  <el-form ref="formRef" :model="form" @submit.prevent="submit()">
+    <el-form-item
+      prop="account"
+      :error="errors.account"
+      :rules="[{ required: true, message: '请输入帐号', trigger: 'blur' }]"
+    >
       <el-input
-        v-model.trim="loginForm.account"
+        v-model.trim="form.account"
         placeholder="手机号码或者电子邮箱"
         type="text"
         prefix-icon="el-icon-user"
       />
     </el-form-item>
-    <el-form-item prop="password" :error="loginFormError.password">
+    <el-form-item
+      prop="password"
+      :error="errors.password"
+      :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]"
+    >
       <el-input
-        v-model.trim="loginForm.password"
+        v-model.trim="form.password"
         placeholder="密码"
         type="password"
         prefix-icon="el-icon-lock"
       />
     </el-form-item>
-    <el-form-item v-if="captcha" prop="captcha" :error="loginFormError.captcha">
+    <el-form-item
+      v-if="captcha"
+      prop="captcha"
+      :error="errors.captcha"
+      :rules="[{ required: true, message: '请输入验证码', trigger: 'blur' }]"
+    >
       <el-input
         class="uppercase"
-        v-model.trim="loginForm.captcha"
+        v-model.trim="form.captcha"
         placeholder="验证码"
         type="text"
         auto-complete="off"
@@ -46,7 +54,7 @@
         type="primary"
         :style="{ width: '100%' }"
         native-type="submit"
-        :loading="submitLoading"
+        :loading="loading"
       >
         确 定
       </el-button>
@@ -56,10 +64,10 @@
 
 <script>
 import { useHttpClient } from '@shared/plugins/HttpClient'
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { ElNotification } from 'element-plus'
 import { useStore } from 'vuex'
-import { useFormError } from '@admin/hooks/useFormError'
+import { useForm } from '@shared/hooks/useForm'
 
 export default {
   name: 'LoginForm',
@@ -74,66 +82,15 @@ export default {
 
     const store = useStore()
 
-    const { getViolation, handleViolation } = useFormError()
-
-    const submitLoading = ref(false)
-    const captcha = ref(null)
-    const loginForm = reactive({
-      account: '',
-      password: '',
-      captcha: '',
-    })
-    const loginFormError = reactive({})
-    const loginFormRef = ref(null)
-
-    const loginFromRules = reactive({
-      account: [{ required: true, message: '请输入帐号', trigger: 'blur' }],
-      password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-      captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
-    })
-
-    const updateCaptcha = async () => {
-      const { data } = await httpClient.get('open/captcha', null, false, true)
-
-      captcha.value = data
-      loginForm.captcha = ''
-    }
-
-    const removeCaptcha = () => {
-      captcha.value = null
-      loginForm.captcha = ''
-    }
-
-    const loginSubmit = async () => {
-      const valid = await loginFormRef.value.validate()
-
-      if (!valid) {
-        return false
-      }
-
-      submitLoading.value = true
-
-      let loginFormData
-
-      if (captcha.value) {
-        // eslint-disable-next-line no-new-func
-        const captchaProcess = new Function('captcha', captcha.value.process)
-
-        loginFormData = Object.assign({}, loginForm, {
-          captcha: captchaProcess(loginForm.captcha),
-        })
-      } else {
-        loginFormData = loginForm
-      }
-
-      const { data, error } = await httpClient.post(
-        'auth/login',
-        loginFormData,
-        null,
-        false
-      )
-
-      if (data) {
+    const { loading, form, errors, submit } = useForm({
+      data: { account: '', password: '', captcha: '' },
+      validator: async () => {
+        return await formRef.value.validate()
+      },
+      onSubmit: async (data) => {
+        return await httpClient.post('auth/login', data, null, false)
+      },
+      onSuccess: async (data) => {
         await store.dispatch('auth/login', data)
 
         ElNotification.success({
@@ -142,40 +99,52 @@ export default {
           duration: 2000,
         })
 
-        this.$emit('on-success')
-      }
-
-      if (error) {
-        let violations = getViolation(error)
-
-        if (violations) {
-          const violationCaptcha = violations.find((violation) => {
-            return violation.field.split('.').pop() === 'captcha'
-          })
-
-          if (violationCaptcha) {
-            await updateCaptcha()
-          } else {
-            removeCaptcha()
-          }
+        // this.$emit('on-success')
+      },
+      onError: async (errors) => {
+        if (errors.captcha) {
+          await updateCaptcha()
+        } else {
+          removeCaptcha()
         }
+      },
+      beforeSubmit: (data) => {
+        if (captcha.value) {
+          // eslint-disable-next-line no-new-func
+          const captchaProcess = new Function('captcha', captcha.value.process)
 
-        handleViolation(violations, loginFormError)
-      }
+          return Object.assign({}, data, {
+            captcha: captchaProcess(data.captcha),
+          })
+        }
+        return data
+      },
+    })
 
-      submitLoading.value = false
+    const captcha = ref(null)
+    const formRef = ref()
+
+    const updateCaptcha = async () => {
+      const { data } = await httpClient.get('open/captcha', null, false, true)
+
+      captcha.value = data
+      form.captcha = ''
+    }
+
+    const removeCaptcha = () => {
+      captcha.value = null
+      form.captcha = ''
     }
 
     return {
-      submitLoading,
-      loginForm,
-      loginFromRules,
-      loginFormRef,
-      loginFormError,
+      submit,
+      loading,
+      form,
+      errors,
+      formRef,
       captcha,
       updateCaptcha,
       removeCaptcha,
-      loginSubmit,
     }
   },
 }

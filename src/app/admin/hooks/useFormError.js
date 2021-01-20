@@ -26,31 +26,25 @@ export function useFormError() {
     return violations
   }
 
-  const handleViolation = (violations, formError) => {
-    clearViolation(formError)
-
+  const handleViolation = (violations, formRef) => {
     if (violations == null) {
       return
     }
 
+    console.log(formRef.value.$slots.default())
+
     violations.forEach((violation) => {
       const violationField = violation.field.split('.').pop()
-
-      formError[violationField] = violation.message
     })
   }
 
-  const handleViolationError = (error, formError) => {
+  const handleViolationError = (error, formRef) => {
     let violations = getViolation(error)
 
-    handleViolation(violations, formError)
+    handleViolation(violations, formRef)
   }
 
-  const clearViolation = (formError) => {
-    Object.keys(formError).forEach((key) => {
-      delete formError[key]
-    })
-  }
+  const clearViolation = (formRef) => {}
 
   return {
     getViolation,
