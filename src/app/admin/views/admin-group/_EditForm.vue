@@ -92,8 +92,8 @@
 <script>
 import MiscService from '@admin/services/MiscService'
 import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
-import AuthService from '@admin/services/AuthService'
 import SameWidth from '../../../../shared/directives/SameWidth'
+import AuthService from '@admin/services/AuthService'
 
 export default {
   directives: {

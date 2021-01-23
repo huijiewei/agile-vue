@@ -46,11 +46,11 @@
 import PrefectScrollbar from '../../../shared/components/PrefectScrollbar'
 import HeaderNav from '@admin/components/HeaderNav'
 import SiderMenu from '@admin/components/SiderMenu'
-import AuthService from '@admin/services/AuthService'
 import HeaderTab from '@admin/components/HeaderTab'
 import { provide, ref, nextTick, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+import { useAuthService } from '@admin/services/useAuthService'
 
 export default {
   name: 'AdminLayout',
@@ -58,11 +58,12 @@ export default {
   setup() {
     const store = useStore()
     const route = useRoute()
+    const authService = useAuthService()
 
     const isRouterAlive = ref(true)
 
     const loadAccount = async () => {
-      const { data } = await AuthService.account()
+      const { data } = await authService.account()
 
       if (data) {
         await store.dispatch('auth/account', data)

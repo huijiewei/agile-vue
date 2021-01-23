@@ -68,6 +68,7 @@ import { ref, toRaw } from 'vue'
 import { ElNotification } from 'element-plus'
 import { useStore } from 'vuex'
 import { useForm } from '@shared/hooks/useForm'
+import { useAuthService } from '@admin/services/useAuthService'
 
 export default {
   name: 'LoginForm',
@@ -78,7 +79,7 @@ export default {
   },
   emits: ['submit'],
   setup(props, { emit }) {
-    const httpClient = useHttpClient()
+    const authService = useAuthService()
 
     const store = useStore()
 
@@ -120,12 +121,7 @@ export default {
           })
         }
 
-        const { data, error } = await httpClient.post(
-          'auth/login',
-          formData,
-          null,
-          false
-        )
+        const { data, error } = await authService.login(formData)
 
         if (data) {
           await store.dispatch('auth/login', data)

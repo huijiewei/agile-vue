@@ -66,9 +66,10 @@
 import AgAvatar from '../../../shared/components/Avatar'
 import Breadcrumb from '@admin/components/Breadcrumb'
 import { useStore } from 'vuex'
-import { inject, getCurrentInstance } from 'vue'
+import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useAuthService } from '@admin/services/useAuthService'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'HeaderNav',
@@ -86,10 +87,8 @@ export default {
   setup() {
     const store = useStore()
     const router = useRouter()
-    const httpClient = useHttpClient()
     const route = useRoute()
-
-    const { ctx } = getCurrentInstance()
+    const authService = useAuthService()
 
     const handleRefresh = inject('reload')
 
@@ -98,12 +97,12 @@ export default {
     }
 
     const logout = async () => {
-      const { data } = await httpClient.post('auth/logout', null, null, false)
+      const { data } = await authService.logout()
 
       if (data) {
         await store.dispatch('auth/logout')
 
-        ctx.$message({
+        ElMessage({
           type: 'success',
           duration: 1000,
           message: data.message,
@@ -131,7 +130,7 @@ export default {
       }
 
       if (command === 'userRefresh') {
-        const { data } = await httpClient.get('auth/account', null, false)
+        const { data } = await authService.account()
 
         if (data) {
           await store.dispatch('auth/account', data)
