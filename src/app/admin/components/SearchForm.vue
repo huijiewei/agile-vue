@@ -82,9 +82,7 @@ export default {
   },
   emits: ['submit', 'reset'],
   inject: ['reload'],
-  setup(props) {
-
-  },
+  setup(props) {},
   data() {
     return {
       formModel: {},

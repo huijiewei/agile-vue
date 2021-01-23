@@ -15,39 +15,39 @@
 
 <script>
 import AdminForm from '@admin/views/admin/_EditForm'
-import AdminService from '@admin/services/AdminService'
-import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
+import { reactive, inject } from 'vue'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
+import { useHttpClient } from '@shared/plugins/HttpClient'
 
 export default {
   name: 'AdminCreate',
   components: { PlaceholderForm, AdminForm },
-  data() {
-    return {
-      pageTitle: '新建管理员',
-      admin: null,
-    }
-  },
-  inject: ['historyBack'],
-  created() {
-    this.admin = {
+  setup() {
+    const pageTitle = '新建管理员'
+    const admin = reactive({
       phone: '',
       email: '',
       name: '',
       avatar: '',
-      adminGroup: { id: null },
-    }
-  },
-  methods: {
-    async createAdmin(admin, done, fail, always) {
-      const { data, error } = await AdminService.create(admin)
+      adminGroupId: 0,
+    })
+
+    const store = useStore()
+    const historyBack = inject('historyBack')
+    const httpClient = useHttpClient()
+
+    const createAdmin = async (admin, done, fail, always) => {
+      const { data, error } = await httpClient.post('admins', admin)
 
       if (data) {
         done()
 
-        this.$message.success('新建管理员成功')
+        ElMessage.success('新建管理员成功')
 
-        await this.$store.dispatch('tabs/deleteCache', 'Admin')
-        await this.historyBack('/admin', true, true)
+        await store.dispatch('tabs/deleteCache', 'Admin')
+        await historyBack('/admin', true, true)
       }
 
       if (error) {
@@ -55,7 +55,13 @@ export default {
       }
 
       always()
-    },
+    }
+
+    return {
+      pageTitle,
+      admin,
+      createAdmin,
+    }
   },
 }
 </script>

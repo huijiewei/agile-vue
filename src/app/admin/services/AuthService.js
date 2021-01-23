@@ -2,7 +2,7 @@ import { useHttpClient } from '@shared/plugins/HttpClient'
 
 const AuthService = {
   login(credentials) {
-    return useHttpClient().post('auth/login', credentials, null, false)
+    return useHttpClient().post('auth/login', credentials)
   },
   logout() {
     return useHttpClient().post('auth/logout', null, null, false)

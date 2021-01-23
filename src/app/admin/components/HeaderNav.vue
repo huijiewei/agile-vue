@@ -68,8 +68,8 @@ import Breadcrumb from '@admin/components/Breadcrumb'
 import { useStore } from 'vuex'
 import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthService } from '@admin/services/useAuthService'
 import { ElMessage } from 'element-plus'
+import { useHttpClient } from '@shared/plugins/HttpClient'
 
 export default {
   name: 'HeaderNav',
@@ -88,7 +88,7 @@ export default {
     const store = useStore()
     const router = useRouter()
     const route = useRoute()
-    const authService = useAuthService()
+    const httpClient = useHttpClient()
 
     const handleRefresh = inject('reload')
 
@@ -97,7 +97,7 @@ export default {
     }
 
     const logout = async () => {
-      const { data } = await authService.logout()
+      const { data } = await httpClient.post('auth/logout')
 
       if (data) {
         await store.dispatch('auth/logout')
@@ -130,7 +130,7 @@ export default {
       }
 
       if (command === 'userRefresh') {
-        const { data } = await authService.account()
+        const { data } = await httpClient.get('auth/account', null, false)
 
         if (data) {
           await store.dispatch('auth/account', data)

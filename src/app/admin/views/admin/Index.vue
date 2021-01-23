@@ -6,7 +6,7 @@
           :disabled="!$can('admin/create')"
           type="primary"
           size="medium"
-          @click="handleAdminCreate()"
+          @click="adminCreate()"
         >
           新建管理员
         </el-button>
@@ -52,7 +52,7 @@
             plain
             type="primary"
             size="mini"
-            @click="handleAdminEdit(scope.row)"
+            @click="adminEdit(scope.row)"
           >
             编辑
           </el-button>
@@ -61,7 +61,7 @@
             plain
             type="danger"
             size="mini"
-            @click="handleAdminDelete(scope.row)"
+            @click="adminDelete(scope.row)"
           >
             删除
           </el-button>
@@ -72,64 +72,78 @@
 </template>
 
 <script>
-import AdminService from '@admin/services/AdminService'
 import AgAvatar from '../../../../shared/components/Avatar'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRouter } from 'vue-router'
+import { useDeleteDialog } from '@admin/hooks/useDeleteDialog'
+import { ElMessage } from 'element-plus'
+import { ref } from 'vue'
 
 export default {
   name: 'Admin',
   components: { AgAvatar },
   emits: ['click'],
-  data() {
-    return {
-      loading: true,
-      admins: [],
-    }
-  },
-  async created() {
-    const { data } = await AdminService.all()
+  setup() {
+    const httpClient = useHttpClient()
+    const router = useRouter()
+    const { deleteDialog } = useDeleteDialog()
 
-    if (data) {
-      this.admins = Object.freeze(data.items)
+    const loading = ref(true)
+    const admins = ref([])
+
+    const loadAdmins = async () => {
+      const { data } = await httpClient.get('admins')
+
+      if (data) {
+        admins.value = Object.freeze(data.items)
+      }
+
+      loading.value = false
     }
 
-    this.loading = false
-  },
-  methods: {
-    handleAdminCreate() {
-      this.$router.push({
-        path: '/admin/create',
-      })
-    },
-    handleAdminEdit(admin) {
-      this.$router.push({
-        path: `/admin/edit/${admin.id}`,
-      })
-    },
-    handleAdminDelete(admin) {
-      this.$deleteDialog({
+    loadAdmins()
+
+    const adminCreate = () => {
+      router.push('/admin/create')
+    }
+
+    const adminEdit = (admin) => {
+      router.push(`/admin/edit/${admin.id}`)
+    }
+
+    const adminDelete = (admin) => {
+      deleteDialog({
         message: `输入管理员电话 <strong>${admin.phone}</strong> 以确认删除`,
         promptLabel: '管理员电话',
         promptValue: admin.phone,
         callback: async () => {
-          this.loading = true
+          loading.value = true
 
-          const { data } = await AdminService.delete(admin.id)
+          const { data } = await httpClient.delete('admins/' + admin.id)
 
           if (data) {
-            this.admins = Object.freeze(
-              this.admins.filter((item) => item.id !== admin.id)
+            admins.value = Object.freeze(
+              admins.value.filter((item) => item.id !== admin.id)
             )
 
-            this.$message({
+            ElMessage({
               type: 'success',
               message: data.message,
             })
           }
 
-          this.loading = false
+          loading.value = false
         },
       })
-    },
+    }
+
+    return {
+      loading,
+      admins,
+      adminCreate,
+      adminEdit,
+      adminDelete,
+    }
   },
 }
 </script>

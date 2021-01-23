@@ -38,13 +38,13 @@
             <span
               v-if="preview"
               class="el-upload-list__item-preview"
-              @click="handlePreview(file.url)"
+              @click="onPreview(file.url)"
             >
               <i class="el-icon-zoom-in" />
             </span>
             <span
               class="el-upload-list__item-delete"
-              @click="handleRemove(file.url)"
+              @click="onRemove(file.url)"
             >
               <i class="el-icon-delete" />
             </span>
@@ -83,13 +83,13 @@
             <span
               v-if="preview"
               class="el-upload-list__item-preview"
-              @click="handlePreview(files.url)"
+              @click="onPreview(files.url)"
             >
               <i class="el-icon-zoom-in" />
             </span>
             <span
               class="el-upload-list__item-delete"
-              @click="handleRemove(files.url)"
+              @click="onRemove(files.url)"
             >
               <i class="el-icon-delete" />
             </span>
@@ -98,21 +98,17 @@
       </template>
     </ul>
     <el-upload
-      :disabled="buttonDisabled"
+      :disabled="loading"
       :action="option.url"
       :accept="option.typesLimit.map((type) => '.' + type).join(', ')"
       :multiple="false"
       :show-file-list="false"
       :http-request="httpRequest"
-      :before-upload="handleBeforeUpload"
-      :on-success="handleSuccess"
-      :on-error="handleError"
+      :before-upload="onBeforeUpload"
+      :on-success="onSuccess"
+      :on-error="onError"
     >
-      <el-button
-        :disabled="buttonDisabled"
-        size="mini"
-        plain
-        icon="el-icon-upload"
+      <el-button :disabled="loading" size="mini" plain icon="el-icon-upload"
         >点击上传</el-button
       >
     </el-upload>
@@ -142,6 +138,9 @@
 <script>
 import Upload from '../../../../shared/utils/upload'
 import ImageCropper from '@admin/components/ImageCropper'
+import { ref, reactive, onBeforeUnmount, computed } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'Upload',
@@ -182,161 +181,41 @@ export default {
       default: '',
     },
   },
-  model: {
-    prop: 'value',
-    event: 'change',
-  },
-  data() {
-    return {
-      box: { width: 'auto', height: '32px' },
-      timer: null,
-      option: Upload.defaultOption(),
-      buttonDisabled: true,
-      uploadFiles: this.multiple ? [] : null,
-      cropperImage: null,
-      dialogVisible: false,
-      dialogImageUrl: '',
-    }
-  },
-  computed: {
-    files: function () {
-      if (this.multiple) {
-        return this.value.map((url) => {
-          return {
-            name: this.getFilename(url),
-            url: url,
-          }
-        })
-      } else {
-        return {
-          name: this.getFilename(this.value),
-          url: this.value,
+  setup(props) {
+    const httpClient = useHttpClient()
+
+    const box = props.preview
+      ? {
+          width: props.preview[0] - 2 + 'px',
+          height: props.preview[0] - 2 + 'px',
         }
-      }
-    },
-  },
-  async mounted() {
-    if (this.preview) {
-      this.box = {
-        width: this.preview[0] - 2 + 'px',
-        height: this.preview[1] - 2 + 'px',
-      }
-    }
+      : { width: 'auto', height: '32px' }
 
-    await this.updateOption()
-  },
-  beforeUnmount() {
-    this.destroyTimer()
-  },
-  methods: {
-    destroyTimer() {
-      if (this.timer) {
-        clearTimeout(this.timer)
-        this.timer = null
-      }
-    },
+    const loading = ref(true)
 
-    getFilename(url) {
+    let timer = null
+    let option = reactive(Upload.defaultOption())
+    let cropperImage = reactive(null)
+    let uploadFiles = ref(props.multiple ? [] : null)
+
+    const getFileName = (url) => {
       if (!url || url.length === 0) {
         return ''
       }
 
       return url.split('/').pop().split('#').shift().split('?').shift()
-    },
+    }
 
-    async updateOption() {
-      this.destroyTimer()
-
-      this.buttonDisabled = true
-
-      const { data } = await this.$http.get(
-        this.action,
-        { thumbs: this.thumbs, cropper: this.cropper.enable },
-        false
-      )
-
-      if (data) {
-        this.option = data
-        this.buttonDisabled = false
-
-        if (data.timeout && data.timeout > 0) {
-          this.timer = setTimeout(this.updateOption, data.timeout * 1000)
-        }
-      }
-    },
-
-    updateFiles(upload) {
-      const file = this.getThumbFile(upload, this.defaultThumb)
-
-      if (this.multiple) {
-        this.uploadFiles.push(file)
-      } else {
-        this.uploadFiles = file
-      }
-
-      this.$emit('on-upload-success', upload)
-
-      this.updateValue()
-    },
-
-    updateValue() {
-      this.$emit('change', this.uploadFiles)
-    },
-
-    httpRequest(option) {
-      this.buttonDisabled = true
-
-      Upload.upload(
-        option.action,
-        this.option,
-        option.file,
-        option.onSuccess,
-        option.onError
-      )
-    },
-
-    humanFileSize(size) {
+    const humanFileSize = (size) => {
       const i = Math.floor(Math.log(size) / Math.log(1024))
       return (
         (size / Math.pow(1024, i)).toFixed(2) * 1 +
         ' ' +
         ['B', 'kB', 'MB', 'GB', 'TB'][i]
       )
-    },
+    }
 
-    handleBeforeUpload(file) {
-      const sizeLimit = this.option.sizeLimit
-      if (file.size > sizeLimit) {
-        this.$message({
-          type: 'error',
-          message:
-            '你选择的文件大小超出上传限制:' + this.humanFileSize(sizeLimit),
-          duration: 1500,
-        })
-
-        return false
-      }
-
-      return true
-    },
-
-    handleSuccess(upload) {
-      this.buttonDisabled = false
-
-      if (upload.original) {
-        if (
-          this.cropper.enable &&
-          this.option.cropUrl &&
-          this.option.cropUrl.length > 0
-        ) {
-          this.cropperImage = upload.original
-        } else {
-          this.updateFiles(upload)
-        }
-      }
-    },
-
-    getThumbFile(upload, thumb) {
+    const getThumbFile = (upload, thumb) => {
       if (thumb !== '' && Array.isArray(upload.thumbs)) {
         const file = upload.thumbs.find((uploadThumb) => {
           return uploadThumb.thumb === thumb
@@ -348,43 +227,180 @@ export default {
       }
 
       return upload.original
-    },
+    }
 
-    handleError(message) {
-      this.buttonDisabled = false
+    const destroyTimer = () => {
+      if (timer) {
+        window.clearTimeout(timer)
+        timer = null
+      }
+    }
 
-      this.$message({
+    const updateOption = async () => {
+      destroyTimer()
+
+      loading.value = true
+
+      const { data } = await httpClient.get(
+        props.action,
+        { thumbs: props.thumbs, cropper: props.cropper.enable },
+        false
+      )
+
+      if (data) {
+        option = data
+        loading.value = false
+
+        if (data.timeout && data.timeout > 0) {
+          timer = window.setTimeout(updateOption, data.timeout * 1000)
+        }
+      }
+    }
+
+    const httpRequest = (option) => {
+      loading.value = true
+
+      Upload.upload(
+        option.action,
+        option,
+        option.file,
+        option.onSuccess,
+        option.onError
+      )
+    }
+
+    updateOption()
+
+    onBeforeUnmount(() => {
+      destroyTimer()
+    })
+
+    const onSuccess = (upload) => {
+      loading.value = false
+
+      if (upload.original) {
+        if (
+          props.cropper.enable &&
+          option.cropUrl &&
+          option.cropUrl.length > 0
+        ) {
+          cropperImage = upload.original
+        } else {
+          updateFiles(upload)
+        }
+      }
+    }
+
+    const onError = (error) => {
+      loading.value = false
+
+      ElMessage({
         type: 'error',
-        message: message,
+        message: error,
         duration: 1500,
       })
-    },
+    }
 
-    handleRemove(file) {
-      if (Array.isArray(this.uploadFiles)) {
-        this.uploadFiles = this.uploadFiles.filter((uploadFile) => {
+    const onPreview = (url) => {
+      dialogImageUrl.value = url
+      dialogVisible.value = true
+    }
+
+    const onImageCropperSuccess = (data) => {
+      cropperImage = null
+      this.updateFiles(data)
+    }
+
+    const onImageCropperCancel = () => {
+      cropperImage = null
+    }
+
+    const onRemove = (file) => {
+      if (Array.isArray(uploadFiles.value)) {
+        uploadFiles.value = uploadFiles.value.filter((uploadFile) => {
           return uploadFile !== file
         })
       } else {
-        this.uploadFiles = ''
+        uploadFiles.value = null
       }
 
-      this.updateValue()
-    },
+      updateValue()
+    }
 
-    handlePreview(file) {
-      this.dialogImageUrl = file
-      this.dialogVisible = true
-    },
+    const files = computed(() => {
+      if (props.multiple) {
+        return props.value.map((url) => {
+          return {
+            name: getFileName(url),
+            url: url,
+          }
+        })
+      } else {
+        return {
+          name: getFileName(props.value),
+          url: props.value,
+        }
+      }
+    })
 
-    handleImageCropperSuccess(data) {
-      this.cropperImage = null
-      this.updateFiles(data)
-    },
+    const updateValue = () => {
+      emit('change', uploadFiles.value)
+    }
 
-    handleImageCropperCancel() {
-      this.cropperImage = null
-    },
+    const updateFiles = (upload) => {
+      const file = getThumbFile(upload, props.defaultThumb)
+
+      if (props.multiple) {
+        uploadFiles.value.push(file)
+      } else {
+        uploadFiles.value = file
+      }
+
+      emit('on-upload-success', upload)
+
+      updateValue()
+    }
+
+    const onBeforeUpload = (file) => {
+      const sizeLimit = option.sizeLimit
+      if (file.size > sizeLimit) {
+        ElMessage({
+          type: 'error',
+          message:
+            '你选择的文件大小超出上传限制:' + this.humanFileSize(sizeLimit),
+          duration: 1500,
+        })
+
+        return false
+      }
+
+      return true
+    }
+
+    const dialogVisible = ref(false)
+    const dialogImageUrl = ref('')
+
+    return {
+      box,
+      option,
+      loading,
+      httpRequest,
+      onSuccess,
+      onError,
+      onRemove,
+      onPreview,
+      onBeforeUpload,
+      onImageCropperSuccess,
+      onImageCropperCancel,
+      files,
+      updateFiles,
+      dialogVisible,
+      dialogImageUrl,
+    }
+  },
+  model: {
+    prop: 'value',
+    event: 'change',
   },
 }
 </script>

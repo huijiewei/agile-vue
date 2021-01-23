@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import { ref, computed, nextTick, inject, watch } from 'vue'
+import { computed, inject, nextTick, ref } from 'vue'
 import { useStore } from 'vuex'
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 
@@ -258,12 +258,10 @@ export default {
       handleScroll(delta)
     }
 
-    const handleContextMenu = (tab, idx, event) => {
+    const handleContextMenu = (tab, idx) => {
       const elem = tabRefs.value[idx]
 
-      const left = elem.offsetLeft + elem.offsetWidth / 2
-
-      contextMenuLeft.value = left
+      contextMenuLeft.value = elem.offsetLeft + elem.offsetWidth / 2
       contextMenuTop.value = elem.offsetHeight + 9
 
       contextMenuTab.value = tab

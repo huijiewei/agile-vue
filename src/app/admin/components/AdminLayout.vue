@@ -50,7 +50,7 @@ import HeaderTab from '@admin/components/HeaderTab'
 import { provide, ref, nextTick, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import { useAuthService } from '@admin/services/useAuthService'
+import { useHttpClient } from '@shared/plugins/HttpClient'
 
 export default {
   name: 'AdminLayout',
@@ -58,12 +58,12 @@ export default {
   setup() {
     const store = useStore()
     const route = useRoute()
-    const authService = useAuthService()
+    const httpClient = useHttpClient()
 
     const isRouterAlive = ref(true)
 
     const loadAccount = async () => {
-      const { data } = await authService.account()
+      const { data } = await httpClient.get('auth/account', null, false)
 
       if (data) {
         await store.dispatch('auth/account', data)
