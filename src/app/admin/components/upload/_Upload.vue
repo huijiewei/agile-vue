@@ -108,14 +108,19 @@
       :on-success="onSuccess"
       :on-error="onError"
     >
-      <el-button :disabled="loading" size="mini" plain icon="el-icon-upload"
+      <el-button
+        native-type="button"
+        :disabled="loading"
+        size="mini"
+        plain
+        icon="el-icon-upload"
         >点击上传</el-button
       >
     </el-upload>
     <el-dialog
       append-to-body
       class="image-view-dialog"
-      v-model:visible="dialogVisible"
+      :visible="dialogVisible"
       center
     >
       <img class="image-view" :src="dialogImageUrl" alt="" />
@@ -129,8 +134,8 @@
       :crop-url="option.cropUrl"
       :aspect-ratio="cropper.aspectRatio"
       :cropper-size="cropper.size"
-      @on-cancel="handleImageCropperCancel"
-      @on-success="handleImageCropperSuccess"
+      @on-cancel="onImageCropperCancel"
+      @on-success="onImageCropperSuccess"
     />
   </div>
 </template>
@@ -138,13 +143,49 @@
 <script>
 import Upload from '../../../../shared/utils/upload'
 import ImageCropper from '@admin/components/ImageCropper'
-import { ref, reactive, onBeforeUnmount, computed } from 'vue'
+import { ref, onBeforeUnmount, onBeforeMount, computed } from 'vue'
 import { useHttpClient } from '@shared/plugins/HttpClient'
 import { ElMessage } from 'element-plus'
 
 export default {
   name: 'Upload',
   components: { ImageCropper },
+  props: {
+    value: {
+      type: [Array, String],
+      default: null,
+    },
+    action: {
+      type: String,
+      default: '',
+    },
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
+    preview: {
+      type: Array,
+      default: null,
+    },
+    cropper: {
+      type: Object,
+      default: function () {
+        return {
+          enable: false,
+          aspectRatio: 1,
+          size: [200, 200],
+        }
+      },
+    },
+    thumbs: {
+      type: Array,
+      default: null,
+    },
+    defaultThumb: {
+      type: String,
+      default: '',
+    },
+  },
   setup(props) {
     const httpClient = useHttpClient()
 
@@ -158,8 +199,8 @@ export default {
     const loading = ref(true)
 
     let timer = null
-    let option = reactive(Upload.defaultOption())
-    let cropperImage = reactive(null)
+    let option = ref(Upload.defaultOption())
+    let cropperImage = ref(null)
     let uploadFiles = ref(props.multiple ? [] : null)
 
     const getFileName = (url) => {
@@ -212,7 +253,7 @@ export default {
       )
 
       if (data) {
-        option = data
+        option.value = data
         loading.value = false
 
         if (data.timeout && data.timeout > 0) {
@@ -221,19 +262,21 @@ export default {
       }
     }
 
-    const httpRequest = (option) => {
+    const httpRequest = (opt) => {
       loading.value = true
 
       Upload.upload(
-        option.action,
-        option,
-        option.file,
-        option.onSuccess,
-        option.onError
+        opt.action,
+        option.value,
+        opt.file,
+        opt.onSuccess,
+        opt.onError
       )
     }
 
-    updateOption()
+    onBeforeMount(async () => {
+      await updateOption()
+    })
 
     onBeforeUnmount(() => {
       destroyTimer()
@@ -245,10 +288,11 @@ export default {
       if (upload.original) {
         if (
           props.cropper.enable &&
-          option.cropUrl &&
-          option.cropUrl.length > 0
+          option.value.cropUrl &&
+          option.value.cropUrl.length > 0
         ) {
-          cropperImage = upload.original
+          console.log(1)
+          cropperImage.value = upload.original
         } else {
           updateFiles(upload)
         }
@@ -271,12 +315,12 @@ export default {
     }
 
     const onImageCropperSuccess = (data) => {
-      cropperImage = null
+      cropperImage.value = null
       this.updateFiles(data)
     }
 
     const onImageCropperCancel = () => {
-      cropperImage = null
+      cropperImage.value = null
     }
 
     const onRemove = (file) => {
@@ -302,7 +346,7 @@ export default {
       } else {
         return {
           name: getFileName(props.value),
-          url: props.value,
+          url: props.value || '',
         }
       }
     })
@@ -326,12 +370,11 @@ export default {
     }
 
     const onBeforeUpload = (file) => {
-      const sizeLimit = option.sizeLimit
+      const sizeLimit = option.value.sizeLimit
       if (file.size > sizeLimit) {
         ElMessage({
           type: 'error',
-          message:
-            '你选择的文件大小超出上传限制:' + this.humanFileSize(sizeLimit),
+          message: '你选择的文件大小超出上传限制:' + humanFileSize(sizeLimit),
           duration: 1500,
         })
 
@@ -345,7 +388,6 @@ export default {
     const dialogImageUrl = ref('')
 
     return {
-      preview: props.perview,
       box,
       option,
       loading,
@@ -361,6 +403,7 @@ export default {
       updateFiles,
       dialogVisible,
       dialogImageUrl,
+      cropperImage,
     }
   },
   model: {
