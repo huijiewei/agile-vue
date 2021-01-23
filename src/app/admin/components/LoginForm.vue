@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="formRef" :model="form" @submit.prevent="submit()">
+  <el-form ref="formRef" :model="form" @submit.prevent="handleSubmit(onSubmit)">
     <el-form-item
       prop="account"
       :error="errors.account"
@@ -64,7 +64,7 @@
 
 <script>
 import { useHttpClient } from '@shared/plugins/HttpClient'
-import { ref } from 'vue'
+import { ref, toRaw } from 'vue'
 import { ElNotification } from 'element-plus'
 import { useStore } from 'vuex'
 import { useForm } from '@shared/hooks/useForm'
@@ -77,48 +77,15 @@ export default {
     },
   },
   emits: ['submit'],
-  setup() {
+  setup(props, { emit }) {
     const httpClient = useHttpClient()
 
     const store = useStore()
 
-    const { loading, form, errors, submit } = useForm({
-      data: { account: '', password: '', captcha: '' },
-      validator: async () => {
-        return await formRef.value.validate()
-      },
-      onSubmit: async (data) => {
-        return await httpClient.post('auth/login', data, null, false)
-      },
-      onSuccess: async (data) => {
-        await store.dispatch('auth/login', data)
-
-        ElNotification.success({
-          title: data.message,
-          message: '欢迎光临 Agile 管理系统',
-          duration: 2000,
-        })
-
-        // this.$emit('on-success')
-      },
-      onError: async (errors) => {
-        if (errors.captcha) {
-          await updateCaptcha()
-        } else {
-          removeCaptcha()
-        }
-      },
-      beforeSubmit: (data) => {
-        if (captcha.value) {
-          // eslint-disable-next-line no-new-func
-          const captchaProcess = new Function('captcha', captcha.value.process)
-
-          return Object.assign({}, data, {
-            captcha: captchaProcess(data.captcha),
-          })
-        }
-        return data
-      },
+    const { loading, form, errors, setErrors, handleSubmit } = useForm({
+      account: '',
+      password: '',
+      captcha: '',
     })
 
     const captcha = ref(null)
@@ -136,8 +103,57 @@ export default {
       form.captcha = ''
     }
 
+    const onSubmit = () => {
+      formRef.value.validate(async (valid) => {
+        if (!valid) {
+          return
+        }
+
+        let formData = toRaw(form)
+
+        if (captcha.value) {
+          // eslint-disable-next-line no-new-func
+          const captchaProcess = new Function('captcha', captcha.value.process)
+
+          formData = Object.assign({}, formData, {
+            captcha: captchaProcess(formData.captcha),
+          })
+        }
+
+        const { data, error } = await httpClient.post(
+          'auth/login',
+          formData,
+          null,
+          false
+        )
+
+        if (data) {
+          await store.dispatch('auth/login', data)
+
+          ElNotification.success({
+            title: data.message,
+            message: '欢迎光临 Agile 管理系统',
+            duration: 2000,
+          })
+
+          emit('on-success')
+        }
+
+        if (error) {
+          await setErrors(error)
+
+          if (errors.captcha) {
+            await updateCaptcha()
+          } else {
+            removeCaptcha()
+          }
+        }
+      })
+    }
+
     return {
-      submit,
+      handleSubmit,
+      onSubmit,
       loading,
       form,
       errors,

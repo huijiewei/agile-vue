@@ -1,44 +1,17 @@
-import { reactive, ref, toRaw } from 'vue'
+import { reactive, ref, nextTick } from 'vue'
 
-export function useForm(
-  options = {
-    data: {},
-    validator: null,
-    onSubmit: null,
-    onSuccess: null,
-    onError: null,
-    beforeSubmit: null,
-  }
-) {
-  const defaults = JSON.parse(JSON.stringify(options.data))
-
+export function useForm(data = {}) {
+  const form = reactive(data)
   const errors = reactive({})
-  const form = reactive(options.data)
   const loading = ref(false)
-
-  const reset = (...fields) => {
-    if (fields.length === 0) {
-      Object.assign(form, defaults)
-    } else {
-      Object.assign(
-        form,
-        Object.keys(defaults)
-          .filter((key) => fields.includes(key))
-          .reduce((carry, key) => {
-            carry[key] = defaults[key]
-            return carry
-          }, {})
-      )
-    }
-  }
 
   const clearErrors = () => {
     Object.keys(errors).forEach((key) => {
-      delete errors[key]
+      errors[key] = ''
     })
   }
 
-  const setErrors = (error) => {
+  const setErrors = async (error) => {
     clearErrors()
 
     if (
@@ -64,41 +37,17 @@ export function useForm(
       return
     }
 
+    await nextTick()
+
     violations.forEach((violation) => {
       errors[violation.field.split('.').pop()] = violation.message
     })
   }
 
-  const submit = async () => {
-    if (options.validator) {
-      const valid = await options.validator()
-
-      if (!valid) {
-        return
-      }
-    }
-
+  const handleSubmit = async (onSubmit) => {
     loading.value = true
 
-    let rawData = toRaw(form)
-
-    if (options.beforeSubmit) {
-      rawData = options.beforeSubmit(rawData)
-    }
-
-    const { data, error } = await options.onSubmit(rawData)
-
-    if (data && options.onSuccess) {
-      options.onSuccess(data)
-    }
-
-    if (error) {
-      setErrors(error)
-
-      if (options.onError) {
-        options.onError(errors)
-      }
-    }
+    await onSubmit()
 
     loading.value = false
   }
@@ -107,7 +56,7 @@ export function useForm(
     form,
     errors,
     loading,
-    reset,
-    submit,
+    setErrors,
+    handleSubmit,
   }
 }

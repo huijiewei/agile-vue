@@ -8,7 +8,7 @@
           </div>
           <h3>管理员登陆</h3>
         </div>
-        <login-form @on-success="loginSuccess" />
+        <login-form @on-success="onSuccess" />
       </div>
     </div>
   </div>
@@ -16,18 +16,26 @@
 
 <script>
 import LoginForm from '@admin/components/LoginForm'
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
   name: 'Login',
   components: { LoginForm },
-  methods: {
-    loginSuccess() {
-      if (this.$router.currentRoute.query.direct) {
-        this.$router.replace(this.$router.currentRoute.query.direct)
+  setup() {
+    const router = useRouter()
+    const route = useRoute()
+
+    const onSuccess = async () => {
+      if (route.query.direct) {
+        await router.replace(route.query.direct)
       } else {
-        this.$router.replace('/home')
+        await router.replace('/home')
       }
-    },
+    }
+
+    return {
+      onSuccess,
+    }
   },
 }
 </script>
