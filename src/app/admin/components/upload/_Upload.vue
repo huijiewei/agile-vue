@@ -145,42 +145,6 @@ import { ElMessage } from 'element-plus'
 export default {
   name: 'Upload',
   components: { ImageCropper },
-  props: {
-    value: {
-      type: [Array, String],
-      default: null,
-    },
-    action: {
-      type: String,
-      default: '',
-    },
-    multiple: {
-      type: Boolean,
-      default: false,
-    },
-    preview: {
-      type: Array,
-      default: null,
-    },
-    cropper: {
-      type: Object,
-      default: function () {
-        return {
-          enable: false,
-          aspectRatio: 1,
-          size: [200, 200],
-        }
-      },
-    },
-    thumbs: {
-      type: Array,
-      default: null,
-    },
-    defaultThumb: {
-      type: String,
-      default: '',
-    },
-  },
   setup(props) {
     const httpClient = useHttpClient()
 
@@ -381,6 +345,7 @@ export default {
     const dialogImageUrl = ref('')
 
     return {
+      preview: props.perview,
       box,
       option,
       loading,
