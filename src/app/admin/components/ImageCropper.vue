@@ -1,11 +1,13 @@
 <template>
   <el-dialog
-    width="900"
+    width="70%"
     :custom-class="'image-cropper-dialog'"
     :model-value="true"
     :show-close="false"
-    center
-    append-to-body
+    :center="true"
+    :append-to-body="true"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
   >
     <vue-cropper
       ref="cropperRef"
@@ -20,16 +22,18 @@
       :auto-crop-area="0.6"
       :min-crop-box-width="cropperSize[0] * 2"
       :min-crop-box-height="cropperSize[1] * 2"
-      @ready="onReady"
+      :ready="onReady"
       :img-style="{ width: '100%' }"
       alt="Source Image"
     />
-    <span class="dialog-footer">
-      <el-button @click="onCancel">取 消</el-button>
-      <el-button :disabled="loading" type="primary" @click="onSubmit"
-        >确 定</el-button
-      >
-    </span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="onCancel">取 消</el-button>
+        <el-button :disabled="loading" type="primary" @click="onSubmit"
+          >确 定</el-button
+        >
+      </div>
+    </template>
   </el-dialog>
 </template>
 

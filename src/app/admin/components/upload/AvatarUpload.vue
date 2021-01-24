@@ -1,34 +1,35 @@
 <template>
   <image-upload
     :multiple="false"
-    :value="value"
+    v-model="value"
     :thumbs="['200x200']"
     :default-thumb="'200x200'"
     :cropper="{ enable: true }"
-    @change="handleChange"
   />
 </template>
 
 <script>
 import ImageUpload from '@admin/components/upload/ImageUpload'
+import { computed } from 'vue'
 
 export default {
   name: 'AvatarUpload',
   components: { ImageUpload },
   props: {
-    value: {
+    modelValue: {
       type: [Array, String],
       default: null,
     },
   },
-  model: {
-    prop: 'value',
-    event: 'change',
-  },
-  methods: {
-    handleChange(files) {
-      this.$emit('change', files)
-    },
+  setup(props, { emit }) {
+    const value = computed({
+      get: () => props.modelValue,
+      set: (value) => emit('update:modelValue', value),
+    })
+
+    return {
+      value,
+    }
   },
 }
 </script>

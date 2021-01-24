@@ -1,10 +1,6 @@
 <template>
   <div v-show="options">
-    <el-select
-      :disabled="disabled"
-      :value="value"
-      v-bind="$attrs"
-    >
+    <el-select :disabled="disabled" v-model="value" v-bind="$attrs">
       <el-option
         v-for="option in options"
         :key="option[optionValue]"
@@ -24,10 +20,12 @@
 </template>
 
 <script>
+import { computed, ref } from 'vue'
+
 export default {
   name: 'RemoteSelect',
   props: {
-    value: {
+    modelValue: {
       required: true,
     },
     disabled: Boolean,
@@ -43,20 +41,27 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      options: null,
-    }
-  },
-  created() {
-    this.loadOptions()
-  },
-  methods: {
-    loadOptions() {
-      this.remoteMethod((options) => {
-        this.options = options
+  setup(props, { emit }) {
+    const options = ref(null)
+
+    const loadOptions = async () => {
+      props.remoteMethod((data) => {
+        options.value = data
       })
-    },
+    }
+
+    const value = computed({
+      get: () => props.modelValue,
+      set: (value) => emit('update:modelValue', value),
+    })
+
+    loadOptions()
+
+    return {
+      value,
+      options,
+      loadOptions,
+    }
   },
 }
 </script>

@@ -2,20 +2,20 @@
   <upload
     :action="'misc/file-upload-option'"
     :multiple="multiple"
-    :value="value"
-    @change="handleChange"
-    @on-upload-success="handleUploadSuccess"
+    v-model="value"
+    @on-upload-success="onSuccess"
   />
 </template>
 
 <script>
 import Upload from '@admin/components/upload/_Upload'
+import { computed } from 'vue'
 
 export default {
   name: 'FileUpload',
   components: { Upload },
   props: {
-    value: {
+    modelValue: {
       type: [Array, String],
       default: null,
     },
@@ -28,14 +28,21 @@ export default {
     prop: 'value',
     event: 'change',
   },
-  methods: {
-    handleChange(value) {
-      this.$emit('change', value)
-    },
+  emits: ['change', 'on-upload-success'],
+  setup(props, { emit }) {
+    const value = computed({
+      get: () => props.modelValue,
+      set: (value) => emit('update:modelValue', value),
+    })
 
-    handleUploadSuccess(upload) {
-      this.$emit('on-upload-success', upload)
-    },
+    const onSuccess = (upload) => {
+      emit('on-upload-success', upload)
+    }
+
+    return {
+      value,
+      onSuccess,
+    }
   },
 }
 </script>

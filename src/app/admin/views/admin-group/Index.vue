@@ -6,7 +6,7 @@
           :disabled="!$can('admin-group/create')"
           type="primary"
           size="medium"
-          @click="handleAdminGroupCreate()"
+          @click="adminGroupCreate()"
         >
           新建管理组
         </el-button>
@@ -22,7 +22,7 @@
             plain
             type="primary"
             size="mini"
-            @click="handleAdminGroupEdit(scope.row)"
+            @click="adminGroupEdit(scope.row)"
           >
             编辑
           </el-button>
@@ -31,7 +31,7 @@
             plain
             type="danger"
             size="mini"
-            @click="handleAdminGroupDelete(scope.row)"
+            @click="adminGroupDelete(scope.row)"
           >
             删除
           </el-button>
@@ -45,17 +45,23 @@
 import AdminGroupService from '@admin/services/AdminGroupService'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDeleteDialog } from '@admin/hooks/useDeleteDialog'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'AdminGroup',
-  setup(ctx) {
+  setup() {
     const router = useRouter()
+
+    const httpClient = useHttpClient()
+    const { deleteDialog } = useDeleteDialog()
 
     const loading = ref(true)
     const adminGroups = ref([])
 
     const loadAdminGroups = async () => {
-      const { data } = await AdminGroupService.all()
+      const { data } = await httpClient.get('admin-groups')
 
       if (data) {
         adminGroups.value = Object.freeze(data.items)
@@ -64,36 +70,38 @@ export default {
       loading.value = false
     }
 
-    const handleAdminGroupCreate = () => {
+    const adminGroupCreate = () => {
       router.push({ path: '/admin-group/create' })
     }
 
-    const handleAdminGroupEdit = (adminGroup) => {
+    const adminGroupEdit = (adminGroup) => {
       router.push({
         path: `/admin-group/edit/${adminGroup.id}`,
       })
     }
 
-    const handleAdminGroupDelete = (adminGroup) => {
-      ctx.root.$deleteDialog({
+    const adminGroupDelete = (adminGroup) => {
+      deleteDialog({
         message: `删除管理组 <strong>${adminGroup.name}</strong>`,
         callback: async () => {
-          this.loading = true
+          loading.value = true
 
-          const { data } = await AdminGroupService.delete(adminGroup.id)
+          const { data } = await httpClient.delete(
+            'admin-groups/' + adminGroup.id
+          )
 
           if (data) {
-            this.adminGroups = Object.freeze(
-              this.adminGroups.filter((item) => item.id !== adminGroup.id)
+            adminGroups.value = Object.freeze(
+              adminGroups.value.filter((item) => item.id !== adminGroup.id)
             )
 
-            this.$message({
+            ElMessage({
               type: 'success',
               message: data.message,
             })
           }
 
-          this.loading = false
+          loading.value = false
         },
       })
     }
@@ -103,9 +111,9 @@ export default {
     return {
       loading,
       adminGroups,
-      handleAdminGroupCreate,
-      handleAdminGroupEdit,
-      handleAdminGroupDelete,
+      adminGroupCreate,
+      adminGroupEdit,
+      adminGroupDelete,
     }
   },
 }

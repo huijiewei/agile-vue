@@ -118,12 +118,13 @@
       >
     </el-upload>
     <el-dialog
-      append-to-body
-      class="image-view-dialog"
-      :visible="dialogVisible"
-      center
+      v-if="dialogVisible"
+      :append-to-body="true"
+      :custom-class="'image-view-dialog'"
+      :model-value="dialogVisible"
+      :center="true"
     >
-      <img class="image-view" :src="dialogImageUrl" alt="" />
+      <img class="image-view" :src="dialogImageUrl" alt="Image" />
       <div>
         图片链接：<span>{{ dialogImageUrl }}</span>
       </div>
@@ -151,7 +152,7 @@ export default {
   name: 'Upload',
   components: { ImageCropper },
   props: {
-    value: {
+    modelValue: {
       type: [Array, String],
       default: null,
     },
@@ -186,7 +187,7 @@ export default {
       default: '',
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const httpClient = useHttpClient()
 
     const box = props.preview
@@ -291,7 +292,6 @@ export default {
           option.value.cropUrl &&
           option.value.cropUrl.length > 0
         ) {
-          console.log(1)
           cropperImage.value = upload.original
         } else {
           updateFiles(upload)
@@ -316,7 +316,7 @@ export default {
 
     const onImageCropperSuccess = (data) => {
       cropperImage.value = null
-      this.updateFiles(data)
+      updateFiles(data)
     }
 
     const onImageCropperCancel = () => {
@@ -335,24 +335,27 @@ export default {
       updateValue()
     }
 
-    const files = computed(() => {
-      if (props.multiple) {
-        return props.value.map((url) => {
+    const files = computed({
+      get: () => {
+        if (props.multiple) {
+          return props.modelValue.map((url) => {
+            return {
+              name: getFileName(url),
+              url: url,
+            }
+          })
+        } else {
           return {
-            name: getFileName(url),
-            url: url,
+            name: getFileName(props.modelValue),
+            url: props.modelValue || '',
           }
-        })
-      } else {
-        return {
-          name: getFileName(props.value),
-          url: props.value || '',
         }
-      }
+      },
+      set: (value) => emit('update:modelValue', value),
     })
 
     const updateValue = () => {
-      emit('change', uploadFiles.value)
+      files.value = uploadFiles.value
     }
 
     const updateFiles = (upload) => {
@@ -400,15 +403,10 @@ export default {
       onImageCropperSuccess,
       onImageCropperCancel,
       files,
-      updateFiles,
       dialogVisible,
       dialogImageUrl,
       cropperImage,
     }
-  },
-  model: {
-    prop: 'value',
-    event: 'change',
   },
 }
 </script>

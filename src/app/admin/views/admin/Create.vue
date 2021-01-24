@@ -31,7 +31,7 @@ export default {
       email: '',
       name: '',
       avatar: '',
-      adminGroupId: 0,
+      adminGroupId: null,
     })
 
     const store = useStore()

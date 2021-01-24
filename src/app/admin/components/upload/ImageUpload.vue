@@ -1,26 +1,26 @@
 <template>
   <upload
     ref="upload"
-    :value="value"
+    v-model="value"
     :action="'misc/image-upload-option'"
     :multiple="multiple"
     :preview="preview"
     :cropper="cropper"
     :thumbs="thumbs"
     :default-thumb="defaultThumb"
-    @change="handleChange"
-    @on-upload-success="handleUploadSuccess"
+    @on-upload-success="onSuccess"
   />
 </template>
 
 <script>
 import Upload from '@admin/components/upload/_Upload'
+import { computed } from 'vue'
 
 export default {
   name: 'ImageUpload',
   components: { Upload },
   props: {
-    value: {
+    modelValue: {
       type: [Array, String],
       default: null,
     },
@@ -53,22 +53,22 @@ export default {
       default: '',
     },
   },
-  model: {
-    prop: 'value',
-    event: 'change',
-  },
-  methods: {
-    handleChange(value) {
-      this.$emit('change', value)
-    },
+  setup(props, { emit }) {
+    const value = computed({
+      get: () => props.modelValue,
+      set: (value) => emit('update:modelValue', value),
+    })
 
-    handleUploadSuccess(upload) {
-      this.$emit('on-upload-success', upload)
-    },
+    const onSuccess = (upload) => {
+      emit('on-upload-success', upload)
 
-    getThumbFile(upload, thumb) {
-      return this.$refs.upload.getThumbFile(upload, thumb)
-    },
+      return true
+    }
+
+    return {
+      value,
+      onSuccess,
+    }
   },
 }
 </script>

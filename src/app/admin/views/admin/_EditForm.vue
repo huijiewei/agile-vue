@@ -36,7 +36,7 @@
         <el-input
           v-model.trim="form.password"
           type="password"
-          autocomplete="new-password"
+          autocomplete="off"
           show-password
         />
       </el-col>
@@ -54,7 +54,7 @@
         <el-input
           v-model.trim="form.passwordConfirm"
           type="password"
-          autocomplete="new-password"
+          autocomplete="off"
           show-password
         />
       </el-col>
