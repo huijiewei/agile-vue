@@ -1,21 +1,23 @@
 <template>
+  <div class="box-header">
+    <h4>{{ pageTitle }}</h4>
+  </div>
   <el-row :gutter="0" style="padding: 5px">
-    <div class="box-header">
-      <h4>{{ pageTitle }}</h4>
-    </div>
-    <shop-category-form
-      v-if="shopCategory"
-      :submit-text="pageTitle"
-      :shop-category="shopCategory"
-      :category-tree="categoryTree"
-      :category-parents="categoryParents"
-      :is-edit="true"
-      :can-submit="$can('shop-category/edit')"
-      @on-submit="editShopCategory"
-      @on-delete="deleteShopCategory"
-    >
-    </shop-category-form>
-    <placeholder-form v-else />
+    <el-col :span="24">
+      <shop-category-form
+        v-if="shopCategory"
+        :submit-text="pageTitle"
+        :shop-category="shopCategory"
+        :category-tree="categoryTree"
+        :category-parents="categoryParents"
+        :is-edit="true"
+        :can-submit="$can('shop-category/edit')"
+        @on-submit="editShopCategory"
+        @on-delete="deleteShopCategory"
+      >
+      </shop-category-form>
+      <placeholder-form v-else />
+    </el-col>
   </el-row>
 </template>
 

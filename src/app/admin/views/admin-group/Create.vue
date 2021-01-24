@@ -15,36 +15,37 @@
 
 <script>
 import AdminGroupForm from '@admin/views/admin-group/_EditForm'
-import AdminGroupService from '@admin/services/AdminGroupService'
-import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
+import { inject, reactive } from 'vue'
+import { useStore } from 'vuex'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'AdminGroupCreate',
   components: { PlaceholderForm, AdminGroupForm },
-  data() {
-    return {
-      pageTitle: '新建管理组',
-      adminGroup: null,
-    }
-  },
-  created() {
-    this.adminGroup = {
+  setup() {
+    const pageTitle = '新建管理组'
+
+    const adminGroup = reactive({
       name: '',
       permissions: [],
-    }
-  },
-  inject: ['historyBack'],
-  methods: {
-    async createAdminGroup(adminGroup, done, fail, always) {
-      const { data, error } = await AdminGroupService.create(adminGroup)
+    })
+
+    const store = useStore()
+    const historyBack = inject('historyBack')
+    const httpClient = useHttpClient()
+
+    const createAdminGroup = async (adminGroup, done, fail, always) => {
+      const { data, error } = await httpClient.post('admin-groups', adminGroup)
 
       if (data) {
         done()
 
-        this.$message.success('新建管理组成功')
+        ElMessage.success('新建管理组成功')
 
-        await this.$store.dispatch('tabs/deleteCache', 'AdminGroup')
-        await this.historyBack('/admin-group', true, true)
+        await store.dispatch('tabs/deleteCache', 'AdminGroup')
+        await historyBack('/admin-group', true, true)
       }
 
       if (error) {
@@ -52,7 +53,13 @@ export default {
       }
 
       always()
-    },
+    }
+
+    return {
+      pageTitle,
+      adminGroup,
+      createAdminGroup,
+    }
   },
 }
 </script>

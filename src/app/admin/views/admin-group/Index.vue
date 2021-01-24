@@ -42,8 +42,7 @@
 </template>
 
 <script>
-import AdminGroupService from '@admin/services/AdminGroupService'
-import { ref } from 'vue'
+import { ref, onBeforeMount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDeleteDialog } from '@admin/hooks/useDeleteDialog'
 import { useHttpClient } from '@shared/plugins/HttpClient'
@@ -106,7 +105,9 @@ export default {
       })
     }
 
-    loadAdminGroups()
+    onBeforeMount(async () => {
+      await loadAdminGroups()
+    })
 
     return {
       loading,

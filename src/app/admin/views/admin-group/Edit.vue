@@ -8,7 +8,7 @@
       :submit-text="pageTitle"
       :admin-group="adminGroup"
       :is-edit="true"
-      @on-submit="edit"
+      @on-submit="editAdminGroup"
     />
     <placeholder-form v-else :rows="3" />
   </div>
@@ -16,42 +16,39 @@
 
 <script>
 import AdminGroupForm from '@admin/views/admin-group/_EditForm'
-import AdminGroupService from '@admin/services/AdminGroupService'
-import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
+import { inject, ref, onBeforeMount } from 'vue'
+import { useStore } from 'vuex'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { ElMessage } from 'element-plus'
+import { useRoute } from 'vue-router'
 
 export default {
   name: 'AdminGroupEdit',
   components: { PlaceholderForm, AdminGroupForm },
-  data() {
-    return {
-      pageTitle: '编辑管理组',
-      adminGroup: null,
-    }
-  },
-  inject: ['historyBack'],
-  async created() {
-    await this.view(this.$route.params.id)
-  },
-  methods: {
-    async view(id) {
-      this.adminGroup = null
+  setup() {
+    const pageTitle = '编辑管理组'
 
-      const { data } = await AdminGroupService.view(id)
+    const adminGroup = ref(null)
 
-      if (data) {
-        this.adminGroup = data
-      }
-    },
-    async edit(adminGroup, done, fail, always) {
-      const { data, error } = await AdminGroupService.edit(adminGroup)
+    const route = useRoute()
+    const store = useStore()
+    const historyBack = inject('historyBack')
+    const httpClient = useHttpClient()
+
+    const editAdminGroup = async (adminGroup, done, fail, always) => {
+      const { data, error } = await httpClient.put(
+        'admin-groups/' + adminGroup.id,
+        adminGroup
+      )
 
       if (data) {
         done()
 
-        this.$message.success('管理组编辑成功')
+        ElMessage.success('管理组编辑成功')
 
-        await this.$store.dispatch('tabs/deleteCache', 'AdminGroup')
-        await this.historyBack('/admin-group', false, true)
+        await store.dispatch('tabs/deleteCache', 'AdminGroup')
+        await historyBack('/admin-group', false, true)
       }
 
       if (error) {
@@ -59,7 +56,21 @@ export default {
       }
 
       always()
-    },
+    }
+
+    onBeforeMount(async () => {
+      const { data } = await httpClient.get('admin-groups/' + route.params.id)
+
+      if (data) {
+        adminGroup.value = data
+      }
+    })
+
+    return {
+      pageTitle,
+      adminGroup,
+      editAdminGroup,
+    }
   },
 }
 </script>

@@ -1,14 +1,15 @@
 <template>
   <el-form
-    ref="formModel"
-    :model="formModel"
+    ref="formRef"
+    :model="form"
     label-width="100px"
     label-suffix="："
-    @submit.stop.prevent="handleFormSubmit('formModel')"
+    @submit.stop.prevent="handleSubmit(onSubmit)"
   >
     <el-form-item
       label="名称"
       prop="name"
+      :error="errors.name"
       :rules="[
         { required: true, message: '请输入管理组名称', trigger: 'blur' },
         {
@@ -20,7 +21,7 @@
       ]"
     >
       <el-col :md="9">
-        <el-input v-model.trim="formModel.name" />
+        <el-input v-model.trim="form.name" />
       </el-col>
     </el-form-item>
     <el-form-item label="权限" prop="permissions">
@@ -35,14 +36,14 @@
               v-model="group.checkAll"
               :label="group.name"
               :indeterminate="group.checkIndeterminate"
-              @change="handleCheckAclAllChange(group)"
+              @change="onCheckAclAllChange(group)"
             />
           </div>
           <div class="cgb-body">
             <el-checkbox-group
               v-model="group.checkedPermissions"
               v-same-width="'el-checkbox'"
-              @change="handleCheckedPermissionGroupChange(group)"
+              @change="onCheckedPermissionGroupChange(group)"
             >
               <template v-for="(child, childIndex) in group.children">
                 <el-checkbox
@@ -51,8 +52,7 @@
                   :label="child.actionId"
                   :disabled="checkboxDisabled.includes(child.actionId)"
                   @change="
-                    (checked) =>
-                      handleCheckedPermissionItemChange(checked, child)
+                    (checked) => onCheckedPermissionItemChange(checked, child)
                   "
                 >
                   {{ child.name }}
@@ -69,7 +69,7 @@
                     :disabled="checkboxDisabled.includes(checkbox.actionId)"
                     @change="
                       (checked) =>
-                        handleCheckedPermissionItemChange(checked, checkbox)
+                        onCheckedPermissionItemChange(checked, checkbox)
                     "
                   >
                     {{ checkbox.name }}
@@ -82,7 +82,7 @@
       </div>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" native-type="submit" :loading="submitLoading">
+      <el-button type="primary" native-type="submit" :loading="loading">
         {{ submitText }}
       </el-button>
     </el-form-item>
@@ -90,16 +90,16 @@
 </template>
 
 <script>
-import MiscService from '@admin/services/MiscService'
-import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
-import SameWidth from '../../../../shared/directives/SameWidth'
-import AuthService from '@admin/services/AuthService'
+import SameWidth from '@shared/directives/SameWidth'
+import { useStore } from 'vuex'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useForm } from '@shared/hooks/useForm'
+import { ref, toRaw, onBeforeMount } from 'vue'
 
 export default {
   directives: {
     sameWidth: SameWidth,
   },
-  mixins: [UnprocessableEntityHttpErrorMixin],
   props: {
     submitText: {
       type: String,
@@ -114,118 +114,63 @@ export default {
       default: null,
     },
   },
-  emits: ['submit'],
-  data() {
-    return {
-      submitLoading: false,
-      formModel: null,
-      permissions: [],
-      checkboxDisabled: [],
-    }
-  },
-  async created() {
-    this.formModel = Object.assign({}, this.adminGroup)
+  setup(props, { emit }) {
+    const store = useStore()
+    const httpClient = useHttpClient()
 
-    const { data } = await MiscService.adminGroupPermissions()
+    const { loading, form, errors, setErrors, handleSubmit } = useForm(
+      props.adminGroup
+    )
 
-    const permissions = this.formModel.permissions || []
-    const result = []
+    const formRef = ref()
+    const permissions = ref([])
+    const checkboxDisabled = ref([])
 
-    data.forEach((permission) => {
-      const group = {
-        name: permission.name,
-        checkAll: false,
-        checkIndeterminate: false,
-        checkedPermissions: [],
-        permissionsCount: 0,
-        children: permission.children,
-      }
-
-      permission.children.forEach((child) => {
-        if (child.children) {
-          child.children.forEach((item) => {
-            group.permissionsCount++
-            if (permissions.includes(item.actionId)) {
-              group.checkedPermissions.push(item.actionId)
-              this.disableCombinesCheckbox(item)
-            }
-          })
-        } else {
-          group.permissionsCount++
-          if (permissions.includes(child.actionId)) {
-            group.checkedPermissions.push(child.actionId)
-            this.disableCombinesCheckbox(child)
-          }
-        }
-      })
-
-      const checkedCount = group.checkedPermissions.length
-
-      group.checkAll = group.permissionsCount === checkedCount
-      group.checkIndeterminate =
-        checkedCount > 0 && checkedCount < group.permissionsCount
-
-      result.push(group)
-    })
-
-    this.permissions = result
-  },
-  methods: {
-    disableCombinesCheckbox(item) {
-      if (!item.combines || item.combines.length === 0) {
-        return
-      }
-
-      item.combines.forEach((combine) => {
-        if (!this.checkboxDisabled.includes(combine)) {
-          this.checkboxDisabled.push(combine)
-        }
-      })
-    },
-    handleFormSubmit(formName) {
-      this.$refs[formName].validate((valid) => {
+    const onSubmit = async () => {
+      formRef.value.validate((valid) => {
         if (!valid) {
           return false
         }
 
-        this.submitLoading = true
+        loading.value = true
 
-        const permissions = []
+        const checkedPermissions = []
 
-        this.permissions.forEach((group) => {
+        permissions.value.forEach((group) => {
           group.checkedPermissions.forEach((permission) => {
-            permissions.push(permission)
+            checkedPermissions.push(permission)
           })
         })
 
-        this.formModel.permissions = permissions
+        const formData = { ...toRaw(form), permissions: checkedPermissions }
 
-        this.$emit(
+        emit(
           'on-submit',
-          this.formModel,
+          formData,
           async () => {
-            this.$refs[formName].clearValidate()
+            formRef.value.clearValidate()
             if (
-              this.adminGroup.id ===
-              this.$store.getters['auth/getCurrentUser'].adminGroup.id
+              props.adminGroup.id ===
+              store.getters['auth/getCurrentUser'].adminGroup.id
             ) {
-              const { data } = await AuthService.account()
+              const { data } = await httpClient.get('auth/account', null, false)
 
               if (data) {
-                await this.$store.dispatch('auth/account', data)
+                await store.dispatch('auth/account', data)
               }
             }
           },
-          (error) => {
-            this.handleViolationError(error, formName)
+          async (error) => {
+            await setErrors(error)
           },
           () => {
-            this.submitLoading = false
+            loading.value = false
           }
         )
       })
-    },
-    handleCheckAclAllChange(group) {
+    }
+
+    const onCheckAclAllChange = (group) => {
       group.checkIndeterminate = false
 
       if (group.checkAll === true) {
@@ -241,41 +186,41 @@ export default {
       } else {
         group.checkedPermissions = []
       }
-    },
-    handleCheckedPermissionGroupChange(group) {
+    }
+
+    const onCheckedPermissionGroupChange = (group) => {
       const checkedCount = group.checkedPermissions.length
 
       group.checkAll = group.permissionsCount === checkedCount
       group.checkIndeterminate =
         checkedCount > 0 && checkedCount < group.permissionsCount
-    },
-    handleCheckedPermissionItemChange(checked, item) {
+    }
+
+    const onCheckedPermissionItemChange = (checked, item) => {
       if (!item.combines || item.combines.length === 0) {
         return
       }
 
       if (!checked) {
         item.combines.forEach((combine) => {
-          const matchIndex = this.checkboxDisabled.findIndex(
+          const matchIndex = checkboxDisabled.value.findIndex(
             (checkbox) => checkbox === combine
           )
 
           if (matchIndex > -1) {
-            this.checkboxDisabled.splice(matchIndex, 1)
+            checkboxDisabled.value.splice(matchIndex, 1)
           }
         })
 
         return
       }
 
-      const permissions = this.permissions
-
       item.combines.forEach((combine) => {
-        if (!this.checkboxDisabled.includes(combine)) {
-          this.checkboxDisabled.push(combine)
+        if (!checkboxDisabled.value.includes(combine)) {
+          checkboxDisabled.value.push(combine)
         }
 
-        permissions.forEach((group) => {
+        permissions.value.forEach((group) => {
           if (group.children && group.children.length > 0) {
             group.children.every((child) => {
               if (
@@ -309,7 +254,86 @@ export default {
           }
         })
       })
-    },
+    }
+
+    const disableCombinesCheckbox = (item) => {
+      if (!item.combines || item.combines.length === 0) {
+        return
+      }
+
+      item.combines.forEach((combine) => {
+        if (!checkboxDisabled.value.includes(combine)) {
+          checkboxDisabled.value.push(combine)
+        }
+      })
+    }
+
+    const loadPermissions = async () => {
+      const groupPermissions = props.adminGroup.permissions || []
+
+      const { data } = await httpClient.get(
+        'misc/admin-group-permissions',
+        null,
+        false
+      )
+
+      if (data) {
+        data.forEach((permission) => {
+          const group = {
+            name: permission.name,
+            checkAll: false,
+            checkIndeterminate: false,
+            checkedPermissions: [],
+            permissionsCount: 0,
+            children: permission.children,
+          }
+
+          permission.children.forEach((child) => {
+            if (child.children) {
+              child.children.forEach((item) => {
+                group.permissionsCount++
+                if (groupPermissions.includes(item.actionId)) {
+                  group.checkedPermissions.push(item.actionId)
+                  disableCombinesCheckbox(item)
+                }
+              })
+            } else {
+              group.permissionsCount++
+              if (groupPermissions.includes(child.actionId)) {
+                group.checkedPermissions.push(child.actionId)
+                disableCombinesCheckbox(child)
+              }
+            }
+          })
+
+          const checkedCount = group.checkedPermissions.length
+
+          group.checkAll = group.permissionsCount === checkedCount
+          group.checkIndeterminate =
+            checkedCount > 0 && checkedCount < group.permissionsCount
+
+          permissions.value.push(group)
+        })
+      }
+    }
+
+    onBeforeMount(async () => {
+      await loadPermissions()
+    })
+
+    return {
+      loading,
+      form,
+      errors,
+      formRef,
+      handleSubmit,
+      onSubmit,
+      permissions,
+      checkboxDisabled,
+      onCheckAclAllChange,
+      onCheckedPermissionGroupChange,
+      onCheckedPermissionItemChange,
+    }
   },
 }
 </script>

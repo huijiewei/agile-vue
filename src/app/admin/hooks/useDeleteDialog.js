@@ -20,6 +20,7 @@ export function useDeleteDialog() {
           '</h3><div class="message">' +
           dialogOptions.message +
           '</div>',
+        '',
         {
           showClose: false,
           confirmButtonText: '确定',
@@ -34,11 +35,11 @@ export function useDeleteDialog() {
           },
           inputErrorMessage: dialogOptions.promptLabel + '不匹配',
         }
-      ).then((action) => {
-        if (action === 'confirm') {
+      )
+        .then((action) => {
           dialogOptions.callback()
-        }
-      })
+        })
+        .catch(() => {})
     } else {
       ElMessageBox.confirm(
         '<h3>' +
@@ -46,6 +47,7 @@ export function useDeleteDialog() {
           '</h3><div class="message">' +
           dialogOptions.message +
           '</div>',
+        '',
         {
           showClose: false,
           confirmButtonText: '确定',
@@ -55,11 +57,11 @@ export function useDeleteDialog() {
           dangerouslyUseHTMLString: true,
           center: false,
         }
-      ).then((action) => {
-        if (action === 'confirm') {
+      )
+        .then((action) => {
           dialogOptions.callback()
-        }
-      })
+        })
+        .catch(() => {})
     }
   }
 
