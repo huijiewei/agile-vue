@@ -64,7 +64,6 @@
         </el-tree>
         <el-tree
           v-show="!isSearched"
-          :loading="loading"
           :highlight-current="true"
           :default-expanded-keys="districtExpanded"
           ref="treeRef"
@@ -192,11 +191,10 @@ export default {
     }
 
     const onDistrictExpanded = (expanded, currentId) => {
-      console.log(expanded, currentId)
-      //districtExpanded.value = expanded
-      //districtCurrentId.value = currentId
-      //treeRef.value.setCurrentKey(currentId)
-      //searchRef.value.setCurrentKey(currentId)
+      districtExpanded.value = expanded
+      districtCurrentId.value = currentId
+      treeRef.value.setCurrentKey(currentId)
+      searchRef.value.setCurrentKey(currentId)
     }
 
     const onDistrictUpdated = async (currentId, expandId, collapseId) => {
