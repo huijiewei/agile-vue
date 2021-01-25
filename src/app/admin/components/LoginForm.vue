@@ -76,7 +76,6 @@ export default {
       type: Boolean,
     },
   },
-  emits: ['submit'],
   setup(props, { emit }) {
     const httpClient = useHttpClient()
 

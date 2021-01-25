@@ -2,20 +2,19 @@
   <el-form
     v-if="formModel"
     :model="formModel"
-    ref="formModel"
+    ref="formRef"
     label-width="100px"
     label-suffix="："
-    @submit.stop.prevent="handleFormSubmit('formModel')"
+    @submit.prevent="handleSubmit(onSubmit)"
   >
-    <el-form-item label="所属分类" prop="parentId">
+    <el-form-item label="所属分类" prop="parentId" :error="errors.parentId">
       <el-col :md="16">
         <el-cascader
           style="width: 100%"
           placeholder="请选择上级分类"
           :options="getCategoryTree"
           :props="{ value: 'id', label: 'name', checkStrictly: true }"
-          v-model="formCategoryParents"
-          @change="handleCategoryParentsChange"
+          v-model="getCategoryParents"
         >
         </el-cascader>
       </el-col>
@@ -23,6 +22,7 @@
     <el-form-item
       label="分类名称"
       prop="name"
+      :error="errors.name"
       :rules="[
         { required: true, message: '请输入商品分类名称', trigger: 'blur' },
       ]"
@@ -31,7 +31,7 @@
         <el-input v-model.trim="formModel.name" />
       </el-col>
     </el-form-item>
-    <el-form-item label="分类图标" prop="icon">
+    <el-form-item label="分类图标" prop="icon" :error="errors.icon">
       <el-col :span="16">
         <ag-icon v-if="formModel.icon" :path="formModel.icon" />
         <el-input
@@ -42,10 +42,14 @@
         />
       </el-col>
     </el-form-item>
-    <el-form-item label="图片" prop="image">
+    <el-form-item label="图片" prop="image" :error="errors.image">
       <image-upload v-model="formModel.image" />
     </el-form-item>
-    <el-form-item label="分类介绍" prop="description">
+    <el-form-item
+      label="分类介绍"
+      prop="description"
+      :error="errors.description"
+    >
       <el-col :md="16">
         <el-input
           :autosize="{ minRows: 3, maxRows: 6 }"
@@ -59,7 +63,7 @@
         type="primary"
         :disabled="!canSubmit"
         native-type="submit"
-        :loading="submitLoading"
+        :loading="loading"
         >{{ submitText }}
       </el-button>
 
@@ -69,7 +73,7 @@
         plain
         type="danger"
         size="small"
-        @click="handleShopCategoryDelete"
+        @click="onShopCategoryDelete"
       >
         删除
       </el-button>
@@ -78,13 +82,13 @@
 </template>
 
 <script>
-import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
 import ImageUpload from '@admin/components/upload/ImageUpload'
-import AgIcon from '../../../../shared/components/Icon'
+import AgIcon from '@shared/components/Icon'
+import { useForm } from '@shared/hooks/useForm'
+import { computed, ref, toRaw } from 'vue'
 
 export default {
   components: { ImageUpload, AgIcon },
-  mixins: [UnprocessableEntityHttpErrorMixin],
   props: {
     submitText: {
       type: String,
@@ -108,64 +112,77 @@ export default {
       type: Array,
     },
   },
-  emits: ['submit', 'click'],
-  data() {
-    return {
-      submitLoading: false,
-      formModel: null,
-      formCategoryParents: [],
-    }
-  },
-  computed: {
-    getCategoryTree() {
-      this.disableCategoryInTree(this.shopCategory.id, this.categoryTree)
+  setup(props, { emit }) {
+    const { loading, form, errors, setErrors, handleSubmit } = useForm(
+      props.shopCategory
+    )
 
-      return [...[{ id: 0, name: '根分类' }], ...this.categoryTree]
-    },
-  },
-  created() {
-    this.formModel = Object.assign({}, this.shopCategory)
-    this.formCategoryParents = this.categoryParents
-  },
-  methods: {
-    disableCategoryInTree(id, tree) {
+    const formRef = ref()
+
+    const getCategoryParents = computed({
+      get: () => props.categoryParents,
+      set: (value) => {
+        console.log(value)
+        emit('update:categoryParents', value)
+        form.parentId = value[value.length - 1]
+      },
+    })
+
+    const getCategoryTree = computed(() => {
+      disableCategoryInTree(props.shopCategory.id, props.categoryTree)
+
+      return [...[{ id: 0, name: '根分类' }], ...props.categoryTree]
+    })
+
+    const disableCategoryInTree = (id, tree) => {
       tree.forEach((item) => {
-        item.disabled = this.shopCategory.id === item.id
+        item.disabled = props.shopCategory.id === item.id
 
         if (Array.isArray(item.children) && item.children.length > 0) {
-          this.disableCategoryInTree(id, item.children)
+          disableCategoryInTree(id, item.children)
         }
       })
-    },
-    handleCategoryParentsChange(value) {
-      this.formModel.parentId = value[value.length - 1]
-    },
-    handleShopCategoryDelete() {
-      this.$emit('on-delete', this.formModel)
-    },
-    handleFormSubmit(formName) {
-      this.$refs[formName].validate((valid) => {
+    }
+
+    const onShopCategoryDelete = () => {
+      emit('on-delete', toRaw(form))
+    }
+
+    const onSubmit = async () => {
+      formRef.value.validate((valid) => {
         if (!valid) {
           return false
         }
 
-        this.submitLoading = true
+        loading.value = true
 
-        this.$emit(
+        emit(
           'on-submit',
-          this.formModel,
+          toRaw(form),
           () => {
-            this.$refs[formName].clearValidate()
+            formRef.value.clearValidate()
           },
-          (error) => {
-            this.handleViolationError(error, formName)
+          async (error) => {
+            await setErrors(error)
           },
           () => {
-            this.submitLoading = false
+            loading.value = false
           }
         )
       })
-    },
+    }
+
+    return {
+      loading,
+      formModel: form,
+      errors,
+      formRef,
+      handleSubmit,
+      onSubmit,
+      getCategoryTree,
+      getCategoryParents,
+      onShopCategoryDelete,
+    }
   },
 }
 </script>

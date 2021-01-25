@@ -23,8 +23,12 @@
 
 <script>
 import ShopCategoryForm from '@admin/views/shop-category/_EditForm'
-import ShopCategoryService from '@admin/services/ShopCategoryService'
-import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
+import { ref, onBeforeMount } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRoute, onBeforeRouteUpdate, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { useDeleteDialog } from '@admin/hooks/useDeleteDialog'
 
 export default {
   name: 'ShopCategoryEdit',
@@ -34,24 +38,21 @@ export default {
       type: Array,
     },
   },
-  data() {
-    return {
-      pageTitle: '编辑商品分类',
-      shopCategory: null,
-      categoryParents: [],
-    }
-  },
-  beforeRouteUpdate(to, from, next) {
-    this.shopCategory = null
-    next()
-    this.getShopCategory(to.params.id)
-  },
-  created() {
-    this.getShopCategory(this.$route.params.id)
-  },
-  methods: {
-    async getShopCategory(id) {
-      const { data } = await ShopCategoryService.view(id)
+  emits: ['on-expanded', 'on-updated'],
+  setup(props, { emit }) {
+    const route = useRoute()
+    const router = useRouter()
+    const httpClient = useHttpClient()
+    const { deleteDialog } = useDeleteDialog()
+
+    const pageTitle = '编辑商品分类'
+    const shopCategory = ref(null)
+    const categoryParents = ref([])
+
+    const loadShopCategory = async (id) => {
+      const { data } = await httpClient.get('shop-categories/' + id, {
+        withParents: true,
+      })
 
       if (data) {
         let parents = [0]
@@ -64,24 +65,40 @@ export default {
           parents = data.parents.map((parent) => parent.id)
         }
 
-        this.categoryParents = parents
+        categoryParents.value = parents
 
-        this.$emit('on-expanded', parents, data.id)
+        emit('on-expanded', parents, data.id)
 
-        this.shopCategory = data
+        delete data.parents
+
+        shopCategory.value = data
       }
-    },
-    async editShopCategory(shopCategory, done, fail, always) {
-      const { data, error } = await ShopCategoryService.edit(shopCategory)
+    }
+
+    onBeforeRouteUpdate(async (to, from, next) => {
+      shopCategory.value = null
+      next()
+      await loadShopCategory(to.params.id)
+    })
+
+    onBeforeMount(async () => {
+      await loadShopCategory(route.params.id)
+    })
+
+    const editShopCategory = async (shopCategory, done, fail, always) => {
+      const { data, error } = await httpClient.put(
+        'shop-categories/' + shopCategory.id,
+        shopCategory
+      )
 
       if (data) {
         done()
 
-        this.$message.success('修改成功')
+        ElMessage.success('修改成功')
 
-        await this.$emit('on-updated')
+        emit('on-updated')
 
-        this.$emit(
+        emit(
           'on-expanded',
           data.parents.map((parent) => parent.id),
           data.id
@@ -93,35 +110,38 @@ export default {
       }
 
       always()
-    },
-    async deleteShopCategory(shopCategory) {
-      this.$deleteDialog({
+    }
+
+    const deleteShopCategory = async (shopCategory) => {
+      deleteDialog({
         message: `删除商品分类 <strong>${shopCategory.name}</strong>`,
         callback: async () => {
-          this.loading = true
-
-          const { data } = await ShopCategoryService.delete(shopCategory.id)
+          const { data } = await httpClient.delete(
+            'shop-categories/' + shopCategory.id
+          )
 
           if (data) {
-            this.$message.success('删除成功')
+            ElMessage.success('删除成功')
 
-            await this.$emit('on-updated')
+            await emit('on-updated')
 
-            this.$emit(
-              'on-expanded',
-              this.categoryParents,
-              shopCategory.parentId
-            )
+            emit('on-expanded', categoryParents.value, shopCategory.parentId)
 
-            await this.$router.replace({
+            await router.replace({
               path: '/shop-category',
             })
           }
-
-          this.loading = false
         },
       })
-    },
+    }
+
+    return {
+      pageTitle,
+      shopCategory,
+      categoryParents,
+      editShopCategory,
+      deleteShopCategory,
+    }
   },
 }
 </script>

@@ -16,7 +16,7 @@
             :disabled="!$can('shop-category/create')"
             title="创建根分类"
             size="mini"
-            @click="handleCategoryCreate(0)"
+            @click="categoryCreate(0)"
             icon="el-icon-folder-add"
           >
             创建根分类
@@ -30,7 +30,7 @@
           :highlight-current="true"
           :default-expanded-keys="categoryExpanded"
           :filter-node-method="filterCategoryNode"
-          ref="categoryTree"
+          ref="treeRef"
           node-key="id"
         >
           <template #default="{ data }">
@@ -44,14 +44,14 @@
               <el-button-group class="operate">
                 <el-button
                   size="mini"
-                  @click.stop="handleCategoryEdit(data)"
+                  @click.stop="categoryEdit(data)"
                   :disabled="!$can('shop-category/view')"
                   icon="el-icon-edit-outline"
                   title="查看编辑"
                 />
                 <el-button
                   size="mini"
-                  @click.stop="handleCategoryCreate(data.id)"
+                  @click.stop="categoryCreate(data.id)"
                   :disabled="!$can('shop-category/create')"
                   icon="el-icon-folder-add"
                   title="新建子分类"
@@ -63,9 +63,9 @@
       </el-col>
       <el-col :span="18">
         <router-view
-          :category-tree="this.categoryTree"
-          @on-expanded="handleCategoryTreeExpanded"
-          @on-updated="handleCategoryTreeUpdated"
+          :category-tree="categoryTree"
+          @on-expanded="onCategoryTreeExpanded"
+          @on-updated="onCategoryTreeUpdated"
         />
       </el-col>
     </el-row>
@@ -73,84 +73,103 @@
 </template>
 
 <script>
-import MiscService from '@admin/services/MiscService'
-import AgIcon from '../../../../shared/components/Icon'
+import AgIcon from '@shared/components/Icon'
+import { useRouter } from 'vue-router'
+import { ref, onBeforeMount, watch } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
 
 export default {
   name: 'ShopCategory',
-  watch: {
-    keyword(keyword) {
-      if (!keyword) {
-        this.setAllExpand(false)
+  components: { AgIcon },
+  setup() {
+    const router = useRouter()
+    const httpClient = useHttpClient()
+
+    const loading = ref(true)
+    const keyword = ref('')
+    const categoryTree = ref([])
+    const categoryExpanded = ref([])
+    const treeRef = ref()
+
+    const categoryCreate = (parentId) => {
+      router.push({
+        path: `/shop-category/create/${parentId}`,
+      })
+    }
+
+    const categoryEdit = (category) => {
+      router.push({
+        path: `/shop-category/edit/${category.id}`,
+      })
+    }
+
+    const filterCategoryNode = (value, data) => {
+      if (!value) {
+        return true
       }
 
-      this.$refs.categoryTree.filter(keyword)
-    },
-  },
-  components: { AgIcon },
-  data() {
-    return {
-      loading: true,
-      keyword: '',
-      categoryTree: [],
-      categoryExpanded: [],
+      return data.name.indexOf(value) !== -1
     }
-  },
-  emits: ['submit'],
-  methods: {
-    setAllExpand(state) {
-      const nodes = this.$refs.categoryTree.store.nodesMap
+
+    const loadCategoryTree = async () => {
+      loading.value = true
+
+      const { data } = await httpClient.get(
+        'misc/shop-category-tree',
+        null,
+        false
+      )
+
+      if (data) {
+        categoryTree.value = Object.freeze(data)
+      }
+
+      loading.value = false
+    }
+
+    const setAllExpand = (state) => {
+      const nodes = treeRef.value.store.nodesMap
 
       for (const key in nodes) {
         if (nodes.hasOwnProperty(key)) {
           nodes[key].expanded = state
         }
       }
-    },
+    }
 
-    handleCategoryCreate(parentId) {
-      this.$router.push({
-        path: `/shop-category/create/${parentId}`,
-      })
-    },
+    const onCategoryTreeExpanded = (expanded, currentId) => {
+      categoryExpanded.value = expanded
+      treeRef.value.setCurrentKey(currentId)
+    }
 
-    handleCategoryEdit(category) {
-      this.$router.push({
-        path: `/shop-category/edit/${category.id}`,
-      })
-    },
+    const onCategoryTreeUpdated = async () => {
+      await loadCategoryTree()
+    }
 
-    filterCategoryNode(value, data) {
-      if (!value) {
-        return true
+    watch(keyword, (keyword) => {
+      if (!keyword) {
+        setAllExpand(false)
       }
 
-      return data.name.indexOf(value) !== -1
-    },
+      treeRef.value.filter(keyword)
+    })
 
-    handleCategoryTreeExpanded(expanded, currentId) {
-      this.categoryExpanded = expanded
-      this.$refs.categoryTree.setCurrentKey(currentId)
-    },
+    onBeforeMount(async () => {
+      await loadCategoryTree()
+    })
 
-    async handleCategoryTreeUpdated() {
-      await this.loadCategoryTree()
-    },
-
-    async loadCategoryTree() {
-      this.loading = true
-
-      const { data } = await MiscService.shopCategoryTree()
-
-      if (data) {
-        this.categoryTree = Object.freeze(data)
-      }
-
-      this.loading = false
-    },
-  },
-  created() {
-    this.loadCategoryTree()
+    return {
+      loading,
+      keyword,
+      categoryTree,
+      categoryExpanded,
+      categoryCreate,
+      categoryEdit,
+      treeRef,
+      filterCategoryNode,
+      onCategoryTreeExpanded,
+      onCategoryTreeUpdated,
+    }
   },
 }
 </script>
