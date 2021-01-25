@@ -2,19 +2,18 @@
   <el-form
     v-if="formModel"
     :model="formModel"
-    ref="formModel"
+    ref="formRef"
     label-width="100px"
     label-suffix="："
-    @submit.stop.prevent="handleFormSubmit('formModel')"
+    @submit.prevent="handleSubmit(onSubmit)"
   >
-    <el-form-item label="上级地区" prop="parentId">
+    <el-form-item label="上级地区" prop="parentId" :error="errors.parentId">
       <el-col :md="16">
         <district-cascader
           placeholder="请选择上级地区"
-          v-model="formDistrictParents"
-          @change="handleDistrictParentsChange"
+          v-model="getDistrictParents"
           :leaf-length="6"
-          :disabled-codes="[this.district.code]"
+          :disabled-codes="[district.code]"
         >
         </district-cascader>
       </el-col>
@@ -22,6 +21,7 @@
     <el-form-item
       label="地区名称"
       prop="name"
+      :error="errors.name"
       :rules="[{ required: true, message: '请输入地区名称', trigger: 'blur' }]"
     >
       <el-col :md="7">
@@ -31,18 +31,19 @@
     <el-form-item
       label="地区代码"
       prop="code"
+      :error="errors.code"
       :rules="[{ required: true, message: '请输入地区代码', trigger: 'blur' }]"
     >
       <el-col :md="7">
         <el-input class="text-mono" v-model.trim="formModel.code" />
       </el-col>
     </el-form-item>
-    <el-form-item label="地区邮编" prop="zipCode">
+    <el-form-item label="地区邮编" prop="zipCode" :error="errors.zipCode">
       <el-col :md="7">
         <el-input v-model.trim="formModel.zipCode" />
       </el-col>
     </el-form-item>
-    <el-form-item label="电话区号" prop="areaCode">
+    <el-form-item label="电话区号" prop="areaCode" :error="errors.areaCode">
       <el-col :md="7">
         <el-input v-model.trim="formModel.areaCode" />
       </el-col>
@@ -52,7 +53,7 @@
         type="primary"
         :disabled="!canSubmit"
         native-type="submit"
-        :loading="submitLoading"
+        :loading="loading"
         >{{ submitText }}
       </el-button>
 
@@ -62,7 +63,7 @@
         plain
         type="danger"
         size="small"
-        @click="handleDistrictDelete"
+        @click="districtDelete"
       >
         删除
       </el-button>
@@ -71,12 +72,12 @@
 </template>
 
 <script>
-import UnprocessableEntityHttpErrorMixin from '@admin/mixins/UnprocessableEntityHttpErrorMixin'
 import DistrictCascader from '@admin/components/DistrictCascader'
+import { useForm } from '@shared/hooks/useForm'
+import { computed, ref, toRaw } from 'vue'
 
 export default {
   components: { DistrictCascader },
-  mixins: [UnprocessableEntityHttpErrorMixin],
   props: {
     submitText: {
       type: String,
@@ -97,48 +98,58 @@ export default {
       type: Array,
     },
   },
-  emits: ['submit', 'click'],
-  data() {
-    return {
-      submitLoading: false,
-      formModel: null,
-      formDistrictParents: [],
+  setup(props, { emit }) {
+    const { loading, form, errors, setErrors, handleSubmit } = useForm(
+      props.district
+    )
+    const formRef = ref()
+
+    const getDistrictParents = computed({
+      get: () => props.districtParents,
+      set: (value) => {
+        emit('update:districtParents', value)
+        form.parentId = value[value.length - 1]
+      },
+    })
+
+    const districtDelete = () => {
+      emit('on-delete', toRaw(form))
     }
-  },
-  created() {
-    this.formModel = Object.assign({}, this.district)
-    this.formDistrictParents = this.districtParents
-  },
-  methods: {
-    handleDistrictParentsChange(value) {
-      this.formModel.parentId = value[value.length - 1]
-    },
-    handleDistrictDelete() {
-      this.$emit('on-delete', this.formModel)
-    },
-    handleFormSubmit(formName) {
-      this.$refs[formName].validate((valid) => {
+
+    const onSubmit = async () => {
+      formRef.value.validate((valid) => {
         if (!valid) {
           return false
         }
 
-        this.submitLoading = true
+        loading.value = true
 
-        this.$emit(
+        emit(
           'on-submit',
-          this.formModel,
+          toRaw(form),
           () => {
-            this.$refs[formName].clearValidate()
+            formRef.value.clearValidate()
           },
-          (error) => {
-            this.handleViolationError(error, formName)
+          async (error) => {
+            await setErrors(error)
           },
           () => {
-            this.submitLoading = false
+            loading.value = false
           }
         )
       })
-    },
+    }
+
+    return {
+      loading,
+      formModel: form,
+      errors,
+      formRef,
+      handleSubmit,
+      getDistrictParents,
+      districtDelete,
+      onSubmit,
+    }
   },
 }
 </script>

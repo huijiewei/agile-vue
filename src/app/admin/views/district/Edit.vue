@@ -1,13 +1,13 @@
 <template>
-  <el-row :gutter="0" style="padding: 5px">
-    <div class="box-header">
-      <h4>{{ pageTitle }}</h4>
-    </div>
+  <div class="box-header">
+    <h4>{{ pageTitle }}</h4>
+  </div>
+  <el-row :gutter="0">
     <district-form
       v-if="district"
       :submit-text="pageTitle"
       :district="district"
-      :district-parents="districtParents"
+      v-model:district-parents="districtParents"
       :is-edit="true"
       :can-submit="$can('district/edit')"
       @on-submit="editDistrict"
@@ -20,30 +20,32 @@
 
 <script>
 import DistrictForm from '@admin/views/district/_EditForm'
-import DistrictService from '@admin/services/DistrictService'
-import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useDeleteDialog } from '@admin/hooks/useDeleteDialog'
+import { ref, onBeforeMount } from 'vue'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'DistrictEdit',
   components: { PlaceholderForm, DistrictForm },
-  data() {
-    return {
-      pageTitle: '编辑地区',
-      district: null,
-      districtParents: [],
-    }
-  },
-  beforeRouteUpdate(to, from, next) {
-    this.district = null
-    this.getDistrict(to.params.id)
-    next()
-  },
-  created() {
-    this.getDistrict(this.$route.params.id)
-  },
-  methods: {
-    async getDistrict(id) {
-      const { data } = await DistrictService.view(id)
+  emits: ['on-expanded', 'on-updated'],
+  setup(props, { emit }) {
+    const route = useRoute()
+    const router = useRouter()
+    const httpClient = useHttpClient()
+    const { deleteDialog } = useDeleteDialog()
+
+    const pageTitle = '编辑地区'
+
+    const district = ref(null)
+    const districtParents = ref([])
+
+    const loadDistrict = async (id) => {
+      const { data } = await httpClient.get('districts/' + id, {
+        withParents: true,
+      })
 
       if (data) {
         let parents = [0]
@@ -56,22 +58,28 @@ export default {
           parents = data.parents.map((parent) => parent.id)
         }
 
-        this.districtParents = parents
+        districtParents.value = parents
 
-        this.$emit('on-expanded', parents, data.id)
+        emit('on-expanded', parents, data.id)
 
-        this.district = data
+        delete data.parents
+
+        district.value = data
       }
-    },
-    async editDistrict(district, done, fail, always) {
-      const { data, error } = await DistrictService.edit(district)
+    }
+
+    const editDistrict = async (district, done, fail, always) => {
+      const { data, error } = await httpClient.put(
+        'districts/' + district.id,
+        district
+      )
 
       if (data) {
         done()
 
-        this.$message.success('修改成功')
+        ElMessage.success('修改成功')
 
-        this.$emit('on-updated', data.id, data.parentId, this.district.parentId)
+        emit('on-updated', data.id, data.parentId, district.parentId)
       }
 
       if (error) {
@@ -79,29 +87,44 @@ export default {
       }
 
       always()
-    },
-    async deleteDistrict(district) {
-      this.$deleteDialog({
+    }
+
+    const deleteDistrict = async (district) => {
+      deleteDialog({
         message: `删除地区 <strong>${district.name}</strong>`,
         callback: async () => {
-          this.loading = true
-
-          const { data } = await DistrictService.delete(district.id)
+          const { data } = await httpClient.delete('districts/' + district.id)
 
           if (data) {
-            this.$message.success('删除成功')
+            ElMessage.success('删除成功')
 
-            this.$emit('on-updated', 0, district.parentId)
+            emit('on-updated', 0, district.parentId)
 
-            await this.$router.replace({
+            await router.replace({
               path: '/district',
             })
           }
-
-          this.loading = false
         },
       })
-    },
+    }
+
+    onBeforeMount(async () => {
+      await loadDistrict(route.params.id)
+    })
+
+    onBeforeRouteUpdate(async (to, from, next) => {
+      district.value = null
+      next()
+      await loadDistrict(to.params.id)
+    })
+
+    return {
+      pageTitle,
+      district,
+      districtParents,
+      editDistrict,
+      deleteDistrict,
+    }
   },
 }
 </script>

@@ -16,7 +16,7 @@
             :disabled="!$can('district/create')"
             title="创建根地区"
             size="mini"
-            @click="handleDistrictCreate('0')"
+            @click="districtCreate('0')"
             icon="el-icon-folder-add"
           >
             创建根地区
@@ -29,7 +29,7 @@
           :data="searchedData"
           :highlight-current="true"
           :default-expand-all="true"
-          ref="districtSearchTree"
+          ref="searchRef"
           node-key="id"
         >
           <template #default="{ data }">
@@ -45,7 +45,7 @@
               <el-button-group class="operate">
                 <el-button
                   size="mini"
-                  @click.stop="handleDistrictEdit(data)"
+                  @click.stop="districtEdit(data)"
                   :disabled="!$can('district/view')"
                   icon="el-icon-edit-outline"
                   title="查看编辑"
@@ -53,7 +53,7 @@
                 <el-button
                   v-if="!data.leaf"
                   size="mini"
-                  @click.stop="handleDistrictCreate(data.id)"
+                  @click.stop="districtCreate(data.id)"
                   :disabled="!$can('district/create')"
                   icon="el-icon-folder-add"
                   title="新建子地区"
@@ -67,7 +67,7 @@
           :loading="loading"
           :highlight-current="true"
           :default-expanded-keys="districtExpanded"
-          ref="districtTree"
+          ref="treeRef"
           node-key="id"
           accordion
           :lazy="true"
@@ -89,7 +89,7 @@
               <el-button-group class="operate">
                 <el-button
                   size="mini"
-                  @click.stop="handleDistrictEdit(data)"
+                  @click.stop="districtEdit(data)"
                   :disabled="!$can('district/view')"
                   icon="el-icon-edit-outline"
                   title="查看编辑"
@@ -97,7 +97,7 @@
                 <el-button
                   v-if="!data.leaf"
                   size="mini"
-                  @click.stop="handleDistrictCreate(data.id)"
+                  @click.stop="districtCreate(data.id)"
                   :disabled="!$can('district/create')"
                   icon="el-icon-folder-add"
                   title="新建子地区"
@@ -109,8 +109,8 @@
       </el-col>
       <el-col :span="18">
         <router-view
-          @on-expanded="handleDistrictExpanded"
-          @on-updated="handleDistrictUpdated"
+          @on-expanded="onDistrictExpanded"
+          @on-updated="onDistrictUpdated"
         />
       </el-col>
     </el-row>
@@ -118,15 +118,32 @@
 </template>
 
 <script>
-import MiscService from '@admin/services/MiscService'
-import AgIcon from '../../../../shared/components/Icon'
+import AgIcon from '@shared/components/Icon'
+import { ref, watch } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'District',
-  watch: {
-    async keyword(keyword) {
+  components: { AgIcon },
+  setup() {
+    const router = useRouter()
+    const httpClient = useHttpClient()
+
+    const loading = ref(true)
+    const keyword = ref('')
+    const treeRef = ref()
+    const searchRef = ref()
+    const isSearched = ref(false)
+    const searchedData = ref([])
+    const districtExpanded = ref([])
+    const districtCurrentId = ref(0)
+    const currentNode = ref()
+    const currentResolve = ref()
+
+    watch(keyword, async (keyword) => {
       if (!keyword) {
-        this.isSearched = false
+        isSearched.value = false
 
         return
       }
@@ -135,88 +152,101 @@ export default {
         return
       }
 
-      this.isSearched = true
-      this.loading = true
+      isSearched.value = true
+      loading.value = true
 
-      const { data } = await MiscService.districtSearchTree(keyword)
+      const { data } = await httpClient.get(
+        'misc/district-search-tree',
+        { keyword: keyword },
+        false
+      )
 
       if (data) {
-        this.searchedData = data
+        searchedData.value = data
       }
 
-      this.loading = false
-    },
-  },
-  components: { AgIcon },
-  data() {
-    return {
-      loading: true,
-      keyword: '',
-      isSearched: false,
-      searchedData: [],
-      districtExpanded: [],
-      districtCurrentId: 0,
+      loading.value = false
+    })
+
+    const loadDistricts = async (node, resolve) => {
+      const parentId = (node.data && node.data.id) || 0
+
+      if (parentId === 0) {
+        currentNode.value = node
+        currentResolve.value = resolve
+      }
+
+      loading.value = true
+
+      const { data } = await httpClient.get(
+        'misc/districts',
+        { parentId: parentId },
+        false
+      )
+
+      resolve(data || [])
+
+      treeRef.value.setCurrentKey(districtCurrentId.value)
+
+      loading.value = false
     }
-  },
-  emits: ['click'],
-  methods: {
-    handleDistrictExpanded(expanded, currentId) {
-      this.districtExpanded = expanded
-      this.districtCurrentId = currentId
-      this.$refs.districtTree.setCurrentKey(this.districtCurrentId)
-      this.$refs.districtSearchTree.setCurrentKey(this.districtCurrentId)
-    },
-    handleDistrictUpdated(currentId, expandId, collapseId) {
+
+    const onDistrictExpanded = (expanded, currentId) => {
+      console.log(expanded, currentId)
+      //districtExpanded.value = expanded
+      //districtCurrentId.value = currentId
+      //treeRef.value.setCurrentKey(currentId)
+      //searchRef.value.setCurrentKey(currentId)
+    }
+
+    const onDistrictUpdated = async (currentId, expandId, collapseId) => {
       if (expandId === null || expandId === 0) {
-        this.node.childNodes = []
-        this.loadDistricts(this.node, this.resolve)
+        currentNode.value.childNodes = []
+        await loadDistricts(currentNode.value, currentResolve.value)
         return
       }
 
-      this.districtCurrentId = currentId
+      districtCurrentId.value = currentId
 
       if (collapseId > 0 && collapseId !== expandId) {
-        const collapse = this.$refs.districtTree.getNode(collapseId)
+        const collapse = treeRef.value.getNode(collapseId)
 
         collapse.loaded = false
         collapse.collapse()
       }
 
-      const expand = this.$refs.districtTree.getNode(expandId)
+      const expand = treeRef.value.getNode(expandId)
 
       expand.loaded = false
       expand.expand()
-    },
-    handleDistrictCreate(parentId) {
-      this.$router.push({
+    }
+
+    const districtCreate = async (parentId) => {
+      await router.push({
         path: `/district/create/${parentId}`,
       })
-    },
+    }
 
-    handleDistrictEdit(district) {
-      this.$router.push({
+    const districtEdit = async (district) => {
+      await router.push({
         path: `/district/edit/${district.id}`,
       })
-    },
+    }
 
-    async loadDistricts(node, resolve) {
-      const parentId = (node.data && node.data.id) || 0
-
-      if (parentId === 0) {
-        this.node = node
-        this.resolve = resolve
-      }
-
-      this.loading = true
-
-      const { data } = await MiscService.districts(parentId)
-
-      resolve(data || [])
-
-      this.$refs.districtTree.setCurrentKey(this.districtCurrentId)
-
-      this.loading = false
-    },
+    return {
+      loading,
+      keyword,
+      treeRef,
+      searchRef,
+      isSearched,
+      searchedData,
+      districtExpanded,
+      onDistrictExpanded,
+      onDistrictUpdated,
+      loadDistricts,
+      districtCreate,
+      districtEdit,
+    }
   },
 }
 </script>
