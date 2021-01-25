@@ -1,8 +1,6 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
-    <login-modal v-if="!isLogin"></login-modal>
-  </div>
+  <router-view></router-view>
+  <login-modal v-if="!isLogin"></login-modal>
 </template>
 
 <script>
