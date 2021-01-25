@@ -9,7 +9,7 @@
         :submit-text="pageTitle"
         :shop-category="shopCategory"
         :category-tree="categoryTree"
-        :category-parents="categoryParents"
+        v-model:category-parents="categoryParents"
         :is-edit="true"
         :can-submit="$can('shop-category/edit')"
         @on-submit="editShopCategory"

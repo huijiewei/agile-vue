@@ -8,7 +8,7 @@
       :submit-text="pageTitle"
       :shop-category="shopCategory"
       :category-tree="categoryTree"
-      :category-parents="categoryParents"
+      v-model:category-parents="categoryParents"
       :is-edit="false"
       :can-submit="$can('shop-category/create')"
       @on-submit="createShopCategory"
@@ -20,9 +20,11 @@
 
 <script>
 import ShopCategoryForm from '@admin/views/shop-category/_EditForm'
-import ShopCategoryService from '@admin/services/ShopCategoryService'
-import MiscService from '@admin/services/MiscService'
-import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
+import { ref, onBeforeMount } from 'vue'
+import { useRoute, onBeforeRouteUpdate, useRouter } from 'vue-router'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'ShopCategoryCreate',
@@ -32,56 +34,58 @@ export default {
       type: Array,
     },
   },
-  data() {
-    return {
-      pageTitle: '新建商品分类',
-      shopCategory: null,
-      categoryParents: [],
-    }
-  },
-  beforeRouteUpdate(to, from, next) {
-    this.shopCategory = null
-    next()
-    this.getShopCategoryPath(to.params.id)
-  },
-  created() {
-    this.getShopCategoryPath(this.$route.params.id)
-  },
-  methods: {
-    async getShopCategoryPath(id) {
+  emits: ['on-expanded', 'on-updated'],
+  setup(props, { emit }) {
+    const route = useRoute()
+    const router = useRouter()
+    const httpClient = useHttpClient()
+
+    const pageTitle = '新建商品分类'
+    const shopCategory = ref(null)
+    const categoryParents = ref([])
+
+    const loadShopCategory = async (id) => {
       let parents = [0]
 
       if (id > 0) {
-        const { data } = await MiscService.shopCategoryPath(id)
+        const { data } = await httpClient.get(
+          'misc/shop-category-path',
+          { id: id },
+          false
+        )
 
         if (data && Array.isArray(data)) {
           parents = data.map((parent) => parent.id)
         }
       }
 
-      this.categoryParents = parents
+      categoryParents.value = parents
 
-      this.$emit('on-expanded', parents, id)
+      emit('on-expanded', parents, id)
 
-      this.shopCategory = {
+      shopCategory.value = {
         parentId: id,
         name: '',
         icon: '',
         image: '',
         description: '',
       }
-    },
-    async createShopCategory(shopCategory, done, fail, always) {
-      const { data, error } = await ShopCategoryService.create(shopCategory)
+    }
+
+    const createShopCategory = async (shopCategory, done, fail, always) => {
+      const { data, error } = await httpClient.post(
+        'shop-categories',
+        shopCategory
+      )
 
       if (data) {
         done()
 
-        this.$message.success('新建商品分类成功')
+        ElMessage.success('新建商品分类成功')
 
-        await this.$emit('on-updated')
+        await emit('on-updated')
 
-        await this.$router.replace({
+        await router.replace({
           path: `/shop-category/edit/${data.id}`,
         })
       }
@@ -91,7 +95,24 @@ export default {
       }
 
       always()
-    },
+    }
+
+    onBeforeMount(async () => {
+      await loadShopCategory(route.params.id)
+    })
+
+    onBeforeRouteUpdate(async (to, from, next) => {
+      shopCategory.value = null
+      next()
+      await loadShopCategory(to.params.id)
+    })
+
+    return {
+      pageTitle,
+      shopCategory,
+      categoryParents,
+      createShopCategory,
+    }
   },
 }
 </script>

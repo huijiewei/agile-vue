@@ -122,7 +122,6 @@ export default {
     const getCategoryParents = computed({
       get: () => props.categoryParents,
       set: (value) => {
-        console.log(value)
         emit('update:categoryParents', value)
         form.parentId = value[value.length - 1]
       },
