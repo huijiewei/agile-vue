@@ -29,6 +29,7 @@
           :data="searchedData"
           :highlight-current="true"
           :default-expand-all="true"
+          :current-node-key="districtCurrentId"
           ref="searchRef"
           node-key="id"
         >
@@ -67,6 +68,7 @@
           v-loading="loading"
           :highlight-current="true"
           :default-expanded-keys="districtExpanded"
+          :current-node-key="districtCurrentId"
           ref="treeRef"
           node-key="id"
           accordion
@@ -109,7 +111,7 @@
       </el-col>
       <el-col :span="18">
         <el-row :gutter="0">
-          <el-col :span="24">
+          <el-col>
             <router-view
               @on-expanded="onDistrictExpanded"
               @on-updated="onDistrictUpdated"
@@ -173,9 +175,9 @@ export default {
     })
 
     const loadDistricts = async (node, resolve) => {
-      const parentId = (node.data && node.data.id) || 0
+      console.log(node)
 
-      console.log(parentId)
+      const parentId = (node.data && node.data.id) || 0
 
       if (parentId === 0) {
         currentNode.value = node
@@ -190,13 +192,11 @@ export default {
         false
       )
 
-      console.log(data)
-
-      resolve(data || [])
-
       // treeRef.value.setCurrentKey(districtCurrentId.value)
 
       loading.value = false
+
+      return resolve(data || [])
     }
 
     const onDistrictExpanded = (expanded, currentId) => {
@@ -249,6 +249,7 @@ export default {
       isSearched,
       searchedData,
       districtExpanded,
+      districtCurrentId,
       onDistrictExpanded,
       onDistrictUpdated,
       loadDistricts,

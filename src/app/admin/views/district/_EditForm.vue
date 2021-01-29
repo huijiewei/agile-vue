@@ -8,13 +8,15 @@
     @submit.prevent="handleSubmit(onSubmit)"
   >
     <el-form-item label="上级地区" prop="parentId" :error="errors.parentId">
-      <district-cascader
-        placeholder="请选择上级地区"
-        v-model="getDistrictParents"
-        :leaf-length="6"
-        :disabled-codes="[district.code]"
-      >
-      </district-cascader>
+      <el-col :span="12">
+        <district-cascader
+          placeholder="请选择上级地区"
+          v-model="getDistrictParents"
+          :leaf-length="6"
+          :disabled-codes="[district.code]"
+        >
+        </district-cascader>
+      </el-col>
     </el-form-item>
     <el-form-item
       label="地区名称"
