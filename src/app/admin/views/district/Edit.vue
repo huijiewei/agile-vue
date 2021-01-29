@@ -2,20 +2,18 @@
   <div class="box-header">
     <h4>{{ pageTitle }}</h4>
   </div>
-  <el-row :gutter="0">
-    <district-form
-      v-if="district"
-      :submit-text="pageTitle"
-      :district="district"
-      v-model:district-parents="districtParents"
-      :is-edit="true"
-      :can-submit="$can('district/edit')"
-      @on-submit="editDistrict"
-      @on-delete="deleteDistrict"
-    >
-    </district-form>
-    <placeholder-form v-else />
-  </el-row>
+  <district-form
+    v-if="district"
+    :submit-text="pageTitle"
+    :district="district"
+    v-model:district-parents="districtParents"
+    :is-edit="true"
+    :can-submit="$can('district/edit')"
+    @on-submit="editDistrict"
+    @on-delete="deleteDistrict"
+  >
+  </district-form>
+  <placeholder-form v-else />
 </template>
 
 <script>

@@ -34,8 +34,8 @@
           node-key="id"
         >
           <template #default="{ data }">
-            <div class="category-tree-node">
-              <div class="category-tree-icon">
+            <div class="ag-tree-node">
+              <div class="ag-tree-icon">
                 <ag-icon v-if="data.icon" :path="data.icon" />
                 <i v-else-if="data.children" class="el-icon-folder" />
                 <i v-else class="el-icon-document" />

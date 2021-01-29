@@ -8,15 +8,13 @@
     @submit.prevent="handleSubmit(onSubmit)"
   >
     <el-form-item label="上级地区" prop="parentId" :error="errors.parentId">
-      <el-col :md="16">
-        <district-cascader
-          placeholder="请选择上级地区"
-          v-model="getDistrictParents"
-          :leaf-length="6"
-          :disabled-codes="[district.code]"
-        >
-        </district-cascader>
-      </el-col>
+      <district-cascader
+        placeholder="请选择上级地区"
+        v-model="getDistrictParents"
+        :leaf-length="6"
+        :disabled-codes="[district.code]"
+      >
+      </district-cascader>
     </el-form-item>
     <el-form-item
       label="地区名称"
@@ -24,7 +22,7 @@
       :error="errors.name"
       :rules="[{ required: true, message: '请输入地区名称', trigger: 'blur' }]"
     >
-      <el-col :md="7">
+      <el-col :span="7">
         <el-input v-model.trim="formModel.name" />
       </el-col>
     </el-form-item>

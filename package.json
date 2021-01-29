@@ -17,7 +17,7 @@
     "axios-progress-bar": "^1.2.0",
     "core-js": "^3.8.3",
     "cropperjs": "^1.5.9",
-    "element-plus": "^1.0.1-beta.14",
+    "element-plus": "^1.0.2-beta.30",
     "perfect-scrollbar": "^1.5.0",
     "query-string": "^6.13.8",
     "register-service-worker": "^1.7.2",

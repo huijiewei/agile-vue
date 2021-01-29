@@ -17,11 +17,12 @@
 <script>
 import AdminGroupForm from '@admin/views/admin-group/_EditForm'
 import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
-import { inject, ref, onBeforeMount } from 'vue'
+import { inject, ref, onBeforeMount, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useHttpClient } from '@shared/plugins/HttpClient'
 import { ElMessage } from 'element-plus'
 import { useRoute } from 'vue-router'
+import { useRefreshUser } from '@admin/hooks/useRefreshUser'
 
 export default {
   name: 'AdminGroupEdit',
@@ -35,6 +36,11 @@ export default {
     const store = useStore()
     const historyBack = inject('historyBack')
     const httpClient = useHttpClient()
+    const { refreshUser } = useRefreshUser()
+
+    const currentUserGroupId = computed(() => {
+      return store.getters['auth/getCurrentUser']?.adminGroupId || 0
+    })
 
     const editAdminGroup = async (adminGroup, done, fail, always) => {
       const { data, error } = await httpClient.put(
@@ -48,6 +54,11 @@ export default {
         ElMessage.success('管理组编辑成功')
 
         await store.dispatch('tabs/deleteCache', 'AdminGroup')
+
+        if (currentUserGroupId.value === adminGroup.id) {
+          await refreshUser()
+        }
+
         await historyBack('/admin-group', false, true)
       }
 

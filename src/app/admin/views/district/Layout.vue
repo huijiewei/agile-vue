@@ -33,8 +33,8 @@
           node-key="id"
         >
           <template #default="{ data }">
-            <div class="category-tree-node">
-              <div class="category-tree-icon">
+            <div class="ag-tree-node">
+              <div class="ag-tree-icon">
                 <ag-icon v-if="data.icon" :path="data.icon" />
                 <i v-else-if="data.code.length < 9" class="el-icon-folder" />
                 <i v-else class="el-icon-map-location" />
@@ -64,6 +64,7 @@
         </el-tree>
         <el-tree
           v-show="!isSearched"
+          v-loading="loading"
           :highlight-current="true"
           :default-expanded-keys="districtExpanded"
           ref="treeRef"
@@ -76,8 +77,8 @@
           }"
         >
           <template #default="{ data }">
-            <div class="category-tree-node">
-              <div class="category-tree-icon">
+            <div class="ag-tree-node">
+              <div class="ag-tree-icon">
                 <ag-icon v-if="data.icon" :path="data.icon" />
                 <i v-else-if="data.code.length < 9" class="el-icon-folder" />
                 <i v-else class="el-icon-map-location" />
@@ -107,10 +108,14 @@
         </el-tree>
       </el-col>
       <el-col :span="18">
-        <router-view
-          @on-expanded="onDistrictExpanded"
-          @on-updated="onDistrictUpdated"
-        />
+        <el-row :gutter="0">
+          <el-col :span="24">
+            <router-view
+              @on-expanded="onDistrictExpanded"
+              @on-updated="onDistrictUpdated"
+            />
+          </el-col>
+        </el-row>
       </el-col>
     </el-row>
   </div>
@@ -137,8 +142,8 @@ export default {
     const searchedData = ref([])
     const districtExpanded = ref([])
     const districtCurrentId = ref(0)
-    const currentNode = ref()
-    const currentResolve = ref()
+    const currentNode = ref(null)
+    const currentResolve = ref(null)
 
     watch(keyword, async (keyword) => {
       if (!keyword) {
@@ -170,6 +175,8 @@ export default {
     const loadDistricts = async (node, resolve) => {
       const parentId = (node.data && node.data.id) || 0
 
+      console.log(parentId)
+
       if (parentId === 0) {
         currentNode.value = node
         currentResolve.value = resolve
@@ -183,18 +190,21 @@ export default {
         false
       )
 
+      console.log(data)
+
       resolve(data || [])
 
-      treeRef.value.setCurrentKey(districtCurrentId.value)
+      // treeRef.value.setCurrentKey(districtCurrentId.value)
 
       loading.value = false
     }
 
     const onDistrictExpanded = (expanded, currentId) => {
+      console.log(expanded, currentId)
       districtExpanded.value = expanded
       districtCurrentId.value = currentId
-      treeRef.value.setCurrentKey(currentId)
-      searchRef.value.setCurrentKey(currentId)
+      //treeRef.value.setCurrentKey(currentId)
+      //searchRef.value.setCurrentKey(currentId)
     }
 
     const onDistrictUpdated = async (currentId, expandId, collapseId) => {

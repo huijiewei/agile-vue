@@ -70,6 +70,7 @@ import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRefreshUser } from '@admin/hooks/useRefreshUser'
 
 export default {
   name: 'HeaderNav',
@@ -89,6 +90,7 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const httpClient = useHttpClient()
+    const { refreshUser } = useRefreshUser()
 
     const handleRefresh = inject('reload')
 
@@ -130,11 +132,7 @@ export default {
       }
 
       if (command === 'userRefresh') {
-        const { data } = await httpClient.get('auth/account', null, false)
-
-        if (data) {
-          await store.dispatch('auth/account', data)
-        }
+        await refreshUser()
       }
     }
 

@@ -16,8 +16,13 @@
 
 <script>
 import AdminForm from '@admin/views/admin/_EditForm'
-import AdminService from '@admin/services/AdminService'
-import PlaceholderForm from '../../../../shared/components/Placeholder/PlaceholderForm'
+import PlaceholderForm from '@shared/components/Placeholder/PlaceholderForm'
+import { computed, inject, onBeforeMount, ref } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
+import { useRefreshUser } from '@admin/hooks/useRefreshUser'
 
 export default {
   name: 'AdminEdit',
@@ -25,31 +30,35 @@ export default {
   props: {
     name: String,
   },
-  data() {
-    return {
-      pageTitle: '编辑管理员',
-      admin: null,
-    }
-  },
-  inject: ['historyBack'],
-  async created() {
-    const { data } = await AdminService.view(this.$route.params.id)
+  setup(props, { emit }) {
+    const pageTitle = '新建管理员'
+    const admin = ref(null)
 
-    if (data) {
-      this.admin = data
-    }
-  },
-  methods: {
-    async editAdmin(admin, done, fail, always) {
-      const { data, error } = await AdminService.edit(admin)
+    const route = useRoute()
+    const store = useStore()
+    const historyBack = inject('historyBack')
+    const httpClient = useHttpClient()
+    const { refreshUser } = useRefreshUser()
+
+    const currentUserId = computed(() => {
+      return store.getters['auth/getCurrentUser']?.id || 0
+    })
+
+    const editAdmin = async (admin, done, fail, always) => {
+      const { data, error } = await httpClient.put('admins/' + admin.id, admin)
 
       if (data) {
         done()
 
-        this.$message.success('管理员编辑成功')
+        ElMessage.success('管理员编辑成功')
 
-        await this.$store.dispatch('tabs/deleteCache', 'Admin')
-        await this.historyBack('/admin', false, true)
+        await store.dispatch('tabs/deleteCache', 'Admin')
+
+        if (currentUserId.value === admin.id) {
+          await refreshUser()
+        }
+
+        await historyBack('/admin', false, true)
       }
 
       if (error) {
@@ -57,7 +66,21 @@ export default {
       }
 
       always()
-    },
+    }
+
+    onBeforeMount(async () => {
+      const { data } = await httpClient.get('admins/' + route.params.id)
+
+      if (data) {
+        admin.value = data
+      }
+    })
+
+    return {
+      pageTitle,
+      admin,
+      editAdmin,
+    }
   },
 }
 </script>
