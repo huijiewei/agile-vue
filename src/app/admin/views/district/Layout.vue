@@ -175,8 +175,6 @@ export default {
     })
 
     const loadDistricts = async (node, resolve) => {
-      console.log(node)
-
       const parentId = (node.data && node.data.id) || 0
 
       if (parentId === 0) {
@@ -192,19 +190,14 @@ export default {
         false
       )
 
-      // treeRef.value.setCurrentKey(districtCurrentId.value)
-
       loading.value = false
 
       return resolve(data || [])
     }
 
     const onDistrictExpanded = (expanded, currentId) => {
-      console.log(expanded, currentId)
       districtExpanded.value = expanded
       districtCurrentId.value = currentId
-      //treeRef.value.setCurrentKey(currentId)
-      //searchRef.value.setCurrentKey(currentId)
     }
 
     const onDistrictUpdated = async (currentId, expandId, collapseId) => {
