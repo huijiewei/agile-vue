@@ -1,18 +1,19 @@
 <template>
   <el-form
+    v-if="searchFields"
     :inline="true"
-    :model="formModel"
+    :model="form"
     size="small"
     autocomplete="off"
-    @submit.stop.prevent="handleFormSubmit()"
-    @reset.stop.prevent="handleFormReset()"
+    @submit.stop.prevent="onSubmit"
+    @reset.stop.prevent="onReset"
   >
     <template v-for="item in getOtherFields" :key="item.id">
       <hr v-if="item.type === 'br'" class="br" />
       <el-form-item v-else>
         <el-select
           v-if="item.type === 'select'"
-          v-model="formModel[item.field]"
+          v-model="form[item.field]"
           :multiple="item.multiple"
           :clearable="true"
           :placeholder="item.label"
@@ -26,36 +27,44 @@
         </el-select>
         <el-date-picker
           v-if="item.type === 'date'"
-          v-model="formModel[item.field]"
+          v-model="form[item.field]"
           type="date"
           :style="{ width: '139px' }"
           :editable="false"
-          :value-format="'yyyy-MM-dd'"
+          :format="'yyyy-MM-dd'"
           :placeholder="item.label"
         />
         <el-date-picker
           v-if="item.type === 'dateTimeRange'"
-          v-model="formModel[item.field]"
+          v-model="form[item.field]"
           :type="item.rangeType"
           :style="{ width: '260px' }"
           :start-placeholder="item.labelStart"
           :end-placeholder="item.labelEnd"
           :editable="false"
-          :value-format="'yyyy-MM-dd'"
-          :picker-options="pickerOptions[item.field]"
+          unlink-panels
+          range-separator="至"
+          :format="'yyyy-MM-dd'"
+          :shortcuts="shortcuts[item.field]"
         />
       </el-form-item>
     </template>
     <el-form-item v-if="getKeywordFields.length > 0">
       <el-input v-model="keywordValue" placeholder="请输入内容" clearable>
-        <el-select v-model="keywordField" :style="{ width: '100px' }" value="">
-          <el-option
-            v-for="(item, index) in getKeywordFields"
-            :key="index"
-            :label="item.label"
-            :value="item.field"
-          />
-        </el-select>
+        <template #prepend>
+          <el-select
+            v-model="keywordField"
+            :style="{ width: '100px' }"
+            value=""
+          >
+            <el-option
+              v-for="(item, index) in getKeywordFields"
+              :key="index"
+              :label="item.label"
+              :value="item.field"
+            />
+          </el-select>
+        </template>
       </el-input>
     </el-form-item>
     <el-form-item>
@@ -70,6 +79,9 @@
 </template>
 
 <script>
+import { computed, ref, onMounted, watch, inject, reactive, toRaw } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
 export default {
   name: 'SearchForm',
   props: {
@@ -80,116 +92,85 @@ export default {
       },
     },
   },
-  emits: ['submit', 'reset'],
-  inject: ['reload'],
-  setup(props) {},
-  data() {
-    return {
-      formModel: {},
-      formModelInit: false,
-      keywordField: '',
-      keywordValue: '',
-      pickerOptions: {},
-      pickerOptionsInit: false,
-    }
-  },
-  computed: {
-    getKeywordFields() {
-      if (this.searchFields === null) {
+  setup(props) {
+    const form = ref({})
+    const formInit = ref(false)
+
+    const keywordField = ref('')
+    const keywordValue = ref('')
+
+    const shortcuts = ref({})
+    const shortcutsInit = ref(false)
+
+    const route = useRoute()
+    const router = useRouter()
+
+    const getKeywordFields = computed(() => {
+      if (props.searchFields === null) {
         return []
       }
 
-      return this.searchFields.filter((item) => item.type === 'keyword')
-    },
-    getOtherFields() {
-      if (this.searchFields === null) {
+      return props.searchFields.filter((item) => item.type === 'keyword')
+    })
+
+    const getOtherFields = computed(() => {
+      if (props.searchFields === null) {
         return []
       }
 
-      return this.searchFields.filter((item) => item.type !== 'keyword')
-    },
-  },
-  watch: {
-    searchFields: function () {
-      this.updateFormModel()
-      this.updatePickerOptions()
-    },
-    '$route.query': 'updateFormModel',
-  },
-  mounted() {
-    if (!this.formModelInit) {
-      this.updateFormModel()
-    }
+      return props.searchFields.filter((item) => item.type !== 'keyword')
+    })
 
-    if (!this.pickerOptionsInit) {
-      this.updatePickerOptions()
-    }
-  },
-  methods: {
-    isPageQuery(query) {
-      return query === 'page' || query === 'size'
-    },
-    isKeywordField(field) {
-      return (
-        this.getKeywordFields.find((keywordField) => {
-          return keywordField.field === field
-        }) !== undefined
-      )
-    },
-    updatePickerOptions() {
-      const pickerOptions = {}
-
-      for (const otherField of this.getOtherFields) {
-        if (otherField.type !== 'dateTimeRange') {
-          continue
-        }
-
-        if (!otherField.shortcuts || otherField.shortcuts.length === 0) {
-          continue
-        }
-
-        pickerOptions[otherField.field] = {
-          shortcuts: [],
-        }
-
-        otherField.shortcuts.forEach((shortcut) => {
-          pickerOptions[otherField.field].shortcuts.push({
-            text: shortcut.text,
-            onClick(picker) {
-              picker.$emit('pick', [shortcut.start, shortcut.end])
-            },
-          })
-        })
+    onMounted(() => {
+      if (!formInit.value) {
+        updateForm()
       }
 
-      this.pickerOptions = pickerOptions
-      this.pickerOptionsInit = true
-    },
-    updateFormModel() {
-      this.formModel = {}
-      this.keywordField = ''
-      this.keywordValue = ''
+      if (!shortcutsInit.value) {
+        updateShortcuts()
+      }
+    })
 
-      const routeQuery = this.$route.query
-      const formModel = {}
+    watch(
+      () => props.searchFields,
+      async () => {
+        updateForm()
+        updateShortcuts()
+      }
+    )
 
-      const keywordFields = this.getKeywordFields
+    watch(
+      () => route.query,
+      async () => {
+        updateForm()
+      }
+    )
+
+    const updateForm = () => {
+      form = reactive({})
+      keywordField.value = ''
+      keywordValue.value = ''
+
+      const routeQuery = route.query
+
+      const keywordFields = getKeywordFields.value
+      const formData = {}
 
       for (const field of keywordFields) {
         if (routeQuery.hasOwnProperty(field.field)) {
-          this.keywordField = field.field
-          this.keywordValue = routeQuery[field.field]
-          formModel[field.field] = routeQuery[field.field]
+          keywordField.value = field.field
+          keywordValue.value = routeQuery[field.field]
+          formData[field.field] = routeQuery[field.field]
         } else {
-          formModel[field.field] = ''
+          formData[field.field] = ''
         }
       }
 
-      if (this.keywordField === '' && keywordFields.length > 0) {
-        this.keywordField = keywordFields[0].field
+      if (keywordField.value === '' && keywordFields.length > 0) {
+        keywordField.value = keywordFields[0].field
       }
 
-      const otherFields = this.getOtherFields
+      const otherFields = getOtherFields.value
 
       for (const field of otherFields) {
         if (field.type === 'br') {
@@ -200,30 +181,78 @@ export default {
           if (routeQuery.hasOwnProperty(field.field)) {
             const routeQueryValue = routeQuery[field.field]
 
-            formModel[field.field] = Array.isArray(routeQueryValue)
+            formData[field.field] = Array.isArray(routeQueryValue)
               ? routeQueryValue
               : [routeQueryValue.toString()]
           } else {
-            formModel[field.field] = []
+            formData[field.field] = []
           }
         } else {
           if (routeQuery.hasOwnProperty(field.field)) {
-            formModel[field.field] = routeQuery[field.field]
+            formData[field.field] = routeQuery[field.field]
           } else {
-            formModel[field.field] = ''
+            formData[field.field] = ''
           }
         }
       }
 
-      this.formModel = formModel
-      this.formModelInit = true
-    },
-    getQueryFields() {
+      console.log(formData)
+
+      form = reactive(formData)
+      console.log(form)
+      formInit.value = true
+    }
+
+    const updateShortcuts = () => {
+      const shortcutsData = {}
+
+      for (const otherField of getOtherFields.value) {
+        if (otherField.type !== 'dateTimeRange') {
+          continue
+        }
+
+        if (!otherField.shortcuts || otherField.shortcuts.length === 0) {
+          continue
+        }
+
+        shortcutsData[otherField.field] = []
+
+        otherField.shortcuts.forEach((shortcut) => {
+          shortcutsData[otherField.field].push({
+            text: shortcut.text,
+            value: [shortcut.start, shortcut.end],
+          })
+        })
+      }
+
+      shortcuts.value = shortcutsData
+      shortcutsInit.value = true
+    }
+
+    const isPageQuery = (query) => {
+      return query === 'page' || query === 'size'
+    }
+
+    const isKeywordField = (field) => {
+      return (
+        getKeywordFields.value.find((keywordField) => {
+          return keywordField.field === field
+        }) !== undefined
+      )
+    }
+
+    const handleRefresh = inject('reload')
+
+    const getQueryFields = () => {
       const queryFields = {}
 
-      Object.keys(this.formModel).forEach((key) => {
-        if (!this.isKeywordField(key)) {
-          const value = this.formModel[key]
+      console.log(form)
+      const formData = toRaw(form)
+      console.log(formData)
+
+      Object.keys(formData).forEach((key) => {
+        if (!isKeywordField(key)) {
+          const value = form[key]
 
           if (value && value.length > 0) {
             queryFields[key] = value
@@ -231,45 +260,63 @@ export default {
         }
       })
 
-      Object.keys(this.$route.query).forEach((key) => {
-        if (!this.formModel.hasOwnProperty(key) && !this.isPageQuery(key)) {
-          queryFields[key] = this.$route.query[key]
+      Object.keys(route.query).forEach((key) => {
+        if (!form.value.hasOwnProperty(key) && !isPageQuery(key)) {
+          queryFields[key] = route.query[key]
         }
       })
 
-      if (this.keywordField !== '' && this.keywordValue !== '') {
-        queryFields[this.keywordField] = this.keywordValue
+      if (keywordField.value !== '' && keywordValue.value !== '') {
+        queryFields[keywordField.value] = keywordValue.value
       }
 
       return queryFields
-    },
-    getDefaultQuery() {
+    }
+
+    const getDefaultQuery = () => {
       const defaultQuery = {}
 
-      Object.keys(this.$route.query).forEach((key) => {
-        if (!this.formModel.hasOwnProperty(key) && !this.isPageQuery(key)) {
-          defaultQuery[key] = this.$route.query[key]
+      Object.keys(route.query).forEach((key) => {
+        if (!form.value.hasOwnProperty(key) && !isPageQuery(key)) {
+          defaultQuery[key] = route.query[key]
         }
       })
 
       return defaultQuery
-    },
-    formSubmit(query) {
-      if (JSON.stringify(this.$route.query) === JSON.stringify(query)) {
-        this.reload()
+    }
+
+    const formSubmit = async (query) => {
+      if (JSON.stringify(route.query) === JSON.stringify(query)) {
+        handleRefresh()
       } else {
-        this.$router.push({
-          path: this.$route.path,
+        console.log(route, query)
+        await router.push({
+          path: route.path,
           query: query,
         })
       }
-    },
-    handleFormSubmit() {
-      this.formSubmit(this.getQueryFields())
-    },
-    handleFormReset() {
-      this.formSubmit(this.getDefaultQuery())
-    },
+    }
+
+    const onSubmit = async () => {
+      await formSubmit(getQueryFields())
+    }
+
+    const onReset = async () => {
+      await formSubmit(getDefaultQuery())
+    }
+
+    return {
+      form,
+      formInit,
+      keywordField,
+      keywordValue,
+      shortcuts,
+      shortcutsInit,
+      getKeywordFields,
+      getOtherFields,
+      onSubmit,
+      onReset,
+    }
   },
 }
 </script>

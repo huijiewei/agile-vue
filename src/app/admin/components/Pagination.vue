@@ -7,16 +7,17 @@
       :page-size="pages.perPage"
       layout="total, prev, pager, next, sizes, jumper"
       :total="pages.totalCount"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
+      @current-change="onCurrentChange"
+      @size-change="onSizeChange"
     />
   </div>
 </template>
 
 <script>
+import { useRoute, useRouter } from 'vue-router'
+
 export default {
   name: 'Pagination',
-
   props: {
     pages: {
       type: Object,
@@ -25,19 +26,25 @@ export default {
       },
     },
   },
-  methods: {
-    handleSizeChange(size) {
-      this.$router.push({
-        path: this.$route.fullPath,
-        query: { page: 1, size: size },
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
+
+    const onSizeChange = async (size) => {
+      await router.push({
+        path: route.path,
+        query: { ...route.query, ...{ page: 1, size: size } },
       })
-    },
-    handleCurrentChange(page) {
-      this.$router.push({
-        path: this.$route.fullPath,
-        query: { page: page },
+    }
+
+    const onCurrentChange = async (page) => {
+      await router.push({
+        path: route.path,
+        query: { ...route.query, ...{ page: page } },
       })
-    },
+    }
+
+    return { onSizeChange, onCurrentChange }
   },
 }
 </script>

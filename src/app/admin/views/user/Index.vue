@@ -9,7 +9,7 @@
           :disabled="!$can('user/create')"
           type="primary"
           size="medium"
-          @click="handleUserCreate()"
+          @click="userCreate()"
         >
           新建会员
         </el-button>
@@ -77,7 +77,7 @@
             plain
             type="primary"
             size="mini"
-            @click="handleUserEdit(scope.row)"
+            @click="userEdit(scope.row)"
           >
             编辑
           </el-button>
@@ -86,7 +86,7 @@
             plain
             type="danger"
             size="mini"
-            @click="handleUserDelete(scope.row)"
+            @click="userDelete(scope.row)"
           >
             删除
           </el-button>
@@ -98,80 +98,98 @@
 </template>
 
 <script>
-import AgAvatar from '../../../../shared/components/Avatar'
-import UserService from '@admin/services/UserService'
+import AgAvatar from '@shared/components/Avatar'
 import SearchForm from '@admin/components/SearchForm'
-import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'
 import ExportButton from '@admin/components/ExportButton'
 import Pagination from '@admin/components/Pagination'
+import { onBeforeMount, ref } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRoute, onBeforeRouteUpdate, useRouter } from 'vue-router'
+import { useDeleteDialog } from '@admin/hooks/useDeleteDialog'
+import { ElMessage } from 'element-plus'
+import { useSearchForm } from '@admin/hooks/useSearchForm'
 
 export default {
   name: 'User',
   components: { ExportButton, SearchForm, AgAvatar, Pagination },
-  mixins: [SearchFormFieldsMixin],
-  data() {
-    return {
-      loading: true,
-      users: [],
-      pages: null,
-    }
-  },
-  emits: ['close'],
-  beforeRouteUpdate(to, from, next) {
-    this.getUsers(to.query)
-    next()
-  },
-  created() {
-    this.getUsers(this.$route.query)
-  },
-  methods: {
-    handleUserCreate() {
-      this.$router.push({
-        path: '/user/create',
-      })
-    },
-    handleUserEdit(user) {
-      this.$router.push({
-        path: `/user/edit/${user.id}`,
-      })
-    },
-    handleUserDelete(user) {
-      this.$deleteDialog({
-        message: `删除用户 <strong>${user.name || user.phone}</strong>`,
-        callback: async () => {
-          this.loading = true
+  setup() {
+    const loading = ref(true)
+    const users = ref([])
+    const pages = ref(null)
 
-          const { data } = await UserService.delete(user.id)
+    const route = useRoute()
+    const router = useRouter()
+    const httpClient = useHttpClient()
+    const { deleteDialog } = useDeleteDialog()
+    const { searchFields, setSearchFields, buildRouteQuery } = useSearchForm()
 
-          if (data) {
-            this.users = Object.freeze(
-              this.users.filter((item) => item.id !== user.id)
-            )
+    const loadUsers = async (query) => {
+      loading.value = true
 
-            this.$message({
-              type: 'success',
-              message: data.message,
-            })
-          }
-
-          this.loading = false
-        },
-      })
-    },
-    async getUsers(query) {
-      this.loading = true
-
-      const { data } = await UserService.all(this.buildRouteQuery(query))
+      const { data } = await httpClient.get('users', buildRouteQuery(query))
 
       if (data) {
-        this.users = Object.freeze(data.items)
-        this.pages = data.pages
+        users.value = Object.freeze(data.items)
+        pages.value = data.pages
 
-        this.setSearchFields(data.searchFields)
+        setSearchFields(data.searchFields)
       }
 
-      this.loading = false
-    },
+      loading.value = false
+    }
+
+    onBeforeMount(async () => {
+      await loadUsers(route.query)
+    })
+
+    onBeforeRouteUpdate(async (to, from, next) => {
+      await loadUsers(to.query)
+
+      next()
+    })
+
+    const userCreate = async () => {
+      await router.push({
+        path: '/user/create',
+      })
+    }
+
+    const userEdit = async (user) => {
+      await router.push({
+        path: `/user/edit/${user.id}`,
+      })
+    }
+
+    const userDelete = async (user) => {
+      deleteDialog({
+        message: `删除用户 <strong>${user.name || user.phone}</strong>`,
+        callback: async () => {
+          loading.value = true
+
+          const { data } = await httpClient.delete('users/' + user.id)
+
+          if (data) {
+            users.value = Object.freeze(
+              users.value.filter((item) => item.id !== user.id)
+            )
+
+            ElMessage.success(data.message)
+          }
+
+          loading.value = false
+        },
+      })
+    }
+
+    return {
+      loading,
+      users,
+      pages,
+      userCreate,
+      userEdit,
+      userDelete,
+      searchFields,
+    }
   },
 }
 </script>
