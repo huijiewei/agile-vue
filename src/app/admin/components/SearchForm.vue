@@ -78,7 +78,15 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, watch, inject, reactive, toRaw } from 'vue'
+import {
+  computed,
+  ref,
+  watch,
+  inject,
+  reactive,
+  toRaw,
+  onBeforeMount,
+} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 export default {
@@ -120,7 +128,7 @@ export default {
       return props.searchFields.filter((item) => item.type !== 'keyword')
     })
 
-    onMounted(() => {
+    onBeforeMount(() => {
       if (!formInit.value) {
         updateForm()
       }
@@ -146,7 +154,7 @@ export default {
     )
 
     const updateForm = () => {
-      form.value = ref({})
+      form.value = {}
       keywordField.value = ''
       keywordValue.value = ''
 
@@ -195,10 +203,7 @@ export default {
         }
       }
 
-      console.log(formData)
-
       form.value = formData
-      console.log(form)
       formInit.value = true
     }
 
@@ -245,13 +250,12 @@ export default {
     const getQueryFields = () => {
       const queryFields = {}
 
-      console.log(form)
-      const formData = toRaw(form)
-      console.log(formData)
 
-      Object.keys(formData).forEach((key) => {
+
+      Object.keys(form.value).forEach((key) => {
+        console.log(form.value[key])
         if (!isKeywordField(key)) {
-          const value = form[key]
+          const value = form.value[key]
 
           if (value && value.length > 0) {
             queryFields[key] = value
