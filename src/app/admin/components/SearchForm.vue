@@ -31,7 +31,7 @@
           type="date"
           :style="{ width: '139px' }"
           :editable="false"
-          :format="'yyyy-MM-dd'"
+          :format="'YYYY-MM-DD'"
           :placeholder="item.label"
         />
         <el-date-picker
@@ -43,8 +43,7 @@
           :end-placeholder="item.labelEnd"
           :editable="false"
           unlink-panels
-          range-separator="至"
-          :format="'yyyy-MM-dd'"
+          :format="'YYYY-MM-DD'"
           :shortcuts="shortcuts[item.field]"
         />
       </el-form-item>
@@ -147,7 +146,7 @@ export default {
     )
 
     const updateForm = () => {
-      form = reactive({})
+      form.value = ref({})
       keywordField.value = ''
       keywordValue.value = ''
 
@@ -198,7 +197,7 @@ export default {
 
       console.log(formData)
 
-      form = reactive(formData)
+      form.value = formData
       console.log(form)
       formInit.value = true
     }
