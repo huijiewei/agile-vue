@@ -3,7 +3,7 @@
     <div class="box-toolbar">
       <div class="box-toolbar-button">
         <el-button
-          :disabled="!$can('admin-group/create')"
+          :disabled="!this.$can('admin-group/create')"
           type="primary"
           size="medium"
           @click="adminGroupCreate()"
@@ -16,9 +16,9 @@
       <el-table-column width="90" class-name="text-mono" prop="id" label="Id" />
       <el-table-column prop="name" label="名称" />
       <el-table-column width="130" fixed="right" label="操作" align="right">
-        <template v-slot="scope">
+        <template #default="scope">
           <el-button
-            :disabled="!$can('admin-group/edit')"
+            :disabled="!this.$can('admin-group/edit')"
             plain
             type="primary"
             size="mini"
@@ -27,7 +27,7 @@
             编辑
           </el-button>
           <el-button
-            :disabled="!$can('admin-group/delete')"
+            :disabled="!this.$can('admin-group/delete')"
             plain
             type="danger"
             size="mini"

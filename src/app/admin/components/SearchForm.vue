@@ -1,14 +1,13 @@
 <template>
   <el-form
-    v-if="searchFields"
     :inline="true"
     :model="form"
     size="small"
     autocomplete="off"
-    @submit.stop.prevent="onSubmit"
-    @reset.stop.prevent="onReset"
+    @submit="onSubmit"
+    @reset="onReset"
   >
-    <template v-for="item in getOtherFields" :key="item.id">
+    <template v-for="item in getOtherFields" :key="item.field">
       <hr v-if="item.type === 'br'" class="br" />
       <el-form-item v-else>
         <el-select
@@ -19,8 +18,8 @@
           :placeholder="item.label"
         >
           <el-option
-            v-for="(option, optionIndex) in item.options"
-            :key="option.value + '-' + optionIndex"
+            v-for="option in item.options"
+            :key="item.field + '-' + option.value"
             :label="option.description"
             :value="option.value.toString()"
           />
@@ -51,14 +50,10 @@
     <el-form-item v-if="getKeywordFields.length > 0">
       <el-input v-model="keywordValue" placeholder="请输入内容" clearable>
         <template #prepend>
-          <el-select
-            v-model="keywordField"
-            :style="{ width: '100px' }"
-            value=""
-          >
+          <el-select v-model="keywordField" :style="{ width: '100px' }">
             <el-option
-              v-for="(item, index) in getKeywordFields"
-              :key="index"
+              v-for="item in getKeywordFields"
+              :key="'kof-' + item.field"
               :label="item.label"
               :value="item.field"
             />
@@ -78,15 +73,7 @@
 </template>
 
 <script>
-import {
-  computed,
-  ref,
-  watch,
-  inject,
-  reactive,
-  toRaw,
-  onBeforeMount,
-} from 'vue'
+import { computed, ref, watch, inject, reactive, onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 export default {
@@ -100,7 +87,7 @@ export default {
     },
   },
   setup(props) {
-    const form = ref({})
+    const form = reactive({})
     const formInit = ref(false)
 
     const keywordField = ref('')
@@ -154,22 +141,20 @@ export default {
     )
 
     const updateForm = () => {
-      form.value = {}
       keywordField.value = ''
       keywordValue.value = ''
 
       const routeQuery = route.query
 
       const keywordFields = getKeywordFields.value
-      const formData = {}
 
       for (const field of keywordFields) {
         if (routeQuery.hasOwnProperty(field.field)) {
           keywordField.value = field.field
           keywordValue.value = routeQuery[field.field]
-          formData[field.field] = routeQuery[field.field]
+          form[field.field] = routeQuery[field.field]
         } else {
-          formData[field.field] = ''
+          form[field.field] = ''
         }
       }
 
@@ -177,9 +162,7 @@ export default {
         keywordField.value = keywordFields[0].field
       }
 
-      const otherFields = getOtherFields.value
-
-      for (const field of otherFields) {
+      for (const field of getOtherFields.value) {
         if (field.type === 'br') {
           continue
         }
@@ -188,22 +171,21 @@ export default {
           if (routeQuery.hasOwnProperty(field.field)) {
             const routeQueryValue = routeQuery[field.field]
 
-            formData[field.field] = Array.isArray(routeQueryValue)
+            form[field.field] = Array.isArray(routeQueryValue)
               ? routeQueryValue
               : [routeQueryValue.toString()]
           } else {
-            formData[field.field] = []
+            form[field.field] = []
           }
         } else {
           if (routeQuery.hasOwnProperty(field.field)) {
-            formData[field.field] = routeQuery[field.field]
+            form[field.field] = routeQuery[field.field]
           } else {
-            formData[field.field] = ''
+            form[field.field] = ''
           }
         }
       }
 
-      form.value = formData
       formInit.value = true
     }
 
@@ -250,10 +232,9 @@ export default {
     const getQueryFields = () => {
       const queryFields = {}
 
-      Object.keys(form.value).forEach((key) => {
-        console.log(form.value[key])
+      Object.keys(form).forEach((key) => {
         if (!isKeywordField(key)) {
-          const value = form.value[key]
+          const value = form[key]
 
           if (value && value.length > 0) {
             queryFields[key] = value
@@ -262,7 +243,7 @@ export default {
       })
 
       Object.keys(route.query).forEach((key) => {
-        if (!form.value.hasOwnProperty(key) && !isPageQuery(key)) {
+        if (!form.hasOwnProperty(key) && !isPageQuery(key)) {
           queryFields[key] = route.query[key]
         }
       })
@@ -278,7 +259,7 @@ export default {
       const defaultQuery = {}
 
       Object.keys(route.query).forEach((key) => {
-        if (!form.value.hasOwnProperty(key) && !isPageQuery(key)) {
+        if (!form.hasOwnProperty(key) && !isPageQuery(key)) {
           defaultQuery[key] = route.query[key]
         }
       })
@@ -290,7 +271,6 @@ export default {
       if (JSON.stringify(route.query) === JSON.stringify(query)) {
         handleRefresh()
       } else {
-        console.log(route, query)
         await router.push({
           path: route.path,
           query: query,

@@ -10,7 +10,7 @@
       :category-tree="categoryTree"
       v-model:category-parents="categoryParents"
       :is-edit="false"
-      :can-submit="$can('shop-category/create')"
+      :can-submit="this.$can('shop-category/create')"
       @on-submit="createShopCategory"
     >
     </shop-category-form>

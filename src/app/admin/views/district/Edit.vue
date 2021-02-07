@@ -8,7 +8,7 @@
     :district="district"
     v-model:district-parents="districtParents"
     :is-edit="true"
-    :can-submit="$can('district/edit')"
+    :can-submit="this.$can('district/edit')"
     @on-submit="editDistrict"
     @on-delete="deleteDistrict"
   >

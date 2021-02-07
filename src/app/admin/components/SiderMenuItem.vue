@@ -7,7 +7,7 @@
 
 <script>
 import SiderMenuIcon from './SiderMenuIcon'
-import { formatUrl } from '../../../shared/utils/util'
+import { formatUrl } from '@shared/utils/util'
 
 export default {
   name: 'SiderMenuItem',

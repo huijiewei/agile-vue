@@ -9,15 +9,13 @@
     active-text-color="#ffd04b"
     @select="handleSelect"
   >
-    <template v-for="(menu, index) in getMenus">
+    <template v-for="(menu, index) in getMenus" :key="'m' + 1 + index">
       <sider-menu-item
         v-if="!menu.children"
-        :key="'m' + 1 + index"
         :menu="menu"
       />
       <sider-menu-sub
         v-else
-        :key="'m' + 1 + index"
         :menu="menu"
         :depth="1"
         :index="index"

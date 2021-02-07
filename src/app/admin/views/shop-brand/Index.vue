@@ -6,7 +6,7 @@
       </div>
       <div class="box-toolbar-button">
         <el-button
-          :disabled="!$can('shop-brand/create')"
+          :disabled="!this.$can('shop-brand/create')"
           type="primary"
           size="medium"
           @click="handleShopBrandCreate()"
@@ -27,7 +27,7 @@
       <el-table-column prop="name" width="230" label="品牌名称" />
       <el-table-column prop="slug" width="150" label="品牌别名" />
       <el-table-column width="110" align="center" label="图片">
-        <template v-slot="scope">
+        <template #default="scope">
           <img
             :alt="scope.row.name"
             v-if="scope.row.logo"
@@ -60,9 +60,9 @@
         </template>
       </el-table-column>
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template v-slot="scope">
+        <template #default="scope">
           <el-button
-            :disabled="!$can('shop-brand/edit')"
+            :disabled="!this.$can('shop-brand/edit')"
             type="primary"
             size="mini"
             plain
@@ -71,7 +71,7 @@
             >编辑
           </el-button>
           <el-button
-            :disabled="!$can('shop-brand/delete')"
+            :disabled="!this.$can('shop-brand/delete')"
             type="danger"
             size="mini"
             plain

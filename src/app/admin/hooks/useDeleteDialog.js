@@ -36,8 +36,8 @@ export function useDeleteDialog() {
           inputErrorMessage: dialogOptions.promptLabel + '不匹配',
         }
       )
-        .then((action) => {
-          dialogOptions.callback()
+        .then(async () => {
+          await dialogOptions.callback()
         })
         .catch(() => {})
     } else {
@@ -58,8 +58,8 @@ export function useDeleteDialog() {
           center: false,
         }
       )
-        .then((action) => {
-          dialogOptions.callback()
+        .then(async () => {
+          await dialogOptions.callback()
         })
         .catch(() => {})
     }

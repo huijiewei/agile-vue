@@ -5,7 +5,7 @@
     ref="formRef"
     label-width="100px"
     label-suffix="："
-    @submit.prevent="handleSubmit(onSubmit)"
+    @submit="handleSubmit(onSubmit)"
   >
     <el-form-item label="所属分类" prop="parentId" :error="errors.parentId">
       <el-col :md="16">
@@ -69,7 +69,7 @@
 
       <el-button
         v-if="isEdit"
-        :disabled="!$can('shop-category/delete')"
+        :disabled="!this.$can('shop-category/delete')"
         plain
         type="danger"
         size="small"

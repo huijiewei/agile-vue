@@ -44,7 +44,7 @@
     "eslint-plugin-prettier": "^3.3.0",
     "eslint-plugin-vue": "^7.3.0",
     "less": "^4.1.0",
-    "less-loader": "^8.0.0",
+    "less-loader": "^7.3.0",
     "mocker-api": "^2.7.1",
     "prettier": "^2.2.1"
   },

@@ -10,7 +10,7 @@
       :category-tree="categoryTree"
       :category-parents="categoryParents"
       :is-edit="false"
-      :can-submit="$can('cms-category/create')"
+      :can-submit="this.$can('cms-category/create')"
       @on-submit="createCmsCategory"
     >
     </cms-category-form>

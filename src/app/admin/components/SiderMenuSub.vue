@@ -9,15 +9,13 @@
       <sider-menu-icon v-if="menu.icon" :icon="menu.icon" />
       <span>{{ menu.label }}</span>
     </template>
-    <template v-for="(childMenu, childIndex) in menu.children">
-      <sider-menu-item
-        v-if="!childMenu.children"
-        :key="'m' + (depth + 1) + childIndex"
-        :menu="childMenu"
-      />
+    <template
+      v-for="(childMenu, childIndex) in menu.children"
+      :key="'m' + (depth + 1) + childIndex"
+    >
+      <sider-menu-item v-if="!childMenu.children" :menu="childMenu" />
       <sider-menu-sub
         v-else
-        :key="'m' + (depth + 1) + childIndex"
         :menu="childMenu"
         :depth="depth + 1"
         :index="childIndex"

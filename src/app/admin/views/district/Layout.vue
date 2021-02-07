@@ -47,7 +47,7 @@
                 <el-button
                   size="mini"
                   @click.stop="districtEdit(data)"
-                  :disabled="!$can('district/view')"
+                  :disabled="!this.$can('district/view')"
                   icon="el-icon-edit-outline"
                   title="查看编辑"
                 />
@@ -55,7 +55,7 @@
                   v-if="!data.leaf"
                   size="mini"
                   @click.stop="districtCreate(data.id)"
-                  :disabled="!$can('district/create')"
+                  :disabled="!this.$can('district/create')"
                   icon="el-icon-folder-add"
                   title="新建子地区"
                 />
@@ -92,7 +92,7 @@
                 <el-button
                   size="mini"
                   @click.stop="districtEdit(data)"
-                  :disabled="!$can('district/view')"
+                  :disabled="!this.$can('district/view')"
                   icon="el-icon-edit-outline"
                   title="查看编辑"
                 />
@@ -100,7 +100,7 @@
                   v-if="!data.leaf"
                   size="mini"
                   @click.stop="districtCreate(data.id)"
-                  :disabled="!$can('district/create')"
+                  :disabled="!this.$can('district/create')"
                   icon="el-icon-folder-add"
                   title="新建子地区"
                 />

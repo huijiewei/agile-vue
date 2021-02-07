@@ -6,7 +6,7 @@
       </div>
       <div class="box-toolbar-button">
         <el-button
-          :disabled="!$can('shop-product/create')"
+          :disabled="!this.$can('shop-product/create')"
           type="primary"
           size="medium"
           @click="handleUserCreate()"
@@ -15,7 +15,7 @@
         </el-button>
         &nbsp;&nbsp;
         <export-button
-          :disabled="loading || !$can('shop-product/export')"
+          :disabled="loading || !this.$can('shop-product/export')"
           :api="'shop-products/export'"
           type="default"
           size="small"
@@ -61,9 +61,9 @@
         min-width="160"
       />
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template v-slot="scope">
+        <template #default="scope">
           <el-button
-            :disabled="!$can('shop-product/edit')"
+            :disabled="!this.$can('shop-product/edit')"
             plain
             type="primary"
             size="mini"
@@ -72,7 +72,7 @@
             编辑
           </el-button>
           <el-button
-            :disabled="!$can('shop-product/delete')"
+            :disabled="!this.$can('shop-product/delete')"
             plain
             type="danger"
             size="mini"

@@ -9,6 +9,7 @@ import LoginModal from '@admin/components/LoginModal'
 import { useSplash } from '@shared/hooks/useSplash'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 let lastErrorMessage = ''
 let lastLoginAction = ''
@@ -47,9 +48,8 @@ export default {
       if (action === 'direct') {
         const loginUrl = '/login'
 
-        ctx.$message({
+        ElMessage.warning({
           message: '需要登录才能访问',
-          type: 'warning',
           duration: 2000,
         })
 

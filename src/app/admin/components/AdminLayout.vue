@@ -34,8 +34,7 @@
         >
           <transition name="fade">
             <keep-alive :include="cachedTabs">
-              <component :is="Component" />
-            </keep-alive> </transition
+              <component :is="Component" /></keep-alive></transition
         ></router-view>
       </main>
     </section>
@@ -50,7 +49,6 @@ import HeaderTab from '@admin/components/HeaderTab'
 import { provide, ref, nextTick, computed, onBeforeMount } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import { useHttpClient } from '@shared/plugins/HttpClient'
 import { useRefreshUser } from '@admin/hooks/useRefreshUser'
 
 export default {

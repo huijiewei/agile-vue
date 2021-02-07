@@ -28,7 +28,7 @@
       <div class="check-group-box">
         <div
           v-for="(group, index) in permissions"
-          :key="index"
+          :key="'gp-' + index"
           class="cgb-panel"
         >
           <div class="cgb-head">
@@ -45,10 +45,12 @@
               v-same-width="'el-checkbox'"
               @change="onCheckedPermissionGroupChange(group)"
             >
-              <template v-for="(child, childIndex) in group.children">
+              <template
+                v-for="(child, childIndex) in group.children"
+                :key="'gp-' + index + '-' + childIndex"
+              >
                 <el-checkbox
                   v-if="!child.children"
-                  :key="index + '-' + childIndex"
                   :label="child.actionId"
                   :disabled="checkboxDisabled.includes(child.actionId)"
                   @change="
@@ -57,14 +59,12 @@
                 >
                   {{ child.name }}
                 </el-checkbox>
-                <div
-                  v-if="child.children"
-                  :key="index + '-' + childIndex"
-                  class="cgb-line"
-                >
+                <div v-if="child.children" class="cgb-line">
                   <el-checkbox
                     v-for="(checkbox, checkboxIndex) in child.children"
-                    :key="index + '-' + childIndex + '-' + checkboxIndex"
+                    :key="
+                      'gp-' + index + '-' + childIndex + '-' + checkboxIndex
+                    "
                     :label="checkbox.actionId"
                     :disabled="checkboxDisabled.includes(checkbox.actionId)"
                     @change="

@@ -45,7 +45,7 @@
       />
       <el-table-column prop="name" width="120" label="名称" />
       <el-table-column width="55" align="center" label="头像">
-        <template v-slot="scope">
+        <template #default="scope">
           <ag-avatar :src="scope.row.avatar" />
         </template>
       </el-table-column>
@@ -69,7 +69,7 @@
         width="160"
       />
       <el-table-column width="135" label="操作" fixed="right" align="right">
-        <template v-slot="scope">
+        <template #default="scope">
           <el-button
             :disabled="!this.$can('user/edit')"
             plain
@@ -127,7 +127,7 @@ export default {
       const { data } = await httpClient.get('users', buildRouteQuery(query))
 
       if (data) {
-        users.value = Object.freeze(data.items)
+        users.value = data.items
         pages.value = data.pages
 
         setSearchFields(data.searchFields)
@@ -162,19 +162,17 @@ export default {
       deleteDialog({
         message: `删除用户 <strong>${user.name || user.phone}</strong>`,
         callback: async () => {
-          loading.value = true
+          dataLoading.value = true
 
           const { data } = await httpClient.delete('users/' + user.id)
 
           if (data) {
-            users.value = Object.freeze(
-              users.value.filter((item) => item.id !== user.id)
-            )
+            users.value = users.value.filter((item) => item.id !== user.id)
 
             ElMessage.success(data.message)
           }
 
-          loading.value = false
+          dataLoading.value = false
         },
       })
     }

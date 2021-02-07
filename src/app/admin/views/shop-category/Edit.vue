@@ -11,7 +11,7 @@
         :category-tree="categoryTree"
         v-model:category-parents="categoryParents"
         :is-edit="true"
-        :can-submit="$can('shop-category/edit')"
+        :can-submit="this.$can('shop-category/edit')"
         @on-submit="editShopCategory"
         @on-delete="deleteShopCategory"
       >

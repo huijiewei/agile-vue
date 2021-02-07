@@ -9,7 +9,7 @@
       :district="district"
       :district-parents="districtParents"
       :is-edit="false"
-      :can-submit="$can('district/create')"
+      :can-submit="this.$can('district/create')"
       @on-submit="createDistrict"
     >
     </district-from>

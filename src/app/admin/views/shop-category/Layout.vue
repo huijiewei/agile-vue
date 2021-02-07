@@ -44,15 +44,15 @@
               <el-button-group class="operate">
                 <el-button
                   size="mini"
-                  @click.stop="categoryEdit(data)"
-                  :disabled="!$can('shop-category/view')"
+                  @click="categoryEdit(data)"
+                  :disabled="!this.$can('shop-category/view')"
                   icon="el-icon-edit-outline"
                   title="查看编辑"
                 />
                 <el-button
                   size="mini"
-                  @click.stop="categoryCreate(data.id)"
-                  :disabled="!$can('shop-category/create')"
+                  @click="categoryCreate(data.id)"
+                  :disabled="!this.$can('shop-category/create')"
                   icon="el-icon-folder-add"
                   title="新建子分类"
                 />

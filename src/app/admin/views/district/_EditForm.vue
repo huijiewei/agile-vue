@@ -5,7 +5,7 @@
     ref="formRef"
     label-width="100px"
     label-suffix="："
-    @submit.prevent="handleSubmit(onSubmit)"
+    @submit="handleSubmit(onSubmit)"
   >
     <el-form-item label="上级地区" prop="parentId" :error="errors.parentId">
       <el-col :span="12">
@@ -59,7 +59,7 @@
 
       <el-button
         v-if="isEdit"
-        :disabled="!$can('district/delete')"
+        :disabled="!this.$can('district/delete')"
         plain
         type="danger"
         size="small"
