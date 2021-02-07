@@ -23,19 +23,13 @@
         <header-tab></header-tab>
       </header>
       <main class="ag-main">
-        <router-view
-          v-slot="{ Component }"
-          :key="
-            $route.meta && $route.meta.parent
-              ? $route.meta.parent.path
-              : $route.path
-          "
-          v-if="isRouterAlive"
-        >
+        <router-view v-slot="{ Component }" v-if="isRouterAlive">
           <transition name="fade">
             <keep-alive :include="cachedTabs">
-              <component :is="Component" /></keep-alive></transition
-        ></router-view>
+              <component :is="Component" />
+            </keep-alive>
+          </transition>
+        </router-view>
       </main>
     </section>
   </section>
