@@ -5,7 +5,7 @@
     :model="formModel"
     label-width="100px"
     label-suffix="："
-    @submit="handleFormSubmit('formModel')"
+    @submit.prevent="handleFormSubmit('formModel')"
   >
     <el-form-item
       label="名称"

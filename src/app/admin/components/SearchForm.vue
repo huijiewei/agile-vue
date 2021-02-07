@@ -4,8 +4,8 @@
     :model="form"
     size="small"
     autocomplete="off"
-    @submit="onSubmit"
-    @reset="onReset"
+    @submit.prevent="onSubmit"
+    @reset.prevent="onReset"
   >
     <template v-for="item in getOtherFields" :key="item.field">
       <hr v-if="item.type === 'br'" class="br" />

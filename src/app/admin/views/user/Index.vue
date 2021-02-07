@@ -127,7 +127,7 @@ export default {
       const { data } = await httpClient.get('users', buildRouteQuery(query))
 
       if (data) {
-        users.value = data.items
+        users.value = Object.freeze(data.items)
         pages.value = data.pages
 
         setSearchFields(data.searchFields)
@@ -167,7 +167,9 @@ export default {
           const { data } = await httpClient.delete('users/' + user.id)
 
           if (data) {
-            users.value = users.value.filter((item) => item.id !== user.id)
+            users.value = Object.freeze(
+              users.value.filter((item) => item.id !== user.id)
+            )
 
             ElMessage.success(data.message)
           }

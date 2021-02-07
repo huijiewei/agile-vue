@@ -5,7 +5,7 @@
     ref="formModel"
     label-width="100px"
     label-suffix="："
-    @submit="handleFormSubmit('formModel')"
+    @submit.prevent="handleFormSubmit('formModel')"
   >
     <el-form-item label="所属分类" prop="parentId">
       <el-col :md="16">

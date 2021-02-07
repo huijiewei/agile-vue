@@ -4,7 +4,7 @@
     :model="form"
     label-width="100px"
     label-suffix="："
-    @submit.stop.prevent="handleSubmit(onSubmit)"
+    @submit.prevent="handleSubmit(onSubmit)"
   >
     <el-form-item
       label="名称"
@@ -95,6 +95,7 @@ import { useStore } from 'vuex'
 import { useHttpClient } from '@shared/plugins/HttpClient'
 import { useForm } from '@shared/hooks/useForm'
 import { ref, toRaw, onBeforeMount } from 'vue'
+import { useRefreshUser } from '@admin/hooks/useRefreshUser'
 
 export default {
   directives: {
@@ -117,6 +118,7 @@ export default {
   setup(props, { emit }) {
     const store = useStore()
     const httpClient = useHttpClient()
+    const { refreshUser } = useRefreshUser()
 
     const { loading, form, errors, setErrors, handleSubmit } = useForm(
       props.adminGroup
@@ -131,8 +133,6 @@ export default {
         if (!valid) {
           return false
         }
-
-        loading.value = true
 
         const checkedPermissions = []
 
@@ -153,19 +153,13 @@ export default {
               props.adminGroup.id ===
               store.getters['auth/getCurrentUser'].adminGroup.id
             ) {
-              const { data } = await httpClient.get('auth/account', null, false)
-
-              if (data) {
-                await store.dispatch('auth/account', data)
-              }
+              await refreshUser()
             }
           },
           async (error) => {
             await setErrors(error)
           },
-          () => {
-            loading.value = false
-          }
+          () => {}
         )
       })
     }

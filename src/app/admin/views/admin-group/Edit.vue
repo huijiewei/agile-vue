@@ -36,11 +36,6 @@ export default {
     const store = useStore()
     const historyBack = inject('historyBack')
     const httpClient = useHttpClient()
-    const { refreshUser } = useRefreshUser()
-
-    const currentUserGroupId = computed(() => {
-      return store.getters['auth/getCurrentUser']?.adminGroupId || 0
-    })
 
     const editAdminGroup = async (adminGroup, done, fail, always) => {
       const { data, error } = await httpClient.put(
@@ -54,10 +49,6 @@ export default {
         ElMessage.success('管理组编辑成功')
 
         await store.dispatch('tabs/deleteCache', 'AdminGroup')
-
-        if (currentUserGroupId.value === adminGroup.id) {
-          await refreshUser()
-        }
 
         await historyBack('/admin-group', false, true)
       }

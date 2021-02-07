@@ -31,7 +31,7 @@ export default {
     name: String,
   },
   setup(props, { emit }) {
-    const pageTitle = '新建管理员'
+    const pageTitle = '编辑管理员'
     const admin = ref(null)
 
     const route = useRoute()
@@ -53,10 +53,6 @@ export default {
         ElMessage.success('管理员编辑成功')
 
         await store.dispatch('tabs/deleteCache', 'Admin')
-
-        if (currentUserId.value === admin.id) {
-          await refreshUser()
-        }
 
         await historyBack('/admin', false, true)
       }

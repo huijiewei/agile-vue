@@ -105,6 +105,7 @@ import { useStore } from 'vuex'
 import { computed, ref, toRaw } from 'vue'
 import { useForm } from '@shared/hooks/useForm'
 import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRefreshUser } from '@admin/hooks/useRefreshUser'
 
 export default {
   components: { RemoteSelect, AvatarUpload },
@@ -125,6 +126,7 @@ export default {
   setup(props, { emit }) {
     const store = useStore()
     const httpClient = useHttpClient()
+    const { refreshUser } = useRefreshUser()
 
     const { loading, form, errors, setErrors, handleSubmit } = useForm({
       ...props.admin,
@@ -150,20 +152,20 @@ export default {
           return false
         }
 
-        loading.value = true
-
         emit(
           'on-submit',
           toRaw(form),
-          () => {
+          async () => {
             formRef.value.clearValidate()
+
+            if (currentUserId.value === props.admin.id) {
+              await refreshUser()
+            }
           },
           async (error) => {
             await setErrors(error)
           },
-          () => {
-            loading.value = false
-          }
+          () => {}
         )
       })
     }

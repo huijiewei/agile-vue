@@ -5,7 +5,7 @@
     ref="formRef"
     label-width="100px"
     label-suffix="："
-    @submit="handleSubmit(onSubmit)"
+    @submit.prevent="handleSubmit(onSubmit)"
   >
     <el-form-item label="上级地区" prop="parentId" :error="errors.parentId">
       <el-col :span="12">
