@@ -17,8 +17,6 @@
         <export-button
           :disabled="loading || !$can('user/export')"
           :api="'users/export'"
-          type="default"
-          size="small"
           :confirm="'你确定导出所有用户吗？'"
         >
           会员导出

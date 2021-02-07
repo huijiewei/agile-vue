@@ -1,10 +1,10 @@
 <template>
   <el-button
-    v-loading.fullscreen="loading"
+    v-loading.fullscreen.lock="exportLoading"
     :type="type"
     :size="size"
     :disabled="disabled"
-    :element-loading-text="loadingText"
+    element-loading-text="正在导出 Excel"
     element-loading-spinner="el-icon-loading"
     @click="handleClick"
   >
@@ -13,53 +13,83 @@
 </template>
 
 <script>
+import { reactive, ref } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useRoute } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
 export default {
   name: 'ExportButton',
-  // eslint-disable-next-line vue/require-prop-types
-  props: ['api', 'type', 'size', 'disabled', 'confirm'],
-  data() {
-    return {
-      loading: false,
-      loadingText: '',
-    }
+  props: {
+    api: {
+      type: String,
+      default: '',
+    },
+    type: {
+      type: String,
+      default: 'default',
+    },
+    size: {
+      type: String,
+      default: 'small',
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    confirm: {
+      type: String,
+      default: '你确定导出吗',
+    },
   },
-  methods: {
-    async export() {
-      this.loading = true
-      this.loadingText = '正在导出 Excel'
+  setup(props) {
+    const route = useRoute()
+    const httpClient = useHttpClient()
 
-      const { data } = await this.$http.download(
+    const exportLoading = ref(false)
+
+    const exportExcel = async () => {
+      exportLoading.value = true
+
+      const { data } = await httpClient.download(
         'GET',
-        this.api,
-        Object.assign({}, this.$route.query, {
+        props.api,
+        Object.assign({}, route.query, {
           page: null,
           size: null,
         })
       )
 
       if (data === false) {
-        this.$message({
-          type: 'warning',
+        ElMessage.warning({
           message: '下载文件失败',
           duration: 1500,
         })
       }
 
-      this.loading = false
-    },
-    handleClick() {
-      if (this.confirm && this.confirm.length > 0) {
-        this.$confirm(this.confirm, '提示', {
+      exportLoading.value = false
+    }
+
+    const handleClick = async () => {
+      if (props.confirm) {
+        ElMessageBox.confirm(props.confirm, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning',
-        }).then(() => {
-          this.export()
         })
+          .then(async () => {
+            await exportExcel()
+          })
+          .catch(() => {})
       } else {
-        this.export()
+        await exportExcel()
       }
-    },
+    }
+
+    return {
+      exportLoading,
+      handleClick,
+    }
   },
 }
 </script>
