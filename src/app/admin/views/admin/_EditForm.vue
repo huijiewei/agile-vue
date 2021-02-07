@@ -122,7 +122,6 @@ export default {
       default: null,
     },
   },
-  emits: ['submit'],
   setup(props, { emit }) {
     const store = useStore()
     const httpClient = useHttpClient()

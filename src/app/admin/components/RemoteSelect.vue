@@ -20,13 +20,13 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 
 export default {
   name: 'RemoteSelect',
   props: {
     modelValue: {
-      required: true,
+      default: null,
     },
     disabled: Boolean,
     remoteMethod: {
@@ -55,7 +55,9 @@ export default {
       set: (value) => emit('update:modelValue', value),
     })
 
-    loadOptions()
+    onBeforeMount(async () => {
+      await loadOptions()
+    })
 
     return {
       value,

@@ -250,8 +250,6 @@ export default {
     const getQueryFields = () => {
       const queryFields = {}
 
-
-
       Object.keys(form.value).forEach((key) => {
         console.log(form.value[key])
         if (!isKeywordField(key)) {

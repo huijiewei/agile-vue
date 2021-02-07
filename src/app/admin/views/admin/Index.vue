@@ -3,7 +3,7 @@
     <div class="box-toolbar">
       <div class="box-toolbar-button">
         <el-button
-          :disabled="!$can('admin/create')"
+          :disabled="!this.$can('admin/create')"
           type="primary"
           size="medium"
           @click="adminCreate()"
@@ -12,7 +12,7 @@
         </el-button>
       </div>
     </div>
-    <el-table v-loading="loading" :data="admins">
+    <el-table v-loading="dataLoading" :data="admins">
       <el-table-column
         width="90"
         class-name="text-mono"
@@ -48,7 +48,7 @@
       <el-table-column width="135" fixed="right" label="操作" align="right">
         <template v-slot="scope">
           <el-button
-            :disabled="!$can('admin/edit')"
+            :disabled="!this.$can('admin/edit')"
             plain
             type="primary"
             size="mini"
@@ -57,7 +57,7 @@
             编辑
           </el-button>
           <el-button
-            :disabled="!$can('admin/delete')"
+            :disabled="!this.$can('admin/delete')"
             plain
             type="danger"
             size="mini"
@@ -88,7 +88,7 @@ export default {
     const router = useRouter()
     const { deleteDialog } = useDeleteDialog()
 
-    const loading = ref(true)
+    const dataLoading = ref(true)
     const admins = ref([])
 
     const loadAdmins = async () => {
@@ -98,7 +98,7 @@ export default {
         admins.value = Object.freeze(data.items)
       }
 
-      loading.value = false
+      dataLoading.value = false
     }
 
     loadAdmins()
@@ -117,7 +117,7 @@ export default {
         promptLabel: '管理员电话',
         promptValue: admin.phone,
         callback: async () => {
-          loading.value = true
+          dataLoading.value = true
 
           const { data } = await httpClient.delete('admins/' + admin.id)
 
@@ -126,19 +126,16 @@ export default {
               admins.value.filter((item) => item.id !== admin.id)
             )
 
-            ElMessage({
-              type: 'success',
-              message: data.message,
-            })
+            ElMessage.success(data.message)
           }
 
-          loading.value = false
+          dataLoading.value = false
         },
       })
     }
 
     return {
-      loading,
+      dataLoading,
       admins,
       adminCreate,
       adminEdit,

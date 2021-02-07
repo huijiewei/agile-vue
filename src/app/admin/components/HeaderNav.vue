@@ -104,8 +104,7 @@ export default {
       if (data) {
         await store.dispatch('auth/logout')
 
-        ElMessage({
-          type: 'success',
+        ElMessage.success({
           duration: 1000,
           message: data.message,
           onClose: () => {

@@ -12,7 +12,7 @@
         </el-button>
       </div>
     </div>
-    <el-table v-loading="loading" :data="adminGroups">
+    <el-table v-loading="dataLoading" :data="adminGroups">
       <el-table-column width="90" class-name="text-mono" prop="id" label="Id" />
       <el-table-column prop="name" label="名称" />
       <el-table-column width="130" fixed="right" label="操作" align="right">
@@ -56,7 +56,7 @@ export default {
     const httpClient = useHttpClient()
     const { deleteDialog } = useDeleteDialog()
 
-    const loading = ref(true)
+    const dataLoading = ref(true)
     const adminGroups = ref([])
 
     const loadAdminGroups = async () => {
@@ -66,7 +66,7 @@ export default {
         adminGroups.value = Object.freeze(data.items)
       }
 
-      loading.value = false
+      dataLoading.value = false
     }
 
     const adminGroupCreate = () => {
@@ -83,7 +83,7 @@ export default {
       deleteDialog({
         message: `删除管理组 <strong>${adminGroup.name}</strong>`,
         callback: async () => {
-          loading.value = true
+          dataLoading.value = true
 
           const { data } = await httpClient.delete(
             'admin-groups/' + adminGroup.id
@@ -94,13 +94,10 @@ export default {
               adminGroups.value.filter((item) => item.id !== adminGroup.id)
             )
 
-            ElMessage({
-              type: 'success',
-              message: data.message,
-            })
+            ElMessage.success(data.message)
           }
 
-          loading.value = false
+          dataLoading.value = false
         },
       })
     }
@@ -110,7 +107,7 @@ export default {
     })
 
     return {
-      loading,
+      dataLoading,
       adminGroups,
       adminGroupCreate,
       adminGroupEdit,

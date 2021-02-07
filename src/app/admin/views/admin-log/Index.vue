@@ -6,7 +6,7 @@
       </div>
       <div class="box-toolbar-button"></div>
     </div>
-    <el-table v-loading="loading" :data="adminLogs">
+    <el-table v-loading="dataLoading" :data="adminLogs">
       <el-table-column
         fixed
         width="90"
@@ -65,8 +65,8 @@
     <pagination :pages="pages"></pagination>
     <el-dialog
       title="日志详情"
-      v-model:visible="dialogVisible"
-      :before-close="handleClose"
+      v-model="dialogVisible"
+      @closed="handleClosed"
     >
       <el-table :data="viewAdminLog" :show-header="false">
         <el-table-column property="name" width="150" />
@@ -77,62 +77,59 @@
 </template>
 
 <script>
-import AdminService from '@admin/services/AdminService'
 import SearchForm from '@admin/components/SearchForm'
-import SearchFormFieldsMixin from '@admin/mixins/SearchFormFieldsMixin'
-import { tabledObject } from '../../../../shared/utils/util'
+import { tabledObject } from '@shared/utils/util'
 import Pagination from '@admin/components/Pagination'
-import { onBeforeRouteUpdate, useRoute } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
+import { onBeforeMount, ref } from 'vue'
+import { useHttpClient } from '@shared/plugins/HttpClient'
+import { useSearchForm } from '@admin/hooks/useSearchForm'
 
 export default {
   name: 'AdminLog',
   components: { SearchForm, Pagination },
-  mixins: [SearchFormFieldsMixin],
   setup() {
     const route = useRoute()
+    const httpClient = useHttpClient()
+    const { searchFields, setSearchFields, buildRouteQuery } = useSearchForm()
 
+    const dataLoading = ref(true)
     const adminLogs = ref([])
+    const pages = ref(null)
 
-    let pages = null
-    let loading = true
-    let dialogVisible = false
-    let viewAdminLog = []
+    const dialogVisible = ref(false)
+    const viewAdminLog = ref([])
 
     const getAdminLogs = async (query) => {
-      const { data } = await AdminService.log(this.buildRouteQuery(query))
+      dataLoading.value = true
+
+      const { data } = await httpClient.get(
+        'admin-logs',
+        buildRouteQuery(query)
+      )
 
       if (data) {
         adminLogs.value = Object.freeze(data.items)
-        pages = data.pages
+        pages.value = data.pages
 
-        this.setSearchFields(data.searchFields)
+        setSearchFields(data.searchFields)
       }
 
-      loading = false
+      dataLoading.value = false
     }
 
-    getAdminLogs(route.query)
-
-    onBeforeRouteUpdate(async (to, from) => {
-      if (to.query !== from.query) {
-        await getAdminLogs(to.query)
-      }
+    onBeforeMount(async () => {
+      await getAdminLogs(route.query)
     })
 
-    return {
-      adminLogs,
-      pages,
-      loading,
-      dialogVisible,
-      viewAdminLog,
-      getAdminLogs,
-    }
-  },
-  methods: {
-    handleView(adminLog) {
-      this.dialogVisible = true
-      this.viewAdminLog = tabledObject(adminLog, [
+    onBeforeRouteUpdate(async (to, from, next) => {
+      await getAdminLogs(to.query)
+      next()
+    })
+
+    const handleView = (adminLog) => {
+      dialogVisible.value = true
+      viewAdminLog.value = tabledObject(adminLog, [
         {
           name: 'Id',
           property: 'id',
@@ -187,11 +184,23 @@ export default {
           property: 'createdAt',
         },
       ])
-    },
-    handleClose() {
-      this.dialogVisible = false
-      this.viewAdminLog = []
-    },
+    }
+
+    const handleClosed = () => {
+      viewAdminLog.value = []
+    }
+
+    return {
+      adminLogs,
+      pages,
+      dataLoading,
+      dialogVisible,
+      viewAdminLog,
+      getAdminLogs,
+      searchFields,
+      handleView,
+      handleClosed,
+    }
   },
 }
 </script>

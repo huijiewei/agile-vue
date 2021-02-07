@@ -6,7 +6,7 @@
       </div>
       <div class="box-toolbar-button">
         <el-button
-          :disabled="!$can('user/create')"
+          :disabled="!this.$can('user/create')"
           type="primary"
           size="medium"
           @click="userCreate()"
@@ -15,7 +15,7 @@
         </el-button>
         &nbsp;&nbsp;
         <export-button
-          :disabled="dataLoading || !$can('user/export')"
+          :disabled="dataLoading || !this.$can('user/export')"
           :api="'users/export'"
           :confirm="'你确定导出所有用户吗？'"
         >
@@ -71,7 +71,7 @@
       <el-table-column width="135" label="操作" fixed="right" align="right">
         <template v-slot="scope">
           <el-button
-            :disabled="!$can('user/edit')"
+            :disabled="!this.$can('user/edit')"
             plain
             type="primary"
             size="mini"
@@ -80,7 +80,7 @@
             编辑
           </el-button>
           <el-button
-            :disabled="!$can('user/delete')"
+            :disabled="!this.$can('user/delete')"
             plain
             type="danger"
             size="mini"
@@ -111,15 +111,15 @@ export default {
   name: 'User',
   components: { ExportButton, SearchForm, AgAvatar, Pagination },
   setup() {
-    const dataLoading = ref(true)
-    const users = ref([])
-    const pages = ref(null)
-
     const route = useRoute()
     const router = useRouter()
     const httpClient = useHttpClient()
     const { deleteDialog } = useDeleteDialog()
     const { searchFields, setSearchFields, buildRouteQuery } = useSearchForm()
+
+    const dataLoading = ref(true)
+    const users = ref([])
+    const pages = ref(null)
 
     const loadUsers = async (query) => {
       dataLoading.value = true
