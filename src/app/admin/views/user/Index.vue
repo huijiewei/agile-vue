@@ -15,7 +15,7 @@
         </el-button>
         &nbsp;&nbsp;
         <export-button
-          :disabled="loading || !$can('user/export')"
+          :disabled="dataLoading || !$can('user/export')"
           :api="'users/export'"
           :confirm="'你确定导出所有用户吗？'"
         >
@@ -23,7 +23,7 @@
         </export-button>
       </div>
     </div>
-    <el-table v-loading="loading" :data="users">
+    <el-table v-loading="dataLoading" :data="users">
       <el-table-column
         fixed
         width="90"
@@ -111,7 +111,7 @@ export default {
   name: 'User',
   components: { ExportButton, SearchForm, AgAvatar, Pagination },
   setup() {
-    const loading = ref(true)
+    const dataLoading = ref(true)
     const users = ref([])
     const pages = ref(null)
 
@@ -122,7 +122,7 @@ export default {
     const { searchFields, setSearchFields, buildRouteQuery } = useSearchForm()
 
     const loadUsers = async (query) => {
-      loading.value = true
+      dataLoading.value = true
 
       const { data } = await httpClient.get('users', buildRouteQuery(query))
 
@@ -133,7 +133,7 @@ export default {
         setSearchFields(data.searchFields)
       }
 
-      loading.value = false
+      dataLoading.value = false
     }
 
     onBeforeMount(async () => {
@@ -180,7 +180,7 @@ export default {
     }
 
     return {
-      loading,
+      dataLoading,
       users,
       pages,
       userCreate,

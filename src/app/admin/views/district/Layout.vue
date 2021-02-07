@@ -25,7 +25,7 @@
         <hr class="spacer-xs" />
         <el-tree
           v-show="isSearched"
-          v-loading="loading"
+          v-loading="dataLoading"
           :data="searchedData"
           :highlight-current="true"
           :default-expand-all="true"
@@ -65,7 +65,7 @@
         </el-tree>
         <el-tree
           v-show="!isSearched"
-          v-loading="loading"
+          v-loading="dataLoading"
           :highlight-current="true"
           :default-expanded-keys="districtExpanded"
           :current-node-key="districtCurrentId"
@@ -136,7 +136,7 @@ export default {
     const router = useRouter()
     const httpClient = useHttpClient()
 
-    const loading = ref(true)
+    const dataLoading = ref(true)
     const keyword = ref('')
     const treeRef = ref()
     const searchRef = ref()
@@ -159,7 +159,7 @@ export default {
       }
 
       isSearched.value = true
-      loading.value = true
+      dataLoading.value = true
 
       const { data } = await httpClient.get(
         'misc/district-search-tree',
@@ -171,7 +171,7 @@ export default {
         searchedData.value = data
       }
 
-      loading.value = false
+      dataLoading.value = false
     })
 
     const loadDistricts = async (node, resolve) => {
@@ -182,7 +182,7 @@ export default {
         currentResolve.value = resolve
       }
 
-      loading.value = true
+      dataLoading.value = true
 
       const { data } = await httpClient.get(
         'misc/districts',
@@ -190,7 +190,7 @@ export default {
         false
       )
 
-      loading.value = false
+      dataLoading.value = false
 
       return resolve(data || [])
     }
@@ -235,7 +235,7 @@ export default {
     }
 
     return {
-      loading,
+      dataLoading,
       keyword,
       treeRef,
       searchRef,

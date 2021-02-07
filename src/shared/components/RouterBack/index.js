@@ -3,7 +3,7 @@ import writeHistory from './writeHistory'
 
 export { routerHistory, writeHistory }
 
-export default {
+const RouteBack = {
   install(app, { router, ignoreRoutesWithSameName } = {}) {
     if (!router) {
       console.error('RouterBack: router is required on install')
@@ -14,3 +14,5 @@ export default {
     router.afterEach(writeHistory)
   },
 }
+
+export default RouteBack

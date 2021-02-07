@@ -8,7 +8,7 @@ const HttpGetMethod = ['GET', 'HEAD']
 
 const httpClientSymbol = 'agileHttpClient'
 
-const HttpClient = {
+export const HttpClient = {
   install(
     app,
     {
@@ -85,10 +85,6 @@ const HttpClient = {
     app.config.globalProperties.$http = request
     app.provide(httpClientSymbol, request)
   },
-}
-
-export function createHttpClient() {
-  return HttpClient
 }
 
 export function useHttpClient() {

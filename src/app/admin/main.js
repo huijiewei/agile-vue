@@ -16,13 +16,16 @@ import DeleteDialog from './plugins/DeleteDialog'
 import PermissionCheck from './plugins/PermissionCheck'
 import RouterBack from '@shared/components/RouterBack'
 
-import { createHttpClient } from '@shared/plugins/HttpClient'
+import { HttpClient } from '@shared/plugins/HttpClient'
 
 const app = createApp(App)
 
+app.use(store)
+app.use(router)
+
 app.use(ElementPlus, { locale })
 
-app.use(createHttpClient(), {
+app.use(HttpClient, {
   getApiHost: () => {
     return document
       .querySelector('meta[name="api-host"]')
@@ -51,9 +54,7 @@ app.use(PermissionCheck, {
   store,
 })
 
-app.use(DeleteDialog, {
-  MessageBox: ElementPlus.MessageBox,
-})
+app.use(DeleteDialog)
 
 /*
 app.mixin({
@@ -65,8 +66,6 @@ app.mixin({
   },
 })
 */
-app.use(store)
-app.use(router)
 
 app.use(RouterBack, {
   router,

@@ -27,10 +27,7 @@ const childrenSameWidth = function (el, childClassName) {
 }
 
 const SameWidth = {
-  inserted: function (el, binding) {
-    childrenSameWidth(el, binding.value)
-  },
-  componentUpdated: function (el, binding) {
+  mounted: function (el, binding) {
     childrenSameWidth(el, binding.value)
   },
 }

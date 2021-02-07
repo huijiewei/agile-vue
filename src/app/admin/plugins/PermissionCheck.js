@@ -6,4 +6,4 @@ const PermissionCheck = {
   },
 }
 
-module.exports = PermissionCheck
+export default PermissionCheck
