@@ -12,7 +12,6 @@ import App from './App.vue'
 
 import './registerServiceWorker'
 
-import DeleteDialog from './plugins/DeleteDialog'
 import PermissionCheck from './plugins/PermissionCheck'
 import RouterBack from '@shared/components/RouterBack'
 
@@ -53,8 +52,6 @@ app.use(HttpClient, {
 app.use(PermissionCheck, {
   store,
 })
-
-app.use(DeleteDialog)
 
 /*
 app.mixin({

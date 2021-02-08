@@ -89,28 +89,27 @@ export default {
     }
 
     const historyBack = async (to = null, force = false, closeTab = false) => {
-      if (closeTab) {
-        const next = await store.dispatch('tabs/close', {
+      if (closeTab && to == null) {
+        to = await store.dispatch('tabs/close', {
           name: route.name,
           path: route.path,
         })
-
-        if (to == null) {
-          to = next
-        }
       }
 
       if ((!force || to === null) && ctx.$routerHistory.hasPrevious()) {
-        await router.replace(ctx.$routerHistory.previous())
+        to = ctx.$routerHistory.previous()
       } else {
         if (to == null) {
           to = { path: '/home' }
         } else if (typeof to === 'string') {
           to = { path: to }
         }
-
-        await router.replace(to)
       }
+
+      await router.replace({
+        path: to.path,
+        query: to.query,
+      })
     }
 
     provide('historyBack', historyBack)

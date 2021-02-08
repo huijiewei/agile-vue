@@ -6,23 +6,19 @@
     </el-breadcrumb-item>
     <el-breadcrumb-item
       v-for="(breadcrumb, index) in breadcrumbs"
-      :key="index"
-      :to="{ path: breadcrumb.path }"
+      :key="'bc-' + index"
     >
-      <ag-icon v-if="breadcrumb.icon" :type="breadcrumb.icon" />
       <span>{{ breadcrumb.title }}</span>
     </el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script>
-import AgIcon from '../../../shared/components/Icon'
 import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 export default {
   name: 'Breadcrumb',
-  components: { AgIcon },
   setup() {
     const route = useRoute()
 

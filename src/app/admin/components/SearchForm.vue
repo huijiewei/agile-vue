@@ -4,8 +4,8 @@
     :model="form"
     size="small"
     autocomplete="off"
-    @submit.prevent="onSubmit"
-    @reset.prevent="onReset"
+    @submit.stop.prevent="onSubmit"
+    @reset.stop.prevent="onReset"
   >
     <template v-for="item in getOtherFields" :key="item.field">
       <hr v-if="item.type === 'br'" class="br" />
@@ -272,7 +272,6 @@ export default {
         handleRefresh()
       } else {
         await router.push({
-          path: route.path,
           query: query,
         })
       }

@@ -7,8 +7,8 @@
       :page-size="pages.perPage"
       layout="total, prev, pager, next, sizes, jumper"
       :total="pages.totalCount"
-      @current-change="onCurrentChange"
-      @size-change="onSizeChange"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
     />
   </div>
 </template>
@@ -26,25 +26,23 @@ export default {
       },
     },
   },
-  setup() {
+  setup(props) {
     const route = useRoute()
     const router = useRouter()
 
-    const onSizeChange = async (size) => {
+    const handleSizeChange = async (size) => {
       await router.push({
-        path: route.path,
-        query: { ...route.query, ...{ page: 1, size: size } },
+        query: Object.assign({}, route.query, { page: 1, size: size }),
       })
     }
 
-    const onCurrentChange = async (page) => {
+    const handleCurrentChange = async (page) => {
       await router.push({
-        path: route.path,
-        query: { ...route.query, ...{ page: page } },
+        query: Object.assign({}, route.query, { page: page }),
       })
     }
 
-    return { onSizeChange, onCurrentChange }
+    return { handleSizeChange, handleCurrentChange }
   },
 }
 </script>

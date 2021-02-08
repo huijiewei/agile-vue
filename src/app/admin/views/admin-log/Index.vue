@@ -63,11 +63,7 @@
       </el-table-column>
     </el-table>
     <pagination :pages="pages"></pagination>
-    <el-dialog
-      title="日志详情"
-      v-model="dialogVisible"
-      @closed="handleClosed"
-    >
+    <el-dialog title="日志详情" v-model="dialogVisible" @closed="handleClosed">
       <el-table :data="viewAdminLog" :show-header="false">
         <el-table-column property="name" width="150" />
         <el-table-column property="value" />
@@ -122,9 +118,8 @@ export default {
       await getAdminLogs(route.query)
     })
 
-    onBeforeRouteUpdate(async (to, from, next) => {
+    onBeforeRouteUpdate(async (to) => {
       await getAdminLogs(to.query)
-      next()
     })
 
     const handleView = (adminLog) => {
