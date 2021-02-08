@@ -30,7 +30,7 @@ export default {
   props: {
     name: String,
   },
-  setup(props, { emit }) {
+  setup() {
     const pageTitle = '编辑管理员'
     const admin = ref(null)
 
@@ -38,11 +38,6 @@ export default {
     const store = useStore()
     const historyBack = inject('historyBack')
     const httpClient = useHttpClient()
-    const { refreshUser } = useRefreshUser()
-
-    const currentUserId = computed(() => {
-      return store.getters['auth/getCurrentUser']?.id || 0
-    })
 
     const editAdmin = async (admin, done, fail, always) => {
       const { data, error } = await httpClient.put('admins/' + admin.id, admin)

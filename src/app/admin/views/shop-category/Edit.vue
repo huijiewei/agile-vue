@@ -75,9 +75,7 @@ export default {
       }
     }
 
-    onBeforeRouteUpdate(async (to, from, next) => {
-      shopCategory.value = null
-      next()
+    onBeforeRouteUpdate(async (to) => {
       await loadShopCategory(to.params.id)
     })
 

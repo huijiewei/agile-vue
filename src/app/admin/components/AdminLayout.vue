@@ -27,12 +27,12 @@
           <transition name="fade">
             <keep-alive :include="cachedTabs">
               <component
+                :is="Component"
                 :key="
                   $route.meta && $route.meta.parent
                     ? $route.meta.parent.path
                     : $route.path
                 "
-                :is="Component"
               />
             </keep-alive>
           </transition>
