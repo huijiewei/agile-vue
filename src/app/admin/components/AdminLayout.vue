@@ -24,18 +24,9 @@
       </header>
       <main class="ag-main">
         <router-view v-slot="{ Component }" v-if="isRouterAlive">
-          <transition name="fade">
-            <keep-alive :include="cachedTabs">
-              <component
-                :is="Component"
-                :key="
-                  $route.meta && $route.meta.parent
-                    ? $route.meta.parent.path
-                    : $route.path
-                "
-              />
-            </keep-alive>
-          </transition>
+          <keep-alive :include="cachedTabs">
+            <component :is="Component" />
+          </keep-alive>
         </router-view>
       </main>
     </section>

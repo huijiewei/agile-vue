@@ -110,7 +110,9 @@ export default {
       await loadDistrict(route.params.id)
     })
 
-    onBeforeRouteUpdate(async (to) => {
+    onBeforeRouteUpdate(async (to, from, next) => {
+      district.value = null
+      next()
       await loadDistrict(to.params.id)
     })
 
