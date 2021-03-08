@@ -1,5 +1,6 @@
 const path = require('path')
 const apiMocker = require('mocker-api')
+const webpack = require('webpack')
 
 module.exports = {
   appPath: '/admin',
@@ -13,6 +14,14 @@ module.exports = {
   appChunks: ['vendor', 'element', 'shared', 'admin'],
   outputDir: 'dist/admin',
   pwaEnable: true,
+  chainWebpack: (config) => {
+    config
+      .plugin('NormalModuleReplacement')
+      .use(webpack.NormalModuleReplacementPlugin, [
+        /element-plus[\/\\]lib[\/\\]locale[\/\\]lang[\/\\]en/,
+        'element-plus/lib/locale/lang/zh-cn',
+      ])
+  },
   vueConfig: {
     devServer: {
       port: 8080,
