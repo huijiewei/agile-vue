@@ -46,7 +46,7 @@
     "koa": "^2.13.0",
     "less": "^4.1.1",
     "less-loader": "^7.3.0",
-    "mocker-api": "^2.7.1",
+    "mocker-api": "^2.9.5",
     "prettier": "^2.1.2",
     "vue-template-compiler": "^2.6.12"
   },
